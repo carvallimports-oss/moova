@@ -1,14 +1,14 @@
 import { createClient } from "@/lib/supabase/server"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
+import { CoraStatusCard } from "@/components/dashboard/cora-status-card"
 import {
   MessageSquare,
   TrendingUp,
   Calendar,
   Users,
   Zap,
-  AlertCircle,
 } from "lucide-react"
 
 function StatCard({
@@ -141,32 +141,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Status Cora */}
-      <Card className="border-[#E0D8CE]">
-        <CardHeader className="pb-3">
-          <CardTitle className="font-serif text-lg text-[#2D4A3E] flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
-            Cora — Status
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-[#5A5A5A]">OpenAI GPT-4o</span>
-            <Badge className="bg-green-50 text-green-700 border-green-200 text-xs">Operando</Badge>
-          </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-[#5A5A5A]">Anthropic Claude (fallback)</span>
-            <Badge className="bg-green-50 text-green-700 border-green-200 text-xs">Operando</Badge>
-          </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-[#5A5A5A]">WhatsApp (Evolution API)</span>
-            <Badge className="bg-yellow-50 text-yellow-700 border-yellow-200 text-xs">Aguardando conexão</Badge>
-          </div>
-          <div className="flex items-center gap-2 mt-4 text-xs text-[#8A8A8A] bg-[#EAE3D9] rounded-lg px-3 py-2">
-            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-            Configure o WhatsApp em Configurações para a Cora começar a atender.
-          </div>
-        </CardContent>
-      </Card>
+      <CoraStatusCard />
     </div>
   )
 }

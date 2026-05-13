@@ -40,6 +40,7 @@ export interface Lead {
   region?: string
   last_contact_at?: string
   next_action?: string
+  notes?: string
   created_at: string
 }
 

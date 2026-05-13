@@ -19,10 +19,12 @@ Siga cada passo em ordem. Depois de ter todas as chaves, execute `setup.ps1`.
    - `service_role` → `SUPABASE_SERVICE_ROLE_KEY` ⚠️ nunca expor no frontend
 
 ### Aplicar o schema do banco
-1. No Supabase, vá em **SQL Editor**
-2. Clique em **New query**
-3. Abra o arquivo `supabase/migrations/0001_initial_schema.sql`
-4. Cole todo o conteúdo e clique em **Run**
+Execute as migrations **em ordem** — cada uma depende da anterior:
+
+1. No Supabase, vá em **SQL Editor → New query**
+2. Cole e execute `supabase/migrations/0001_initial_schema.sql`
+3. Cole e execute `supabase/migrations/0002_diagnostico_report_columns.sql`
+4. Cole e execute `supabase/migrations/0003_diagnostico_share_token.sql`
 
 ---
 

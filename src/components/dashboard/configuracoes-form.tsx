@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { createClient } from "@/lib/supabase/client"
-import { Wifi, WifiOff, RefreshCw, Shield } from "lucide-react"
+import { Wifi, WifiOff, RefreshCw, Shield, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 
 type Profile = {
   name: string
@@ -35,32 +36,112 @@ export function ConfiguracoesForm({
   waAccount: WAAccount
 }) {
   const supabase = createClient()
+  const [name, setName] = useState(profile?.name ?? "")
+  const [phone, setPhone] = useState(profile?.phone ?? "")
+  const [creci, setCreci] = useState(profile?.creci ?? "")
   const [formality, setFormality] = useState(profile?.cora_formality ?? "informal")
   const [customPrompt, setCustomPrompt] = useState(profile?.cora_custom_prompt ?? "")
   const [humanApproval, setHumanApproval] = useState(profile?.human_approval_active ?? true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [qrCode, setQrCode] = useState<string | null>(null)
+  const [connecting, setConnecting] = useState(false)
+  const [connected, setConnected] = useState(waAccount?.status === "connected")
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current)
+    }
+  }, [])
+
+  async function handleConnect() {
+    setConnecting(true)
+    setQrCode(null)
+    try {
+      const res = await fetch("/api/whatsapp/connect", { method: "POST" })
+      if (!res.ok) throw new Error()
+      const data = await res.json()
+      const qr = data.qr as string | null
+      if (qr) {
+        const src = qr.startsWith("data:") ? qr : `data:image/png;base64,${qr}`
+        setQrCode(src)
+        pollRef.current = setInterval(async () => {
+          const statusRes = await fetch("/api/whatsapp/status")
+          if (!statusRes.ok) return
+          const status = await statusRes.json()
+          if (status.connected) {
+            setConnected(true)
+            setQrCode(null)
+            if (pollRef.current) clearInterval(pollRef.current)
+            toast.success("WhatsApp conectado!")
+          }
+        }, 4000)
+      } else {
+        toast.error("QR Code não disponível. Tente novamente.")
+      }
+    } catch {
+      toast.error("Erro ao conectar WhatsApp")
+    } finally {
+      setConnecting(false)
+    }
+  }
 
   async function save() {
     setSaving(true)
-    const { data: { user } } = await supabase.auth.getUser()
-    await supabase
-      .from("users")
-      .update({
-        cora_formality: formality,
-        cora_custom_prompt: customPrompt || null,
-        human_approval_active: humanApproval,
-      })
-      .eq("id", user!.id)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
-    setSaving(false)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      await supabase
+        .from("users")
+        .update({
+          name: name || undefined,
+          phone: phone || undefined,
+          creci: creci || undefined,
+          cora_formality: formality,
+          cora_custom_prompt: customPrompt || null,
+          human_approval_active: humanApproval,
+        })
+        .eq("id", user!.id)
+      setSaved(true)
+      toast.success("Configurações salvas")
+      setTimeout(() => setSaved(false), 2000)
+    } catch {
+      toast.error("Erro ao salvar")
+    } finally {
+      setSaving(false)
+    }
   }
 
-  const waConnected = waAccount?.status === "connected"
+  const waConnected = connected
 
   return (
     <div className="space-y-6">
+      {/* Perfil */}
+      <Card className="border-[#E0D8CE]">
+        <CardHeader className="pb-3">
+          <CardTitle className="font-serif text-lg text-[#2D4A3E]">Perfil</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-1.5">
+            <Label>Nome completo</Label>
+            <Input value={name} onChange={(e) => setName(e.target.value)}
+              placeholder="João da Silva" className="border-[#E0D8CE]" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label>WhatsApp (com DDD)</Label>
+              <Input value={phone} onChange={(e) => setPhone(e.target.value)}
+                placeholder="11 99999-9999" className="border-[#E0D8CE]" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>CRECI</Label>
+              <Input value={creci} onChange={(e) => setCreci(e.target.value)}
+                placeholder="123456-SP" className="border-[#E0D8CE]" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* WhatsApp */}
       <Card className="border-[#E0D8CE]">
         <CardHeader className="pb-3">
@@ -93,10 +174,24 @@ export function ConfiguracoesForm({
           </div>
 
           {!waConnected && (
-            <Button className="w-full bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white text-sm gap-2">
-              <RefreshCw className="w-4 h-4" />
-              Conectar WhatsApp (QR Code)
-            </Button>
+            <div className="space-y-3">
+              <Button
+                onClick={handleConnect}
+                disabled={connecting}
+                className="w-full bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white text-sm gap-2"
+              >
+                {connecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                {connecting ? "Gerando QR Code..." : "Conectar WhatsApp (QR Code)"}
+              </Button>
+              {qrCode && (
+                <div className="flex flex-col items-center gap-2 p-4 bg-white border border-[#E0D8CE] rounded-xl">
+                  <p className="text-xs text-[#5A5A5A] font-medium">Escaneie com o WhatsApp</p>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={qrCode} alt="QR Code WhatsApp" className="w-48 h-48 object-contain" />
+                  <p className="text-[11px] text-[#8A8A8A]">Abrindo WhatsApp → Dispositivos vinculados → Vincular dispositivo</p>
+                </div>
+              )}
+            </div>
           )}
 
           <div className="text-xs text-[#8A8A8A] bg-[#EAE3D9] rounded-lg p-3 space-y-1">

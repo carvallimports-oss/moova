@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
-import { CheckCircle2 } from "lucide-react"
+import { CheckCircle2, Loader2, RefreshCw } from "lucide-react"
 
 const STEPS = [
   { id: 1, label: "Seus dados" },
@@ -31,6 +31,12 @@ export default function OnboardingPage() {
     creci: "",
     creci_state: "SP",
   })
+  const [qrCode, setQrCode] = useState<string | null>(null)
+  const [waConnecting, setWaConnecting] = useState(false)
+  const [waConnected, setWaConnected] = useState(false)
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  useEffect(() => () => { if (pollRef.current) clearInterval(pollRef.current) }, [])
 
   function update(field: string, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -49,6 +55,33 @@ export default function OnboardingPage() {
   async function handleStep3() {
     if (!lgpdAccepted) return
     setStep(4)
+  }
+
+  async function handleConnectWA() {
+    setWaConnecting(true)
+    setQrCode(null)
+    try {
+      const res = await fetch("/api/whatsapp/connect", { method: "POST" })
+      if (!res.ok) throw new Error()
+      const data = await res.json()
+      const qr = data.qr as string | null
+      if (qr) {
+        const src = qr.startsWith("data:") ? qr : `data:image/png;base64,${qr}`
+        setQrCode(src)
+        pollRef.current = setInterval(async () => {
+          const statusRes = await fetch("/api/whatsapp/status")
+          if (!statusRes.ok) return
+          const status = await statusRes.json()
+          if (status.connected) {
+            setWaConnected(true)
+            setQrCode(null)
+            if (pollRef.current) clearInterval(pollRef.current)
+          }
+        }, 4000)
+      }
+    } finally {
+      setWaConnecting(false)
+    }
   }
 
   async function handleFinish() {
@@ -225,14 +258,31 @@ export default function OnboardingPage() {
                 <p className="text-sm text-[#8A8A8A]">
                   A Cora vai atender seus leads pelo seu número do WhatsApp.
                 </p>
-                <div className="bg-[#EAE3D9] rounded-xl p-6 text-center space-y-3">
-                  <div className="w-32 h-32 bg-white rounded-xl mx-auto flex items-center justify-center border border-[#E0D8CE]">
-                    <p className="text-xs text-[#8A8A8A]">QR Code<br/>aparece aqui</p>
+
+                {waConnected ? (
+                  <div className="bg-green-50 border border-green-200 rounded-xl p-6 text-center space-y-2">
+                    <CheckCircle2 className="w-10 h-10 text-green-600 mx-auto" />
+                    <p className="font-medium text-green-700">WhatsApp conectado!</p>
+                    <p className="text-xs text-green-600">A Cora já pode começar a atender.</p>
                   </div>
-                  <p className="text-xs text-[#5A5A5A]">
-                    Abra o WhatsApp → Dispositivos vinculados → Vincular dispositivo → Escanear QR Code
-                  </p>
-                </div>
+                ) : qrCode ? (
+                  <div className="bg-white border border-[#E0D8CE] rounded-xl p-4 text-center space-y-2">
+                    <p className="text-xs text-[#5A5A5A] font-medium">Escaneie com o WhatsApp</p>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={qrCode} alt="QR Code WhatsApp" className="w-44 h-44 object-contain mx-auto" />
+                    <p className="text-[11px] text-[#8A8A8A]">WhatsApp → Dispositivos vinculados → Vincular dispositivo</p>
+                  </div>
+                ) : (
+                  <Button
+                    onClick={handleConnectWA}
+                    disabled={waConnecting}
+                    className="w-full bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white gap-2"
+                  >
+                    {waConnecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                    {waConnecting ? "Gerando QR Code..." : "Gerar QR Code"}
+                  </Button>
+                )}
+
                 <div className="text-xs text-[#8A8A8A] bg-[#EAE3D9] rounded-lg p-3">
                   Plano atual: <strong className="text-[#2D4A3E]">Evolution API — R$ 799/mês</strong>.
                   O WhatsApp permanece no seu celular normalmente.
@@ -241,7 +291,7 @@ export default function OnboardingPage() {
                   <Button variant="outline" onClick={() => setStep(3)} className="flex-1 border-[#E0D8CE]">Voltar</Button>
                   <Button onClick={handleFinish} disabled={loading}
                     className="flex-1 bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white">
-                    {loading ? "Criando conta..." : "Conectar depois →"}
+                    {loading ? "Criando conta..." : waConnected ? "Continuar →" : "Conectar depois →"}
                   </Button>
                 </div>
               </>

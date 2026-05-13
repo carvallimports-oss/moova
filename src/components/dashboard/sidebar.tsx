@@ -12,6 +12,12 @@ import {
   LogOut,
   Menu,
   X,
+  Upload,
+  Calendar,
+  CreditCard,
+  BarChart3,
+  Users,
+  ShieldCheck,
 } from "lucide-react"
 import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
@@ -23,12 +29,28 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 const navItems = [
   { href: "/dashboard", label: "Início", icon: LayoutDashboard },
   { href: "/dashboard/conversas", label: "Conversas", icon: MessageSquare },
+  { href: "/dashboard/leads", label: "Leads", icon: Users },
   { href: "/dashboard/pipeline", label: "Pipeline", icon: Kanban },
   { href: "/dashboard/imoveis", label: "Imóveis", icon: Building2 },
+  { href: "/dashboard/visitas", label: "Visitas", icon: Calendar },
+  { href: "/dashboard/relatorio", label: "Diagnóstico", icon: BarChart3 },
+  { href: "/dashboard/pacto", label: "Pacto 90", icon: ShieldCheck },
+  { href: "/dashboard/importar", label: "Importar", icon: Upload },
+  { href: "/dashboard/cobranca", label: "Cobrança", icon: CreditCard },
   { href: "/dashboard/configuracoes", label: "Configurações", icon: Settings },
 ]
 
-function NavContent({ userName, onNavigate }: { userName: string; onNavigate?: () => void }) {
+function NavContent({
+  userName,
+  pendingApprovals,
+  diagDay,
+  onNavigate,
+}: {
+  userName: string
+  pendingApprovals: number
+  diagDay: number | null
+  onNavigate?: () => void
+}) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
@@ -55,6 +77,9 @@ function NavContent({ userName, onNavigate }: { userName: string; onNavigate?: (
       <nav className="flex-1 px-3 py-4 space-y-0.5">
         {navItems.map(({ href, label, icon: Icon }) => {
           const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href))
+          const isConversas = href === "/dashboard/conversas"
+          const isDiag = href === "/dashboard/relatorio"
+
           return (
             <Link
               key={href}
@@ -68,7 +93,23 @@ function NavContent({ userName, onNavigate }: { userName: string; onNavigate?: (
               )}
             >
               <Icon className="w-4 h-4 shrink-0" />
-              {label}
+              <span className="flex-1">{label}</span>
+              {isConversas && pendingApprovals > 0 && (
+                <span className={cn(
+                  "text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center",
+                  active ? "bg-white/20 text-white" : "bg-[#B87333] text-white"
+                )}>
+                  {pendingApprovals > 99 ? "99+" : pendingApprovals}
+                </span>
+              )}
+              {isDiag && diagDay !== null && (
+                <span className={cn(
+                  "text-[10px] font-mono px-1.5 py-0.5 rounded-full",
+                  active ? "bg-white/20 text-white" : "bg-[#EAE3D9] text-[#5A5A5A]"
+                )}>
+                  {diagDay}/14
+                </span>
+              )}
             </Link>
           )
         })}
@@ -100,7 +141,15 @@ function NavContent({ userName, onNavigate }: { userName: string; onNavigate?: (
   )
 }
 
-export function DashboardSidebar({ userName }: { userName: string }) {
+export function DashboardSidebar({
+  userName,
+  pendingApprovals,
+  diagDay,
+}: {
+  userName: string
+  pendingApprovals: number
+  diagDay: number | null
+}) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -114,7 +163,12 @@ export function DashboardSidebar({ userName }: { userName: string }) {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="p-0 w-64 bg-white border-r border-[#E0D8CE]">
-            <NavContent userName={userName} onNavigate={() => setOpen(false)} />
+            <NavContent
+              userName={userName}
+              pendingApprovals={pendingApprovals}
+              diagDay={diagDay}
+              onNavigate={() => setOpen(false)}
+            />
           </SheetContent>
         </Sheet>
         <span className="font-serif text-lg text-[#2D4A3E]">Moova</span>
@@ -122,7 +176,7 @@ export function DashboardSidebar({ userName }: { userName: string }) {
 
       {/* Desktop */}
       <aside className="hidden lg:flex w-60 bg-white border-r border-[#E0D8CE] flex-col shrink-0">
-        <NavContent userName={userName} />
+        <NavContent userName={userName} pendingApprovals={pendingApprovals} diagDay={diagDay} />
       </aside>
     </>
   )

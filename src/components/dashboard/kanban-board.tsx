@@ -25,9 +25,9 @@ const tempColor: Record<string, string> = {
   INERTE: "bg-gray-50 text-gray-500 border-gray-200",
 }
 
-function LeadCard({ lead }: { lead: Lead }) {
+function LeadCard({ lead, onClick }: { lead: Lead; onClick?: () => void }) {
   return (
-    <Card className="border-[#E0D8CE] hover:shadow-sm transition-shadow cursor-pointer">
+    <Card onClick={onClick} className="border-[#E0D8CE] hover:shadow-sm transition-shadow cursor-pointer">
       <CardContent className="p-3 space-y-2">
         <div className="flex items-start justify-between gap-1">
           <p className="font-medium text-sm text-[#2A2A2A] leading-tight">{lead.name}</p>
@@ -60,9 +60,11 @@ function LeadCard({ lead }: { lead: Lead }) {
 export function KanbanBoard({
   stages,
   grouped,
+  onLeadClick,
 }: {
   stages: Stage[]
   grouped: Record<string, Lead[] | null>
+  onLeadClick?: (lead: Lead) => void
 }) {
   return (
     <div className="flex gap-4 overflow-x-auto pb-4 flex-1">
@@ -80,7 +82,7 @@ export function KanbanBoard({
             </div>
             <div className="flex flex-col gap-2 flex-1 min-h-[200px] bg-[#EAE3D9]/40 rounded-xl p-2">
               {leads.map((lead) => (
-                <LeadCard key={lead.id} lead={lead} />
+                <LeadCard key={lead.id} lead={lead} onClick={() => onLeadClick?.(lead)} />
               ))}
               {leads.length === 0 && (
                 <div className="flex-1 flex items-center justify-center">

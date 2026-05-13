@@ -50,8 +50,9 @@ Write-Host ""
 Write-Host "--- EVOLUTION API (WhatsApp — cloud) ---" -ForegroundColor Magenta
 Write-Host "Assine em: https://evolution-api.com ou use servico hospedado" -ForegroundColor DarkGray
 Write-Host "URL ex: https://sua-instancia.evolution-api.com" -ForegroundColor DarkGray
-$evolutionUrl = Ask "EVOLUTION_API_URL" "EVOLUTION_API_URL" $true
-$evolutionKey = Ask "EVOLUTION_API_KEY" "EVOLUTION_API_KEY" $true
+$evolutionUrl     = Ask "EVOLUTION_API_URL" "EVOLUTION_API_URL" $true
+$evolutionKey     = Ask "EVOLUTION_API_KEY" "EVOLUTION_API_KEY" $true
+$evolutionWebhook = Ask "EVOLUTION_WEBHOOK_SECRET (string aleatoria para validar webhooks, ex: moova_wh_2026)" "EVOLUTION_WEBHOOK_SECRET"
 
 # ── ASAAS ─────────────────────────────────────────────────────
 Write-Host ""
@@ -97,6 +98,7 @@ ELEVENLABS_API_KEY=$elevenKey
 # Evolution API (WhatsApp MVP)
 EVOLUTION_API_URL=$evolutionUrl
 EVOLUTION_API_KEY=$evolutionKey
+EVOLUTION_WEBHOOK_SECRET=$evolutionWebhook
 
 # Asaas (pagamentos)
 ASAAS_API_KEY=$asaasKey

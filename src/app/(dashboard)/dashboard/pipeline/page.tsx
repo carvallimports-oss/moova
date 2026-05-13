@@ -1,15 +1,11 @@
 import { createClient } from "@/lib/supabase/server"
-import { KanbanBoard } from "@/components/dashboard/kanban-board"
+import { PipelineClient } from "@/components/dashboard/pipeline-client"
 
-const STAGES = [
-  { key: "novo", label: "Novo" },
-  { key: "qualificado", label: "Qualificado" },
-  { key: "em_consideracao", label: "Em consideração" },
-  { key: "visita_agendada", label: "Visita agendada" },
-  { key: "visitou", label: "Visitou" },
-  { key: "em_negociacao", label: "Em negociação" },
-  { key: "fechou", label: "Fechou" },
-]
+export const dynamic = "force-dynamic"
+import Link from "next/link"
+import { buttonVariants } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
+import { Download } from "lucide-react"
 
 export default async function PipelinePage() {
   const supabase = await createClient()
@@ -22,18 +18,19 @@ export default async function PipelinePage() {
     .neq("status", "perdido")
     .order("updated_at", { ascending: false })
 
-  const grouped = STAGES.reduce<Record<string, typeof leads>>((acc, stage) => {
-    acc[stage.key] = (leads ?? []).filter((l) => l.status === stage.key)
-    return acc
-  }, {})
-
   return (
-    <div className="p-6 lg:p-8 pt-20 lg:pt-8 space-y-6 h-full flex flex-col">
-      <div>
-        <h1 className="font-serif text-2xl text-[#2D4A3E]">Pipeline</h1>
-        <p className="text-sm text-[#8A8A8A] mt-1">{leads?.length ?? 0} leads ativos</p>
+    <div className="p-6 lg:p-8 pt-20 lg:pt-8 space-y-4 h-full flex flex-col">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="font-serif text-2xl text-[#2D4A3E]">Pipeline</h1>
+          <p className="text-sm text-[#8A8A8A] mt-1">{leads?.length ?? 0} leads ativos</p>
+        </div>
+        <Link href="/api/leads/export" className={cn(buttonVariants({ variant: "outline", size: "sm" }), "border-[#E0D8CE] text-[#5A5A5A] gap-2")}>
+          <Download className="w-3.5 h-3.5" />
+          Exportar CSV
+        </Link>
       </div>
-      <KanbanBoard stages={STAGES} grouped={grouped} />
+      <PipelineClient initialLeads={leads ?? []} />
     </div>
   )
 }
