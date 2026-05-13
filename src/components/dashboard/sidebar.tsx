@@ -1,0 +1,129 @@
+"use client"
+
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { cn } from "@/lib/utils"
+import {
+  LayoutDashboard,
+  MessageSquare,
+  Kanban,
+  Building2,
+  Settings,
+  LogOut,
+  Menu,
+  X,
+} from "lucide-react"
+import { useState } from "react"
+import { createClient } from "@/lib/supabase/client"
+import { useRouter } from "next/navigation"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+
+const navItems = [
+  { href: "/dashboard", label: "Início", icon: LayoutDashboard },
+  { href: "/dashboard/conversas", label: "Conversas", icon: MessageSquare },
+  { href: "/dashboard/pipeline", label: "Pipeline", icon: Kanban },
+  { href: "/dashboard/imoveis", label: "Imóveis", icon: Building2 },
+  { href: "/dashboard/configuracoes", label: "Configurações", icon: Settings },
+]
+
+function NavContent({ userName, onNavigate }: { userName: string; onNavigate?: () => void }) {
+  const pathname = usePathname()
+  const router = useRouter()
+  const supabase = createClient()
+
+  async function handleLogout() {
+    await supabase.auth.signOut()
+    router.push("/login")
+  }
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Logo */}
+      <div className="px-6 py-5 border-b border-[#E0D8CE]">
+        <div className="flex items-center gap-2">
+          <div className="w-1.5 h-5 bg-[#B87333] rounded-full" />
+          <span className="font-serif text-xl text-[#2D4A3E]">Moova</span>
+        </div>
+        <p className="text-[10px] text-[#8A8A8A] mt-0.5 font-mono uppercase tracking-widest ml-4">
+          Moova Atende
+        </p>
+      </div>
+
+      {/* Nav items */}
+      <nav className="flex-1 px-3 py-4 space-y-0.5">
+        {navItems.map(({ href, label, icon: Icon }) => {
+          const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href))
+          return (
+            <Link
+              key={href}
+              href={href}
+              onClick={onNavigate}
+              className={cn(
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors",
+                active
+                  ? "bg-[#2D4A3E] text-white font-medium"
+                  : "text-[#5A5A5A] hover:bg-[#EAE3D9] hover:text-[#2D4A3E]"
+              )}
+            >
+              <Icon className="w-4 h-4 shrink-0" />
+              {label}
+            </Link>
+          )
+        })}
+      </nav>
+
+      {/* User */}
+      <div className="px-3 py-4 border-t border-[#E0D8CE]">
+        <div className="flex items-center gap-3 px-3 py-2 rounded-lg">
+          <Avatar className="w-8 h-8">
+            <AvatarFallback className="bg-[#2D4A3E] text-white text-xs">
+              {userName.slice(0, 2).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-[#2A2A2A] truncate">{userName}</p>
+            <p className="text-xs text-[#8A8A8A]">Corretor</p>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleLogout}
+            className="w-8 h-8 text-[#8A8A8A] hover:text-red-600"
+          >
+            <LogOut className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export function DashboardSidebar({ userName }: { userName: string }) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <>
+      {/* Mobile */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-[#FAF7F2] border-b border-[#E0D8CE] px-4 h-14 flex items-center gap-3">
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetTrigger>
+            <Button variant="ghost" size="icon" className="text-[#2D4A3E]">
+              {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="p-0 w-64 bg-white border-r border-[#E0D8CE]">
+            <NavContent userName={userName} onNavigate={() => setOpen(false)} />
+          </SheetContent>
+        </Sheet>
+        <span className="font-serif text-lg text-[#2D4A3E]">Moova</span>
+      </div>
+
+      {/* Desktop */}
+      <aside className="hidden lg:flex w-60 bg-white border-r border-[#E0D8CE] flex-col shrink-0">
+        <NavContent userName={userName} />
+      </aside>
+    </>
+  )
+}
