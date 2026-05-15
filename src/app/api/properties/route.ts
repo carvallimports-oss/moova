@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
 import { z } from "zod"
 
+export const dynamic = "force-dynamic"
+
 const createPropertySchema = z.object({
   title: z.string().min(3),
   description: z.string().optional(),

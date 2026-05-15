@@ -3,6 +3,8 @@ import { NextResponse } from "next/server"
 import { z } from "zod"
 import { createCustomer, createSubscription, getCustomerByExternalRef } from "@/lib/asaas/client"
 
+export const dynamic = "force-dynamic"
+
 const schema = z.object({
   plan: z.enum(["starter", "pro"]),
   name: z.string().min(2),

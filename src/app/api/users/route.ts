@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
 import { z } from "zod"
 
+export const dynamic = "force-dynamic"
+
 const updateSchema = z.object({
   broker_name: z.string().min(2).optional(),
   phone: z.string().optional(),

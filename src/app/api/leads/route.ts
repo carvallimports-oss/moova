@@ -3,6 +3,8 @@ import { NextResponse } from "next/server"
 import { z } from "zod"
 import { inngest } from "@/lib/inngest/client"
 
+export const dynamic = "force-dynamic"
+
 const createLeadSchema = z.object({
   name: z.string().min(2),
   phone: z.string().min(10),

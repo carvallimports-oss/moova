@@ -74,7 +74,7 @@ export const sendPactoMarco = inngest.createFunction(
 
           const refundMap: Record<string, number> = {
             A: 0,
-            B: comissao * 0 + 799 * 3 * 0.7, // 70% de 3 mensalidades
+            B: 799 * 3 * 0.7,  // 70% de 3 mensalidades
             C: 799 * 3 * 0.35,
             D: 0,
           }
