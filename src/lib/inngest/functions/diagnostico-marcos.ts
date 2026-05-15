@@ -75,6 +75,16 @@ export const sendDiagnosticoMarco = inngest.createFunction(
       })
     }
 
+    // Day 14: trigger final report generation
+    if (dayNumber === 14) {
+      await step.run("trigger-day14-report", () =>
+        inngest.send({
+          name: "diagnostico/day14.completed",
+          data: { userId, diagnosticoId },
+        })
+      )
+    }
+
     return { userId, dayNumber, messageContent }
   }
 )

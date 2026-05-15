@@ -9,27 +9,27 @@ export const dynamic = "force-dynamic"
 
 const SCENARIOS = {
   A: {
-    label: "Cenário A — Meta superada",
-    desc: "Você atingiu 100% ou mais da meta de comissão. Nenhum reembolso se aplica.",
+    label: "Cenário A — Meta atingida",
+    desc: "Você atingiu R$ 50k em comissão real. Contrato segue sem devolução.",
     refund: "0%",
     color: "text-green-700 bg-green-50 border-green-200",
   },
   B: {
-    label: "Cenário B — Resultado parcial",
-    desc: "Entre 70% e 99% da meta. Reembolso proporcional de até 20% do valor investido.",
-    refund: "até 20%",
+    label: "Cenário B — Jogou limpo",
+    desc: "Não atingiu a meta, mas cumpriu os compromissos: visitas, aprovações e leads quentes aceitos. Devolução de 70% em até 30 dias úteis.",
+    refund: "70% devolvido",
     color: "text-blue-700 bg-blue-50 border-blue-200",
   },
   C: {
-    label: "Cenário C — Abaixo do esperado",
-    desc: "Entre 30% e 69% da meta. Reembolso de até 40% do valor investido.",
-    refund: "até 40%",
+    label: "Cenário C — Participação parcial",
+    desc: "Boa-fé entre 50% e 79%. Devolução de 35% + 1 mês grátis para continuar.",
+    refund: "35% devolvido + 1 mês grátis",
     color: "text-orange-700 bg-orange-50 border-orange-200",
   },
   D: {
-    label: "Cenário D — Não entregou",
-    desc: "Menos de 30% da meta. Reembolso máximo de 70% do valor investido.",
-    refund: "até 70%",
+    label: "Cenário D — Garantia anulada",
+    desc: "Boa-fé abaixo de 50% ou sabotagem identificada. A garantia não se aplica.",
+    refund: "sem devolução",
     color: "text-red-700 bg-red-50 border-red-200",
   },
 }
@@ -44,7 +44,7 @@ export default async function PactoPage() {
   if (!user) redirect("/login")
 
   const { data: pacto } = await supabase
-    .from("pacto_moova_90")
+    .from("pacto_moova_90_audit")
     .select("*")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
@@ -159,11 +159,12 @@ export default async function PactoPage() {
         <h2 className="font-serif text-lg text-[#2D4A3E]">Como funciona o Pacto</h2>
         <div className="space-y-3 text-sm text-[#5A5A5A]">
           {[
-            "Válido para os 3 primeiros meses de assinatura (90 dias)",
-            "A meta é definida com base no histórico do corretor e no volume de leads",
-            "O score de boa-fé mede sua participação: aprovações feitas, visitas realizadas, leads respondidos",
-            "Cenários A/B/C/D calculados ao final do período com métricas verificáveis",
-            "Reembolso processado em até 10 dias úteis após aprovação",
+            "Meta: R$ 50.000 em comissão real nos primeiros 90 dias",
+            "Score de boa-fé: % visitas realizadas, escalações atendidas em 4h, leads quentes aceitos",
+            "Cenário B (boa-fé ≥80%): 70% devolvido em até 30 dias úteis",
+            "Cenário C (boa-fé 50–79%): 35% devolvido + 1 mês grátis",
+            "Cenário D (boa-fé <50% ou sabotagem): garantia anulada",
+            "Prazo de contestação: 7 dias após veredito, com evidências",
           ].map((rule) => (
             <div key={rule} className="flex items-start gap-2">
               <CheckCircle2 className="w-4 h-4 text-[#B87333] shrink-0 mt-0.5" />
