@@ -12,6 +12,7 @@ import { generateDiagnosticoReport } from "@/lib/inngest/functions/diagnostico-r
 import { sendApprovedMessage } from "@/lib/inngest/functions/send-approved-message"
 import { visitReminders } from "@/lib/inngest/functions/visit-reminders"
 import { classifyImportedLeads } from "@/lib/inngest/functions/classify-imported-leads"
+import { thinkingFollowup } from "@/lib/inngest/functions/thinking-followup"
 
 export const { GET, POST, PUT } = serve({
   client: inngest,
@@ -28,5 +29,6 @@ export const { GET, POST, PUT } = serve({
     sendApprovedMessage,
     visitReminders,
     classifyImportedLeads,
+    thinkingFollowup,
   ],
 })

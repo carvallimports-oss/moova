@@ -131,7 +131,64 @@ export const visitReminders = inngest.createFunction(
       followUps++
     }
 
-    return { reminders24h, followUps }
+    // ── 1h antes da visita ───────────────────────────────────────────────────
+    const upcoming1h = await step.run("fetch-1h-visits", async () => {
+      const in1h = new Date(now.getTime() + 1 * 3600 * 1000)
+      const in90min = new Date(now.getTime() + 1.5 * 3600 * 1000)
+      const { data } = await supabase
+        .from("visits")
+        .select(`
+          id, scheduled_at, user_id, address,
+          leads(id, name, phone),
+          users!visits_user_id_fkey(broker_name, name, phone)
+        `)
+        .gte("scheduled_at", in1h.toISOString())
+        .lte("scheduled_at", in90min.toISOString())
+        .eq("reminder_1h_sent", false)
+        .in("status", ["pendente", "confirmada"])
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return (data ?? []) as any[]
+    })
+
+    let reminders1h = 0
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    for (const visit of upcoming1h as any[]) {
+      if (!visit.leads?.phone || !visit.users) continue
+      await step.run(`reminder-1h-${visit.id}`, async () => {
+        const broker = visit.users
+        const brokerName = broker.broker_name ?? broker.name
+        const dt = new Date(visit.scheduled_at)
+        const timeStr = dt.toLocaleTimeString("pt-BR", {
+          hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo",
+        })
+        const addressNote = visit.address ? ` no endereço ${visit.address}` : ""
+        const msg = `Oi ${visit.leads!.name}! A visita com ${brokerName} é em 1 hora — às ${timeStr}${addressNote}. Nos vemos logo!`
+
+        const { data: wa } = await supabase
+          .from("whatsapp_accounts")
+          .select("instance_name, provider")
+          .eq("user_id", visit.user_id)
+          .single()
+
+        if (!wa?.instance_name) return
+
+        const provider = createWhatsAppProvider((wa.provider ?? "evolution") as "evolution" | "bsp")
+        await provider.sendMessage({ to: visit.leads!.phone, text: msg })
+        await supabase.from("visits").update({ reminder_1h_sent: true }).eq("id", visit.id)
+        await supabase.from("messages").insert({
+          conversation_id: await getOrCreateConvId(supabase, visit.user_id, visit.leads!.id),
+          lead_id: visit.leads!.id,
+          user_id: visit.user_id,
+          content: msg,
+          type: "text",
+          sender: "cora",
+          flags: [],
+        })
+      })
+      reminders1h++
+    }
+
+    return { reminders24h, reminders1h, followUps }
   }
 )
 

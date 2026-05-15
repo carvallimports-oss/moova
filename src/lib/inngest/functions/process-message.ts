@@ -201,12 +201,23 @@ export const processWhatsAppMessage = inngest.createFunction(
       }).eq("id", conversation.id)
     })
 
-    // 8. Se broker assumiu a conversa, não gerar resposta da Cora
+    // 8. Detectar "vou pensar" → agendar retomada em 3 dias
+    await step.run("check-thinking-signal", async () => {
+      const THINKING = /vou pensar|deixa eu pensar|preciso pensar|vou ver|deixa eu ver|vou avaliar|me dá um tempo|preciso analisar|vou considerar|não tenho certeza|tenho que ver/i
+      if (THINKING.test(messageText)) {
+        const followupAt = new Date(Date.now() + 3 * 24 * 3600 * 1000)
+        await supabase.from("leads").update({
+          thinking_followup_at: followupAt.toISOString(),
+        }).eq("id", lead.id)
+      }
+    })
+
+    // 9. Se broker assumiu a conversa, não gerar resposta da Cora
     if (conversation.broker_took_over) {
       return { status: "broker_took_over", convId: conversation.id }
     }
 
-    // 9. Verificar se é primeira interação (disclaimer LGPD M05G)
+    // 10. Verificar se é primeira interação (disclaimer LGPD M05G)
     const isFirstInteraction = await step.run("check-first-interaction", async () => {
       const { count } = await supabase
         .from("messages")
