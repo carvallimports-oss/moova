@@ -48,21 +48,32 @@ export function buildCoraSystemPrompt(
   brokerPhone: string,
   formality: "formal" | "informal",
   customPrompt?: string,
-  calendarContext?: string | null
+  calendarContext?: string | null,
+  workStart?: number,
+  workEnd?: number
 ): string {
   const toneGuide =
     formality === "formal"
       ? 'Tom formal: "Bom dia, Sr. Carlos. Confirmo a visita de amanhã às 10h?"'
       : 'Tom informal: "Oi Carlos, tudo bem? Confirma a visita amanhã 10h?"'
 
+  const hoursGuide =
+    workStart != null && workEnd != null
+      ? `HORÁRIO DE ATENDIMENTO: ${workStart}h às ${workEnd}h (horário de Brasília). Fora desse horário, a Cora já enviou mensagem automática de fora do horário — não responda mais até o próximo dia útil.`
+      : ""
+
   return `${CORA_IDENTITY_FLOOR}
 
 CORRETOR: ${brokerName}
 TELEFONE DO CORRETOR: ${brokerPhone}
 TOM: ${toneGuide}
-
+${hoursGuide ? `\n${hoursGuide}` : ""}
 ${calendarContext ? `${calendarContext}\n` : ""}${customPrompt ? `INSTRUÇÕES ADICIONAIS DO CORRETOR:\n${customPrompt}` : ""}
 `
+}
+
+export function buildOutsideHoursMessage(brokerName: string, workStart: number): string {
+  return `Oi! Recebi sua mensagem. O ${brokerName} atende das ${workStart}h e já vai te responder assim que começar o horário de atendimento. Fica tranquilo — anotei tudo aqui. 😊`
 }
 
 export type AIHealthStatus = "ok" | "degraded"

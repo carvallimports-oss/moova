@@ -12,7 +12,7 @@ export default async function ConfiguracoesPage({
 
   const { data: profile } = await supabase
     .from("users")
-    .select("name, creci, phone, whatsapp_provider, cora_formality, cora_custom_prompt, human_approval_active, human_approval_categories, google_calendar_connected, eleven_labs_voice_id")
+    .select("name, creci, phone, whatsapp_provider, cora_formality, cora_custom_prompt, human_approval_active, human_approval_categories, google_calendar_connected, eleven_labs_voice_id, cora_work_start, cora_work_end")
     .eq("id", user!.id)
     .single()
 

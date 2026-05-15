@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { createClient } from "@/lib/supabase/client"
-import { Wifi, WifiOff, RefreshCw, Shield, Loader2, Mic, MicOff, Calendar, CheckCircle2 } from "lucide-react"
+import { Wifi, WifiOff, RefreshCw, Shield, Loader2, Mic, MicOff, Calendar, CheckCircle2, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
@@ -39,6 +39,8 @@ type Profile = {
   human_approval_categories: HumanApprovalCategories | null
   google_calendar_connected: boolean
   eleven_labs_voice_id: string | null
+  cora_work_start: number | null
+  cora_work_end: number | null
 } | null
 
 type WAAccount = {
@@ -70,6 +72,8 @@ export function ConfiguracoesForm({
       visita: true, valor: true, contraproposta: true, fechamento: true, alto_valor: true,
     }
   )
+  const [workStart, setWorkStart] = useState(profile?.cora_work_start ?? 8)
+  const [workEnd, setWorkEnd] = useState(profile?.cora_work_end ?? 20)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [qrCode, setQrCode] = useState<string | null>(null)
@@ -244,6 +248,8 @@ export function ConfiguracoesForm({
           cora_custom_prompt: customPrompt || null,
           human_approval_active: humanApproval,
           human_approval_categories: approvalCategories,
+          cora_work_start: workStart,
+          cora_work_end: workEnd,
         })
         .eq("id", user!.id)
       setSaved(true)
@@ -539,6 +545,50 @@ export function ConfiguracoesForm({
             />
             <p className="text-xs text-[#8A8A8A]">O piso de identidade da Cora Constitution nunca é alterado.</p>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Horário de operação */}
+      <Card className="border-[#E0D8CE]">
+        <CardHeader className="pb-3">
+          <CardTitle className="font-serif text-lg text-[#2D4A3E] flex items-center gap-2">
+            <Clock className="w-4 h-4" />
+            Horário de Atendimento
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-[#5A5A5A]">
+            Fora desse horário, a Cora envia uma mensagem automática informando o horário de retorno.
+          </p>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label className="text-sm">Início do atendimento</Label>
+              <select
+                value={workStart}
+                onChange={(e) => setWorkStart(Number(e.target.value))}
+                className="w-full border border-[#E0D8CE] rounded-lg px-3 py-2 text-sm bg-white text-[#2A2A2A] focus:outline-none focus:border-[#2D4A3E]"
+              >
+                {Array.from({ length: 24 }, (_, i) => (
+                  <option key={i} value={i}>{String(i).padStart(2, "0")}h00</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm">Fim do atendimento</Label>
+              <select
+                value={workEnd}
+                onChange={(e) => setWorkEnd(Number(e.target.value))}
+                className="w-full border border-[#E0D8CE] rounded-lg px-3 py-2 text-sm bg-white text-[#2A2A2A] focus:outline-none focus:border-[#2D4A3E]"
+              >
+                {Array.from({ length: 24 }, (_, i) => (
+                  <option key={i} value={i}>{String(i).padStart(2, "0")}h00</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <p className="text-xs text-[#8A8A8A]">
+            Horário atual configurado: {String(workStart).padStart(2, "0")}h às {String(workEnd).padStart(2, "0")}h (Brasília)
+          </p>
         </CardContent>
       </Card>
 

@@ -2,6 +2,7 @@ import { inngest } from "../client"
 import {
   checkAIHealth,
   buildCoraSystemPrompt,
+  buildOutsideHoursMessage,
   generateCoraResponse,
   DEGRADED_MODE_MESSAGE,
 } from "@/lib/ai/cora"
@@ -16,6 +17,12 @@ const APPROVAL_TRIGGERS: Record<string, RegExp> = {
   contraproposta: /contraproposta|contra-proposta|ofereço|toparia|aceito se/i,
   fechamento: /fechar|vou.*comprar|quero.*comprar|vou.*alugar|quero.*alugar|assinar|fechamos/i,
 }
+
+// Escalação para humano (M05D)
+const HUMAN_REQUEST = /falar.*corretor|falar.*humano|falar.*você|chama.*ele|quero.*ele|passa.*corretor|fala.*com.*ele|atendimento.*humano|não.*robô/i
+
+// Opt-out LGPD (M13)
+const LGPD_OPTOUT = /não.*quero.*mensagem|para.*mandar|remov.*contato|opt.?out|sair.*lista|me tira|não me.*manda|para de.*enviar|exclu.*meu.*contato/i
 
 function detectApprovalCategory(text: string): string | null {
   for (const [cat, regex] of Object.entries(APPROVAL_TRIGGERS)) {
@@ -59,7 +66,7 @@ export const processWhatsAppMessage = inngest.createFunction(
 
       const { data: user } = await supabase
         .from("users")
-        .select("id, broker_name, name, phone, email, cora_formality, cora_custom_prompt, human_approval_active, human_approval_disabled_at, human_approval_categories, created_at, google_calendar_connected")
+        .select("id, broker_name, name, phone, email, cora_formality, cora_custom_prompt, human_approval_active, human_approval_disabled_at, human_approval_categories, created_at, google_calendar_connected, cora_work_start, cora_work_end")
         .eq("id", wa.user_id)
         .single()
 
@@ -122,6 +129,11 @@ export const processWhatsAppMessage = inngest.createFunction(
 
     if (!lead) return { status: "lead_error" }
 
+    // 4b. LGPD opt-out — não processa mais mensagens desse lead
+    if (lead.lgpd_optout_at) {
+      return { status: "lgpd_optout", leadId: lead.id }
+    }
+
     // 5. Buscar ou criar conversation
     const conversation = await step.run("find-or-create-conversation", async () => {
       const { data: existing } = await supabase
@@ -179,6 +191,55 @@ export const processWhatsAppMessage = inngest.createFunction(
       return text ?? ""
     })
 
+    // 6b. Verificar horário de operação (M04E) — envia msg fora do horário e encerra
+    const outsideHours = await step.run("check-operating-hours", async () => {
+      const workStart = broker.cora_work_start ?? 8
+      const workEnd = broker.cora_work_end ?? 20
+      const hourBR = new Date().toLocaleString("en-US", {
+        timeZone: "America/Sao_Paulo", hour: "numeric", hour12: false,
+      })
+      const currentHour = parseInt(hourBR, 10)
+      return currentHour < workStart || currentHour >= workEnd
+    })
+
+    if (outsideHours) {
+      await step.run("send-outside-hours", async () => {
+        const provider = createWhatsAppProvider((broker.provider ?? "evolution") as "evolution" | "bsp")
+        const brokerName = broker.broker_name ?? broker.name ?? "o corretor"
+        const workStart = broker.cora_work_start ?? 8
+        await provider.sendMessage({
+          to: from,
+          text: buildOutsideHoursMessage(brokerName, workStart),
+        })
+      })
+      return { status: "outside_hours" }
+    }
+
+    // 6c. LGPD opt-out detectado no texto (M13) — reconhece e encerra
+    const isOptOut = LGPD_OPTOUT.test(messageText)
+    if (isOptOut) {
+      await step.run("handle-lgpd-optout", async () => {
+        await supabase.from("leads").update({
+          lgpd_optout_at: new Date().toISOString(),
+        }).eq("id", lead.id)
+
+        const provider = createWhatsAppProvider((broker.provider ?? "evolution") as "evolution" | "bsp")
+        await provider.sendMessage({
+          to: from,
+          text: "Entendido! Removemos seu contato da lista de atendimento da Cora. Caso mude de ideia, é só entrar em contato diretamente com o corretor. Obrigado!",
+        })
+
+        await supabase.from("audit_logs").insert({
+          user_id: broker.id,
+          action: "lead_lgpd_optout",
+          entity_type: "lead",
+          entity_id: lead.id,
+          payload: { phone: from, detected_text: messageText.slice(0, 100) },
+        })
+      })
+      return { status: "lgpd_optout_registered", leadId: lead.id }
+    }
+
     // 7. Salvar mensagem do lead
     await step.run("save-lead-message", async () => {
       await supabase.from("messages").insert({
@@ -200,6 +261,33 @@ export const processWhatsAppMessage = inngest.createFunction(
         updated_at: new Date().toISOString(),
       }).eq("id", conversation.id)
     })
+
+    // 7b. Escalação para humano (M05D) — lead pediu falar com o corretor
+    const wantsHuman = HUMAN_REQUEST.test(messageText)
+    if (wantsHuman) {
+      await step.run("handle-escalation", async () => {
+        await supabase.from("conversations").update({
+          broker_took_over: true,
+          broker_took_over_at: new Date().toISOString(),
+        }).eq("id", conversation.id)
+
+        const brokerName = broker.broker_name ?? broker.name ?? "o corretor"
+        const provider = createWhatsAppProvider((broker.provider ?? "evolution") as "evolution" | "bsp")
+        await provider.sendMessage({
+          to: from,
+          text: `Claro! Passei para o ${brokerName}. Ele entra em contato em breve! 👋`,
+        })
+
+        await supabase.from("audit_logs").insert({
+          user_id: broker.id,
+          action: "lead_escalated_to_human",
+          entity_type: "conversation",
+          entity_id: conversation.id,
+          payload: { phone: from },
+        })
+      })
+      return { status: "escalated_to_human", convId: conversation.id }
+    }
 
     // 8. Detectar "vou pensar" → agendar retomada em 3 dias
     await step.run("check-thinking-signal", async () => {
@@ -254,7 +342,9 @@ export const processWhatsAppMessage = inngest.createFunction(
       brokerPhone,
       (broker.cora_formality as "formal" | "informal") ?? "informal",
       broker.cora_custom_prompt ?? undefined,
-      calendarContext
+      calendarContext,
+      broker.cora_work_start ?? 8,
+      broker.cora_work_end ?? 20
     )
 
     const coraResponse = await step.run("generate-cora-response", async () => {
