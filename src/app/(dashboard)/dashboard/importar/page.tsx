@@ -93,7 +93,7 @@ export default function ImportarPage() {
   )
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="p-6 lg:p-8 pt-20 lg:pt-8 max-w-3xl mx-auto space-y-6">
       <div>
         <h1 className="font-serif text-2xl text-[#2D4A3E]">Importar leads</h1>
         <p className="text-sm text-[#8A8A8A] mt-1">

@@ -41,7 +41,7 @@ export default async function DashboardLayout({
   return (
     <div className="flex h-screen bg-[#FAF7F2] overflow-hidden">
       <DashboardSidebar
-        userName={profile.name}
+        userName={profile.name ?? user.email ?? "Corretor"}
         pendingApprovals={pendingApprovals ?? 0}
         diagDay={diagDay}
       />

@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
@@ -25,9 +26,22 @@ const tempColor: Record<string, string> = {
   INERTE: "bg-gray-50 text-gray-500 border-gray-200",
 }
 
-function LeadCard({ lead, onClick }: { lead: Lead; onClick?: () => void }) {
+function LeadCard({
+  lead,
+  onClick,
+  onDragStart,
+}: {
+  lead: Lead
+  onClick?: () => void
+  onDragStart?: (e: React.DragEvent) => void
+}) {
   return (
-    <Card onClick={onClick} className="border-[#E0D8CE] hover:shadow-sm transition-shadow cursor-pointer">
+    <Card
+      draggable
+      onDragStart={onDragStart}
+      onClick={onClick}
+      className="border-[#E0D8CE] hover:shadow-sm transition-shadow cursor-pointer active:opacity-70 select-none"
+    >
       <CardContent className="p-3 space-y-2">
         <div className="flex items-start justify-between gap-1">
           <p className="font-medium text-sm text-[#2A2A2A] leading-tight">{lead.name}</p>
@@ -61,17 +75,61 @@ export function KanbanBoard({
   stages,
   grouped,
   onLeadClick,
+  onDrop,
 }: {
   stages: Stage[]
   grouped: Record<string, Lead[] | null>
   onLeadClick?: (lead: Lead) => void
+  onDrop?: (lead: Lead, toStage: string) => void
 }) {
+  const [dragOverStage, setDragOverStage] = useState<string | null>(null)
+  const [dragging, setDragging] = useState<Lead | null>(null)
+
+  function handleDragStart(e: React.DragEvent, lead: Lead) {
+    setDragging(lead)
+    e.dataTransfer.effectAllowed = "move"
+  }
+
+  function handleDragOver(e: React.DragEvent, stageKey: string) {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = "move"
+    setDragOverStage(stageKey)
+  }
+
+  function handleDragLeave(e: React.DragEvent) {
+    // Only clear if leaving the column entirely (not entering a child)
+    if (!(e.currentTarget as HTMLElement).contains(e.relatedTarget as Node)) {
+      setDragOverStage(null)
+    }
+  }
+
+  function handleDrop(e: React.DragEvent, toStage: string) {
+    e.preventDefault()
+    setDragOverStage(null)
+    if (dragging && dragging.status !== toStage) {
+      onDrop?.(dragging, toStage)
+    }
+    setDragging(null)
+  }
+
+  function handleDragEnd() {
+    setDragging(null)
+    setDragOverStage(null)
+  }
+
   return (
     <div className="flex gap-4 overflow-x-auto pb-4 flex-1">
       {stages.map((stage) => {
         const leads = grouped[stage.key] ?? []
+        const isOver = dragOverStage === stage.key
         return (
-          <div key={stage.key} className="flex flex-col w-60 shrink-0">
+          <div
+            key={stage.key}
+            className="flex flex-col w-60 shrink-0"
+            onDragOver={(e) => handleDragOver(e, stage.key)}
+            onDragLeave={handleDragLeave}
+            onDrop={(e) => handleDrop(e, stage.key)}
+          >
             <div className="flex items-center justify-between mb-2 px-1">
               <span className="text-xs font-medium text-[#5A5A5A] uppercase tracking-wide">
                 {stage.label}
@@ -80,19 +138,31 @@ export function KanbanBoard({
                 {leads.length}
               </span>
             </div>
-            <div className="flex flex-col gap-2 flex-1 min-h-[200px] bg-[#EAE3D9]/40 rounded-xl p-2">
+            <div
+              className={cn(
+                "flex flex-col gap-2 flex-1 min-h-[200px] rounded-xl p-2 transition-colors",
+                isOver ? "bg-[#2D4A3E]/10 ring-2 ring-dashed ring-[#2D4A3E]/30" : "bg-[#EAE3D9]/40"
+              )}
+            >
               {leads.map((lead) => (
-                <LeadCard key={lead.id} lead={lead} onClick={() => onLeadClick?.(lead)} />
+                <LeadCard
+                  key={lead.id}
+                  lead={lead}
+                  onClick={() => onLeadClick?.(lead)}
+                  onDragStart={(e) => handleDragStart(e, lead)}
+                />
               ))}
               {leads.length === 0 && (
                 <div className="flex-1 flex items-center justify-center">
-                  <p className="text-xs text-[#8A8A8A]/50">Vazio</p>
+                  <p className="text-xs text-[#8A8A8A]/50">{isOver ? "Soltar aqui" : "Vazio"}</p>
                 </div>
               )}
             </div>
           </div>
         )
       })}
+      {/* Invisible drag-end catcher */}
+      <div onDragEnd={handleDragEnd} className="hidden" />
     </div>
   )
 }

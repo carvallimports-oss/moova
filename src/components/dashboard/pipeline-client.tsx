@@ -59,6 +59,22 @@ export function PipelineClient({ initialLeads }: { initialLeads: PipelineLead[] 
     )
   }
 
+  async function handleDrop(lead: PipelineLead, toStage: string) {
+    // Optimistic update
+    setLeads((prev) => prev.map((l) => (l.id === lead.id ? { ...l, status: toStage } : l)))
+
+    const res = await fetch(`/api/leads/${lead.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: toStage }),
+    })
+
+    if (!res.ok) {
+      // Revert on failure
+      setLeads((prev) => prev.map((l) => (l.id === lead.id ? { ...l, status: lead.status } : l)))
+    }
+  }
+
   return (
     <>
       <div className="flex gap-2 flex-wrap">
@@ -78,7 +94,12 @@ export function PipelineClient({ initialLeads }: { initialLeads: PipelineLead[] 
         ))}
       </div>
 
-      <KanbanBoard stages={STAGES} grouped={grouped} onLeadClick={handleLeadClick} />
+      <KanbanBoard
+        stages={STAGES}
+        grouped={grouped}
+        onLeadClick={handleLeadClick}
+        onDrop={handleDrop}
+      />
 
       <LeadModal
         key={selectedLead?.id ?? "new"}

@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import { Calendar } from "lucide-react"
 import { VisitasClient } from "@/components/dashboard/visitas-client"
 
 export const dynamic = "force-dynamic"
@@ -10,14 +9,22 @@ export default async function VisitasPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect("/login")
 
-  const { data: visits } = await supabase
-    .from("visits")
-    .select(`
-      id, scheduled_at, status, notes, address,
-      leads(id, name, phone, temperature)
-    `)
-    .eq("user_id", user.id)
-    .order("scheduled_at", { ascending: true })
+  const [{ data: visits }, { data: leads }] = await Promise.all([
+    supabase
+      .from("visits")
+      .select(`
+        id, scheduled_at, status, notes, address,
+        leads(id, name, phone, temperature)
+      `)
+      .eq("user_id", user.id)
+      .order("scheduled_at", { ascending: true }),
+    supabase
+      .from("leads")
+      .select("id, name")
+      .eq("user_id", user.id)
+      .not("status", "in", '("perdido","fechou")')
+      .order("name", { ascending: true }),
+  ])
 
   const upcoming = (visits ?? []).filter(
     (v) => new Date(v.scheduled_at) >= new Date() && v.status !== "cancelada" && v.status !== "realizada"
@@ -32,7 +39,7 @@ export default async function VisitasPage() {
         </p>
       </div>
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      <VisitasClient initialVisits={(visits ?? []) as any} />
+      <VisitasClient initialVisits={(visits ?? []) as any} availableLeads={(leads ?? []) as { id: string; name: string }[]} />
     </div>
   )
 }

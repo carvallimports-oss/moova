@@ -5,7 +5,7 @@ import { z } from "zod"
 export const dynamic = "force-dynamic"
 
 const patchSchema = z.object({
-  status: z.enum(["pendente", "confirmada", "cancelada", "realizada"]),
+  status: z.enum(["pendente", "confirmada", "cancelada", "realizada"]).optional(),
   notes: z.string().optional(),
 })
 
@@ -28,5 +28,16 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // When visit is marked as realizada, update lead status to visitou
+  if (parsed.data.status === "realizada" && data?.lead_id) {
+    await supabase
+      .from("leads")
+      .update({ status: "visitou" })
+      .eq("id", data.lead_id)
+      .eq("user_id", user.id)
+      .in("status", ["visita_agendada", "qualificado"])
+  }
+
   return NextResponse.json(data)
 }

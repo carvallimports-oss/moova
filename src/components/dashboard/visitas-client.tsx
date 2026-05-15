@@ -2,10 +2,12 @@
 
 import { useState } from "react"
 import { toast } from "sonner"
-import { Calendar, Clock, MapPin, User, Check, X } from "lucide-react"
+import { Calendar, Clock, MapPin, User, Check, X, Plus } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { VisitModal } from "@/components/dashboard/visit-modal"
 
 type Lead = { id: string; name: string; phone: string; temperature: string | null } | null
 
@@ -113,6 +115,16 @@ function VisitCard({ visit, onUpdate }: { visit: Visit; onUpdate: (id: string, s
                 </button>
               </div>
             )}
+            {status === "confirmada" && (
+              <button
+                onClick={() => handle("realizada")}
+                disabled={!!loading}
+                className="flex items-center gap-1 px-2 py-1 text-[11px] bg-blue-50 text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50"
+              >
+                <Check className="w-3 h-3" />
+                {loading === "realizada" ? "..." : "Realizada"}
+              </button>
+            )}
           </div>
         </div>
       </CardContent>
@@ -120,45 +132,75 @@ function VisitCard({ visit, onUpdate }: { visit: Visit; onUpdate: (id: string, s
   )
 }
 
-export function VisitasClient({ initialVisits }: { initialVisits: Visit[] }) {
+export function VisitasClient({
+  initialVisits,
+  availableLeads,
+}: {
+  initialVisits: Visit[]
+  availableLeads: { id: string; name: string }[]
+}) {
   const [visits, setVisits] = useState(initialVisits)
+  const [modalOpen, setModalOpen] = useState(false)
 
   function handleUpdate(id: string, status: string) {
     setVisits((prev) => prev.map((v) => (v.id === id ? { ...v, status } : v)))
+  }
+
+  function handleCreated(visit: Visit) {
+    setVisits((prev) => [...prev, visit].sort(
+      (a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime()
+    ))
   }
 
   const now = new Date()
   const upcoming = visits.filter((v) => new Date(v.scheduled_at) >= now && v.status !== "cancelada" && v.status !== "realizada")
   const past = visits.filter((v) => new Date(v.scheduled_at) < now || v.status === "cancelada" || v.status === "realizada")
 
-  if (visits.length === 0) {
-    return (
-      <div className="text-center py-16 text-[#8A8A8A]">
-        <Calendar className="w-10 h-10 mx-auto mb-3 opacity-20" />
-        <p className="text-sm">Nenhuma visita agendada ainda.</p>
-        <p className="text-xs mt-1">A Cora agenda visitas automaticamente ao qualificar leads quentes.</p>
-      </div>
-    )
-  }
-
   return (
-    <div className="space-y-8">
-      {upcoming.length > 0 && (
-        <section className="space-y-3">
-          <h2 className="text-xs font-medium text-[#8A8A8A] uppercase tracking-widest">Próximas</h2>
-          {upcoming.map((v) => (
-            <VisitCard key={v.id} visit={v} onUpdate={handleUpdate} />
-          ))}
-        </section>
+    <>
+      <div className="flex justify-end">
+        <Button
+          onClick={() => setModalOpen(true)}
+          className="bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white gap-2"
+        >
+          <Plus className="w-4 h-4" />
+          Nova visita
+        </Button>
+      </div>
+
+      {visits.length === 0 ? (
+        <div className="text-center py-16 text-[#8A8A8A]">
+          <Calendar className="w-10 h-10 mx-auto mb-3 opacity-20" />
+          <p className="text-sm">Nenhuma visita agendada ainda.</p>
+          <p className="text-xs mt-1">A Cora agenda visitas automaticamente ao qualificar leads quentes.</p>
+        </div>
+      ) : (
+        <div className="space-y-8">
+          {upcoming.length > 0 && (
+            <section className="space-y-3">
+              <h2 className="text-xs font-medium text-[#8A8A8A] uppercase tracking-widest">Próximas</h2>
+              {upcoming.map((v) => (
+                <VisitCard key={v.id} visit={v} onUpdate={handleUpdate} />
+              ))}
+            </section>
+          )}
+          {past.length > 0 && (
+            <section className="space-y-3">
+              <h2 className="text-xs font-medium text-[#8A8A8A] uppercase tracking-widest">Histórico</h2>
+              {past.map((v) => (
+                <VisitCard key={v.id} visit={v} onUpdate={handleUpdate} />
+              ))}
+            </section>
+          )}
+        </div>
       )}
-      {past.length > 0 && (
-        <section className="space-y-3">
-          <h2 className="text-xs font-medium text-[#8A8A8A] uppercase tracking-widest">Histórico</h2>
-          {past.map((v) => (
-            <VisitCard key={v.id} visit={v} onUpdate={handleUpdate} />
-          ))}
-        </section>
-      )}
-    </div>
+
+      <VisitModal
+        leads={availableLeads}
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onCreated={handleCreated}
+      />
+    </>
   )
 }

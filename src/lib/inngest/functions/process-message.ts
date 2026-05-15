@@ -436,7 +436,7 @@ export const processWhatsAppMessage = inngest.createFunction(
     await step.run("update-diagnostico", async () => {
       const { data: diag } = await supabase
         .from("diagnostico_cora_14d")
-        .select("id, leads_attended")
+        .select("id, leads_attended, started_at")
         .eq("user_id", broker.id)
         .eq("converted_to_subscription", false)
         .gt("ends_at", new Date().toISOString())
@@ -450,6 +450,13 @@ export const processWhatsAppMessage = inngest.createFunction(
         .select("lead_id", { count: "exact", head: true })
         .eq("user_id", broker.id)
         .eq("sender", "cora")
+
+      // Contar visitas agendadas desde o início do diagnóstico
+      const { count: visitsCount } = await supabase
+        .from("visits")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", broker.id)
+        .gte("created_at", diag.started_at ?? new Date(0).toISOString())
 
       // Comissão estimada: leads QUENTE × 6%
       const { data: hotLeads } = await supabase
@@ -466,6 +473,7 @@ export const processWhatsAppMessage = inngest.createFunction(
       await supabase.from("diagnostico_cora_14d").update({
         leads_attended: leadsCount ?? diag.leads_attended,
         leads_contacted: leadsCount ?? 0,
+        visits_scheduled: visitsCount ?? 0,
         estimated_commission: estimatedCommission,
       }).eq("id", diag.id)
     })

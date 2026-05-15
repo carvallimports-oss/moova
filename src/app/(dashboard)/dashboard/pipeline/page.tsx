@@ -1,8 +1,8 @@
 import { createClient } from "@/lib/supabase/server"
 import { PipelineClient } from "@/components/dashboard/pipeline-client"
+import Link from "next/link"
 
 export const dynamic = "force-dynamic"
-import Link from "next/link"
 import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Download } from "lucide-react"

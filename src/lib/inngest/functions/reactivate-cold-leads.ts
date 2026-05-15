@@ -151,6 +151,32 @@ export const reactivateColdLeads = inngest.createFunction(
       reactivated++
     }
 
+    // Update diagnostico cold_leads_reactivated counters per broker
+    if (reactivated > 0) {
+      await step.run("update-diagnostico-counters", async () => {
+        // Group by user_id
+        const byUser = new Map<string, number>()
+        for (const l of allLeads) {
+          byUser.set(l.user_id, (byUser.get(l.user_id) ?? 0) + 1)
+        }
+        for (const [userId, count] of byUser) {
+          const { data: diag } = await supabase
+            .from("diagnostico_cora_14d")
+            .select("id, cold_leads_reactivated")
+            .eq("user_id", userId)
+            .eq("converted_to_subscription", false)
+            .gt("ends_at", now.toISOString())
+            .single()
+          if (diag) {
+            await supabase
+              .from("diagnostico_cora_14d")
+              .update({ cold_leads_reactivated: (diag.cold_leads_reactivated ?? 0) + count })
+              .eq("id", diag.id)
+          }
+        }
+      })
+    }
+
     return { reactivated, sequences: inSequence.length, newCandidates: newCandidates.length }
   }
 )
