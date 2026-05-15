@@ -11,30 +11,28 @@ export const generateDiagnosticoReport = inngest.createFunction(
     triggers: [{ event: "diagnostico/day14.completed" }],
   },
   async ({ event, step }) => {
-    const { userId } = event.data as { userId: string }
+    const { userId, diagnosticoId } = event.data as { userId: string; diagnosticoId: string }
     const supabase = createAdminClient()
 
     const stats = await step.run("compute-stats", async () => {
-      const { data: user } = await supabase
-        .from("users")
-        .select("broker_name, email")
-        .eq("id", userId)
-        .single()
+      const [{ data: user }, { data: diag }] = await Promise.all([
+        supabase.from("users").select("broker_name, email").eq("id", userId).single(),
+        supabase.from("diagnostico_cora_14d").select("started_at").eq("id", diagnosticoId).single(),
+      ])
 
-      const fourteenDaysAgo = new Date()
-      fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14)
+      const startedAt = diag?.started_at ?? new Date(Date.now() - 14 * 86400000).toISOString()
 
       const { count: leadsContacted } = await supabase
         .from("leads")
         .select("id", { count: "exact", head: true })
         .eq("user_id", userId)
-        .gte("created_at", fourteenDaysAgo.toISOString())
+        .gte("last_contact_at", startedAt)
 
       const { count: visitsScheduled } = await supabase
         .from("visits")
         .select("id", { count: "exact", head: true })
         .eq("user_id", userId)
-        .gte("created_at", fourteenDaysAgo.toISOString())
+        .gte("created_at", startedAt)
 
       const { count: hotLeads } = await supabase
         .from("leads")
@@ -73,7 +71,7 @@ export const generateDiagnosticoReport = inngest.createFunction(
           visits_scheduled: stats.visitsScheduled,
           estimated_commission: stats.estimatedCommission,
         })
-        .eq("user_id", userId)
+        .eq("id", diagnosticoId)
     })
 
     // Send email report
