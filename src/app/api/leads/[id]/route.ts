@@ -11,6 +11,7 @@ const updateSchema = z.object({
   region: z.string().optional(),
   next_action: z.string().optional(),
   notes: z.string().optional(),
+  is_vip: z.boolean().optional(),
 })
 
 async function getAuthedClient() {

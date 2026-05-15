@@ -4,6 +4,7 @@ import Link from "next/link"
 import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { RelatorioShareButton } from "@/components/dashboard/relatorio-share-button"
+import { TrendingUp, Users, Calendar, CheckCircle } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
@@ -11,12 +12,17 @@ function fmt(n: number) {
   return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 })
 }
 
+function pct(num: number, den: number) {
+  if (den === 0) return "—"
+  return `${Math.round((num / den) * 100)}%`
+}
+
 export default async function RelatorioPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect("/login")
 
-  const [{ data: diag }, { data: profile }] = await Promise.all([
+  const [{ data: diag }, { data: profile }, { data: leadsByStatus }] = await Promise.all([
     supabase
       .from("diagnostico_cora_14d")
       .select("*")
@@ -29,6 +35,10 @@ export default async function RelatorioPage() {
       .select("broker_name")
       .eq("id", user.id)
       .single(),
+    supabase
+      .from("leads")
+      .select("status")
+      .eq("user_id", user.id),
   ])
 
   const brokerName = profile?.broker_name ?? "Corretor"
@@ -39,7 +49,18 @@ export default async function RelatorioPage() {
   const ends = diag?.ends_at ? new Date(diag.ends_at) : new Date()
   const now = new Date()
   const daysElapsed = Math.min(14, Math.floor((now.getTime() - started.getTime()) / 86400000))
-  const isCompleted = !!diag?.completed_at
+  const isCompleted = diag?.completed_at != null || (diag?.ends_at != null && new Date(diag.ends_at) < now)
+
+  // Funil de conversão
+  const statuses = (leadsByStatus ?? []).map((l) => l.status)
+  const totalLeads = statuses.length
+  const qualificados = statuses.filter((s) =>
+    ["qualificado", "em_consideracao", "visita_agendada", "visitou", "em_negociacao", "fechou"].includes(s)
+  ).length
+  const visitasOcorridas = statuses.filter((s) =>
+    ["visita_agendada", "visitou", "em_negociacao", "fechou"].includes(s)
+  ).length
+  const fechamentos = statuses.filter((s) => s === "fechou").length
 
   return (
     <div className="max-w-2xl mx-auto space-y-8 pb-12">
@@ -71,6 +92,59 @@ export default async function RelatorioPage() {
         <p className="text-sm text-[#B0D0C0] uppercase tracking-widest mb-2">Comissão estimada</p>
         <p className="text-6xl font-serif font-bold">{fmt(estimatedCommission)}</p>
         <p className="text-xs text-[#8AC0A8] mt-3">Baseado em leads QUENTE × 6% de comissão média</p>
+      </div>
+
+      {/* Funil de conversão (M09) */}
+      <div className="border border-[#E0D8CE] rounded-2xl p-6 space-y-4 bg-white">
+        <h2 className="font-serif text-lg text-[#2D4A3E]">Funil de conversão</h2>
+        <div className="space-y-3">
+          {[
+            {
+              icon: Users,
+              label: "Total de leads",
+              value: totalLeads,
+              rate: null,
+              color: "text-[#2D4A3E]",
+            },
+            {
+              icon: TrendingUp,
+              label: "Leads qualificados",
+              value: qualificados,
+              rate: pct(qualificados, totalLeads),
+              color: "text-[#3A6B5A]",
+            },
+            {
+              icon: Calendar,
+              label: "Com visita realizada",
+              value: visitasOcorridas,
+              rate: pct(visitasOcorridas, qualificados),
+              color: "text-[#B87333]",
+            },
+            {
+              icon: CheckCircle,
+              label: "Fechamentos",
+              value: fechamentos,
+              rate: pct(fechamentos, visitasOcorridas),
+              color: "text-green-700",
+            },
+          ].map(({ icon: Icon, label, value, rate, color }, i) => (
+            <div key={i} className="flex items-center gap-3">
+              <div
+                className="h-8 rounded-lg bg-[#2D4A3E]/10 flex items-center justify-center shrink-0"
+                style={{ width: `${Math.max(10, Math.round((value / Math.max(totalLeads, 1)) * 100))}%`, minWidth: "40px" }}
+              >
+                <Icon className={`w-3.5 h-3.5 ${color}`} />
+              </div>
+              <div className="flex items-center justify-between flex-1 min-w-0">
+                <span className="text-sm text-[#5A5A5A] truncate">{label}</span>
+                <div className="flex items-center gap-2 shrink-0 ml-2">
+                  <span className={`text-sm font-medium ${color}`}>{value}</span>
+                  {rate && <span className="text-xs text-[#8A8A8A] bg-[#EAE3D9] px-1.5 py-0.5 rounded">{rate}</span>}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Progress bar */}

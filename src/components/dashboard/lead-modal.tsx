@@ -37,6 +37,7 @@ const TEMP_LABELS: Record<string, string> = {
 
 export function LeadModal({ lead, open, onClose, onSaved }: Props) {
   const [saving, setSaving] = useState(false)
+  const [isVip, setIsVip] = useState(lead?.is_vip ?? false)
   const [form, setForm] = useState({
     name: lead?.name ?? "",
     phone: lead?.phone ?? "",
@@ -63,6 +64,7 @@ export function LeadModal({ lead, open, onClose, onSaved }: Props) {
         region: form.region || undefined,
         next_action: form.next_action || undefined,
         notes: form.notes || undefined,
+        is_vip: isVip,
       }
       if (form.estimated_budget) body.estimated_budget = parseFloat(form.estimated_budget)
 
@@ -161,6 +163,21 @@ export function LeadModal({ lead, open, onClose, onSaved }: Props) {
             <Textarea value={form.notes} onChange={(e) => set("notes", e.target.value)}
               placeholder="Notas internas sobre o lead..." rows={3}
               className="border-[#E0D8CE] resize-none" />
+          </div>
+
+          {/* VIP toggle */}
+          <div className="flex items-center justify-between py-2 px-3 rounded-lg border border-[#E0D8CE] bg-[#FAF7F2]">
+            <div>
+              <p className="text-sm font-medium text-[#2A2A2A]">Lead VIP</p>
+              <p className="text-xs text-[#8A8A8A]">A Cora prioriza respostas e aprovações humanas para VIPs</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsVip((v) => !v)}
+              className={`w-11 h-6 rounded-full transition-colors relative ${isVip ? "bg-[#B87333]" : "bg-[#E0D8CE]"}`}
+            >
+              <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-all ${isVip ? "left-[22px]" : "left-0.5"}`} />
+            </button>
           </div>
         </div>
 

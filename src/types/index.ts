@@ -41,6 +41,8 @@ export interface Lead {
   last_contact_at?: string
   next_action?: string
   notes?: string
+  is_vip?: boolean
+  lgpd_optout_at?: string | null
   created_at: string
 }
 

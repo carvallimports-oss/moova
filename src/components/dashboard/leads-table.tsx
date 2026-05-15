@@ -6,7 +6,7 @@ import type { Lead } from "@/types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { ChevronUp, ChevronDown, Phone, MapPin, Plus } from "lucide-react"
+import { ChevronUp, ChevronDown, Phone, MapPin, Plus, Star } from "lucide-react"
 
 type TableLead = {
   id: string
@@ -18,6 +18,7 @@ type TableLead = {
   region: string | null
   last_contact_at: string | null
   next_action: string | null
+  is_vip: boolean
   created_at: string
 }
 
@@ -48,6 +49,7 @@ export function LeadsTable({ initialLeads }: { initialLeads: TableLead[] }) {
   const [leads, setLeads] = useState(initialLeads)
   const [statusFilter, setStatusFilter] = useState("all")
   const [tempFilter, setTempFilter] = useState("all")
+  const [vipOnly, setVipOnly] = useState(false)
   const [search, setSearch] = useState("")
   const [sortKey, setSortKey] = useState<SortKey>("created_at")
   const [sortAsc, setSortAsc] = useState(false)
@@ -72,6 +74,7 @@ export function LeadsTable({ initialLeads }: { initialLeads: TableLead[] }) {
     let list = leads
     if (statusFilter !== "all") list = list.filter((l) => l.status === statusFilter)
     if (tempFilter !== "all") list = list.filter((l) => l.temperature === tempFilter)
+    if (vipOnly) list = list.filter((l) => l.is_vip)
     if (search) {
       const q = search.toLowerCase()
       list = list.filter((l) => l.name.toLowerCase().includes(q) || l.phone.includes(q))
@@ -146,6 +149,17 @@ export function LeadsTable({ initialLeads }: { initialLeads: TableLead[] }) {
             <option key={t} value={t}>{t}</option>
           ))}
         </select>
+        <button
+          onClick={() => setVipOnly((v) => !v)}
+          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm transition-colors ${
+            vipOnly
+              ? "border-[#B87333] bg-[#B87333]/10 text-[#B87333]"
+              : "border-[#E0D8CE] bg-white text-[#5A5A5A] hover:border-[#B87333]/40"
+          }`}
+        >
+          <Star className="w-3.5 h-3.5" />
+          VIP
+        </button>
       </div>
 
       {/* Table */}
@@ -194,7 +208,12 @@ export function LeadsTable({ initialLeads }: { initialLeads: TableLead[] }) {
                   >
                     <td className="px-4 py-3">
                       <div>
-                        <p className="font-medium text-[#2A2A2A]">{lead.name}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium text-[#2A2A2A]">{lead.name}</p>
+                          {lead.is_vip && (
+                            <Star className="w-3 h-3 text-[#B87333] fill-[#B87333] shrink-0" />
+                          )}
+                        </div>
                         <div className="flex items-center gap-3 mt-0.5">
                           <span className="flex items-center gap-1 text-xs text-[#8A8A8A]">
                             <Phone className="w-3 h-3" />
