@@ -444,12 +444,12 @@ export const processWhatsAppMessage = inngest.createFunction(
 
       if (!diag) return
 
-      // Contar leads únicos atendidos
+      // Contar leads únicos atendidos (com contato dentro do diagnóstico)
       const { count: leadsCount } = await supabase
-        .from("messages")
-        .select("lead_id", { count: "exact", head: true })
+        .from("leads")
+        .select("id", { count: "exact", head: true })
         .eq("user_id", broker.id)
-        .eq("sender", "cora")
+        .gte("last_contact_at", diag.started_at ?? new Date(0).toISOString())
 
       // Contar visitas agendadas desde o início do diagnóstico
       const { count: visitsCount } = await supabase

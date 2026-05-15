@@ -49,7 +49,12 @@ function VisitCard({ visit, onUpdate }: { visit: Visit; onUpdate: (id: string, s
     try {
       await patchVisit(visit.id, newStatus)
       onUpdate(visit.id, newStatus)
-      toast.success(newStatus === "confirmada" ? "Visita confirmada" : "Visita cancelada")
+      const msgs: Record<string, string> = {
+        confirmada: "Visita confirmada",
+        cancelada: "Visita cancelada",
+        realizada: "Visita marcada como realizada",
+      }
+      toast.success(msgs[newStatus] ?? "Visita atualizada")
     } catch {
       toast.error("Erro ao atualizar visita")
     } finally {

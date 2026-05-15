@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server"
 import { ConfiguracoesForm } from "@/components/dashboard/configuracoes-form"
 
+export const dynamic = "force-dynamic"
+
 export default async function ConfiguracoesPage({
   searchParams,
 }: {

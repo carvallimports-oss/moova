@@ -63,7 +63,7 @@ export default async function RelatorioPage() {
   const fechamentos = statuses.filter((s) => s === "fechou").length
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8 pb-12">
+    <div className="p-6 lg:p-8 pt-20 lg:pt-8 max-w-2xl mx-auto space-y-8 pb-12">
       {/* Header */}
       <div className="text-center space-y-2 pt-4">
         <p className="text-xs text-[#B87333] uppercase tracking-widest font-mono">Diagnóstico Cora · 14 dias</p>

@@ -91,7 +91,7 @@ export function LeadsTable({ initialLeads }: { initialLeads: TableLead[] }) {
       return 0
     })
     return list
-  }, [leads, statusFilter, tempFilter, search, sortKey, sortAsc])
+  }, [leads, statusFilter, tempFilter, vipOnly, search, sortKey, sortAsc])
 
   function handleSaved(updated: Lead) {
     setLeads((prev) => {

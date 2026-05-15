@@ -9,10 +9,9 @@ export const aiHealthCheck = inngest.createFunction(
   },
   async ({ step }) => {
     const health = await step.run("check-health", () => checkAIHealth())
+    const supabase = createAdminClient()
 
     if (!health.anyAvailable) {
-      const supabase = createAdminClient()
-
       await step.run("register-incident", async () => {
         await supabase.from("fallback_incidents").insert({
           openai_status: health.openai,
@@ -27,6 +26,14 @@ export const aiHealthCheck = inngest.createFunction(
           name: "ai/degraded.detected",
           data: { affectedLeads: 0, incidentAt: new Date().toISOString() },
         })
+      })
+    } else {
+      // Resolve any open incidents now that AI is back
+      await step.run("resolve-open-incidents", async () => {
+        await supabase
+          .from("fallback_incidents")
+          .update({ resolved_at: new Date().toISOString() })
+          .is("resolved_at", null)
       })
     }
 
