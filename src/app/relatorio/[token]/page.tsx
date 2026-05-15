@@ -57,6 +57,17 @@ export default async function PublicRelatorioPage({ params }: { params: Promise<
           <p className="text-[10px] text-[#70A898] mt-2">6% sobre leads QUENTE</p>
         </div>
 
+        {/* Stories CTA */}
+        <div className="border border-[#E0D8CE] rounded-2xl p-5 text-center space-y-3 bg-[#FAF7F2]">
+          <p className="text-xs text-[#5A5A5A]">Compartilhe nos Stories do Instagram</p>
+          <a
+            href={`/relatorio/${token}/story`}
+            className="inline-block bg-[#2D4A3E] text-white text-sm px-5 py-2.5 rounded-lg hover:bg-[#3A6B5A] transition-colors"
+          >
+            Ver versão Stories 9:16
+          </a>
+        </div>
+
         {/* Footer */}
         <div className="text-center space-y-2 pt-2">
           <p className="text-xs text-[#8A8A8A]">Powered by</p>

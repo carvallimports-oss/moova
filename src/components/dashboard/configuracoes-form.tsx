@@ -8,9 +8,17 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { createClient } from "@/lib/supabase/client"
-import { Wifi, WifiOff, RefreshCw, Shield, Loader2 } from "lucide-react"
+import { Wifi, WifiOff, RefreshCw, Shield, Loader2, Mic, MicOff, Calendar, CheckCircle2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+
+const VOICE_PROMPTS = [
+  "Olá! Sou a Cora, assistente do corretor pelo Moova. Como posso ajudar?",
+  "Ótimo! Vou verificar as informações desse imóvel para você agora mesmo.",
+  "Que excelente escolha! Podemos agendar uma visita amanhã às 10h?",
+  "Perfeito. Vou passar todas as informações para o corretor agora.",
+  "Qualquer dúvida é só perguntar. Estou aqui para ajudar!",
+]
 
 type HumanApprovalCategories = {
   visita: boolean
@@ -29,6 +37,8 @@ type Profile = {
   cora_custom_prompt: string | null
   human_approval_active: boolean
   human_approval_categories: HumanApprovalCategories | null
+  google_calendar_connected: boolean
+  eleven_labs_voice_id: string | null
 } | null
 
 type WAAccount = {
@@ -40,9 +50,13 @@ type WAAccount = {
 export function ConfiguracoesForm({
   profile,
   waAccount,
+  calendarConnectedParam,
+  calendarErrorParam,
 }: {
   profile: Profile
   waAccount: WAAccount
+  calendarConnectedParam?: boolean
+  calendarErrorParam?: boolean
 }) {
   const supabase = createClient()
   const [name, setName] = useState(profile?.name ?? "")
@@ -63,11 +77,125 @@ export function ConfiguracoesForm({
   const [connected, setConnected] = useState(waAccount?.status === "connected")
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
+  // Voice cloning state
+  const [voiceCloned, setVoiceCloned] = useState(!!profile?.eleven_labs_voice_id)
+  const [recordings, setRecordings] = useState<(string | null)[]>([null, null, null, null, null])
+  const [activeRecording, setActiveRecording] = useState<number | null>(null)
+  const [recordingTime, setRecordingTime] = useState(0)
+  const [cloningVoice, setCloningVoice] = useState(false)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  // Google Calendar state
+  const [calendarConnected, setCalendarConnected] = useState(
+    (profile?.google_calendar_connected ?? false) || (calendarConnectedParam ?? false)
+  )
+  const [calendarError] = useState(calendarErrorParam ?? false)
+
+  useEffect(() => {
+    if (calendarConnectedParam) toast.success("Google Agenda conectada!")
+    if (calendarErrorParam) toast.error("Erro ao conectar Google Agenda. Tente novamente.")
+  }, [calendarConnectedParam, calendarErrorParam])
+
   useEffect(() => {
     return () => {
       if (pollRef.current) clearInterval(pollRef.current)
+      if (timerRef.current) clearInterval(timerRef.current)
+      if (mediaRecorderRef.current?.state === "recording") {
+        mediaRecorderRef.current.stop()
+      }
     }
   }, [])
+
+  async function startRecording(index: number) {
+    if (activeRecording !== null) stopRecording()
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const mimeType = MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : ""
+      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined)
+      mediaRecorderRef.current = recorder
+      const chunks: Blob[] = []
+
+      recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data) }
+      recorder.onstop = () => {
+        stream.getTracks().forEach((t) => t.stop())
+        const blob = new Blob(chunks, { type: recorder.mimeType || "audio/webm" })
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          setRecordings((prev) => {
+            const next = [...prev]
+            next[index] = reader.result as string
+            return next
+          })
+        }
+        reader.readAsDataURL(blob)
+        setActiveRecording(null)
+        setRecordingTime(0)
+        if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null }
+      }
+
+      setActiveRecording(index)
+      recorder.start()
+
+      let secs = 0
+      timerRef.current = setInterval(() => {
+        secs++
+        setRecordingTime(secs)
+        if (secs >= 30) stopRecording()
+      }, 1000)
+    } catch {
+      toast.error("Permissão de microfone negada")
+    }
+  }
+
+  function stopRecording() {
+    if (mediaRecorderRef.current?.state === "recording") {
+      mediaRecorderRef.current.stop()
+    }
+    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null }
+    setRecordingTime(0)
+  }
+
+  async function handleCloneVoice() {
+    const validRecordings = recordings.filter(Boolean) as string[]
+    if (validRecordings.length < 2) return
+    setCloningVoice(true)
+    try {
+      const res = await fetch("/api/voice/clone", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ audios: validRecordings }),
+      })
+      if (!res.ok) throw new Error()
+      setVoiceCloned(true)
+      setRecordings([null, null, null, null, null])
+      toast.success("Voz personalizada criada!")
+    } catch {
+      toast.error("Erro ao clonar voz. Tente novamente.")
+    } finally {
+      setCloningVoice(false)
+    }
+  }
+
+  async function handleDeleteVoice() {
+    const res = await fetch("/api/voice/clone", { method: "DELETE" })
+    if (res.ok) {
+      setVoiceCloned(false)
+      toast.success("Voz removida com sucesso")
+    }
+  }
+
+  async function handleDisconnectCalendar() {
+    await supabase.from("users").update({
+      google_calendar_connected: false,
+      google_calendar_access_token: null,
+      google_calendar_refresh_token: null,
+      google_calendar_token_expiry: null,
+    })
+    setCalendarConnected(false)
+    toast.success("Google Agenda desconectada")
+  }
 
   async function handleConnect() {
     setConnecting(true)
@@ -129,6 +257,7 @@ export function ConfiguracoesForm({
   }
 
   const waConnected = connected
+  const recordingsDone = recordings.filter(Boolean).length
 
   return (
     <div className="space-y-6">
@@ -214,6 +343,158 @@ export function ConfiguracoesForm({
             <p className="font-medium text-[#5A5A5A]">Plano atual: Evolution API — R$ 799/mês</p>
             <p>Migração para BSP oficial (selo verde Meta) disponível no plano R$ 1.199/mês.</p>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Google Agenda */}
+      <Card className="border-[#E0D8CE]">
+        <CardHeader className="pb-3">
+          <CardTitle className="font-serif text-lg text-[#2D4A3E] flex items-center gap-2">
+            <Calendar className="w-4 h-4" />
+            Google Agenda
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {calendarConnected ? (
+            <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-green-700 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4" />
+                  Google Agenda conectada
+                </p>
+                <p className="text-xs text-green-600 mt-0.5">A Cora verifica sua disponibilidade ao agendar visitas</p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDisconnectCalendar}
+                className="text-red-600 border-red-200 hover:bg-red-50 text-xs shrink-0 ml-2"
+              >
+                Desconectar
+              </Button>
+            </div>
+          ) : (
+            <>
+              <p className="text-sm text-[#5A5A5A]">
+                Conecte sua agenda para que a Cora sugira visitas apenas em horários livres.
+              </p>
+              <a
+                href="/api/calendar/auth"
+                className="flex items-center justify-center gap-2 w-full bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white text-sm py-2.5 px-4 rounded-md transition-colors"
+              >
+                <Calendar className="w-4 h-4" />
+                Conectar Google Agenda
+              </a>
+              {calendarError && (
+                <p className="text-xs text-red-600 bg-red-50 rounded-lg p-2 text-center">
+                  Erro ao conectar. Verifique as credenciais e tente novamente.
+                </p>
+              )}
+              <p className="text-xs text-[#8A8A8A]">
+                Acesso somente leitura. A Cora não cria nem modifica eventos.
+              </p>
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Voz da Cora */}
+      <Card className="border-[#E0D8CE]">
+        <CardHeader className="pb-3">
+          <CardTitle className="font-serif text-lg text-[#2D4A3E] flex items-center gap-2">
+            <Mic className="w-4 h-4" />
+            Voz da Cora
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {voiceCloned ? (
+            <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-green-700 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4" />
+                  Voz personalizada ativa
+                </p>
+                <p className="text-xs text-green-600 mt-0.5">A Cora usa sua voz clonada nos áudios</p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDeleteVoice}
+                className="text-red-600 border-red-200 hover:bg-red-50 text-xs shrink-0 ml-2"
+              >
+                Remover voz
+              </Button>
+            </div>
+          ) : (
+            <>
+              <p className="text-sm text-[#5A5A5A]">
+                Grave as frases abaixo para que a Cora envie áudios com uma voz próxima à sua.
+              </p>
+              <div className="space-y-2">
+                {VOICE_PROMPTS.map((prompt, i) => (
+                  <div key={i} className={cn(
+                    "border rounded-xl p-3 space-y-2 transition-colors",
+                    recordings[i] ? "border-[#2D4A3E] bg-[#F0F5F2]" : "border-[#E0D8CE]"
+                  )}>
+                    <p className="text-xs text-[#5A5A5A] italic leading-relaxed">&ldquo;{prompt}&rdquo;</p>
+                    <div className="flex items-center justify-between gap-2">
+                      {recordings[i] ? (
+                        <>
+                          <span className="text-xs text-green-700 flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3" /> Gravado
+                          </span>
+                          <button
+                            onClick={() => startRecording(i)}
+                            disabled={activeRecording !== null}
+                            className="text-xs text-[#8A8A8A] hover:text-[#2D4A3E] transition-colors"
+                          >
+                            Re-gravar
+                          </button>
+                        </>
+                      ) : activeRecording === i ? (
+                        <>
+                          <span className="text-xs text-red-600 flex items-center gap-1 animate-pulse">
+                            <MicOff className="w-3 h-3" /> Gravando {recordingTime}s
+                          </span>
+                          <button
+                            onClick={stopRecording}
+                            className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded hover:bg-red-200 transition-colors"
+                          >
+                            Parar
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          onClick={() => startRecording(i)}
+                          disabled={activeRecording !== null && activeRecording !== i}
+                          className="text-xs bg-[#EAE3D9] text-[#5A5A5A] px-3 py-1 rounded-lg hover:bg-[#E0D8CE] transition-colors disabled:opacity-40 flex items-center gap-1"
+                        >
+                          <Mic className="w-3 h-3" /> Gravar
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <Button
+                onClick={handleCloneVoice}
+                disabled={recordingsDone < 2 || cloningVoice}
+                className="w-full bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white text-sm gap-2"
+              >
+                {cloningVoice ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mic className="w-4 h-4" />}
+                {cloningVoice
+                  ? "Criando voz..."
+                  : recordingsDone > 0
+                  ? `Criar voz personalizada (${recordingsDone}/5 gravações)`
+                  : "Criar voz personalizada"
+                }
+              </Button>
+              <p className="text-xs text-[#8A8A8A] text-center">
+                Mínimo 2 gravações. Mais gravações = melhor qualidade.
+              </p>
+            </>
+          )}
         </CardContent>
       </Card>
 

@@ -47,7 +47,8 @@ export function buildCoraSystemPrompt(
   brokerName: string,
   brokerPhone: string,
   formality: "formal" | "informal",
-  customPrompt?: string
+  customPrompt?: string,
+  calendarContext?: string | null
 ): string {
   const toneGuide =
     formality === "formal"
@@ -60,7 +61,7 @@ CORRETOR: ${brokerName}
 TELEFONE DO CORRETOR: ${brokerPhone}
 TOM: ${toneGuide}
 
-${customPrompt ? `INSTRUÇÕES ADICIONAIS DO CORRETOR:\n${customPrompt}` : ""}
+${calendarContext ? `${calendarContext}\n` : ""}${customPrompt ? `INSTRUÇÕES ADICIONAIS DO CORRETOR:\n${customPrompt}` : ""}
 `
 }
 

@@ -59,7 +59,7 @@ export const processWhatsAppMessage = inngest.createFunction(
 
       const { data: user } = await supabase
         .from("users")
-        .select("id, broker_name, name, phone, email, cora_formality, cora_custom_prompt, human_approval_active, human_approval_disabled_at, human_approval_categories, created_at")
+        .select("id, broker_name, name, phone, email, cora_formality, cora_custom_prompt, human_approval_active, human_approval_disabled_at, human_approval_categories, created_at, google_calendar_connected")
         .eq("id", wa.user_id)
         .single()
 
@@ -230,12 +230,20 @@ export const processWhatsAppMessage = inngest.createFunction(
       }))
     })
 
-    // 11. Gerar resposta da Cora
+    // 11. Agenda do corretor (Google Calendar) — contexto para evitar conflitos
+    const calendarContext = await step.run("fetch-calendar-context", async () => {
+      if (!broker.google_calendar_connected) return null
+      const { getFreeSlots } = await import("@/lib/calendar/google")
+      return getFreeSlots(supabase, broker.id)
+    })
+
+    // 12. Gerar resposta da Cora
     const systemPrompt = buildCoraSystemPrompt(
       brokerName,
       brokerPhone,
       (broker.cora_formality as "formal" | "informal") ?? "informal",
-      broker.cora_custom_prompt ?? undefined
+      broker.cora_custom_prompt ?? undefined,
+      calendarContext
     )
 
     const coraResponse = await step.run("generate-cora-response", async () => {
