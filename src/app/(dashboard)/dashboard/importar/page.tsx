@@ -56,31 +56,32 @@ export default function ImportarPage() {
 
   async function handleImport() {
     setImporting(true)
-    const updated = [...leads]
+    setLeads((prev) => prev.map((l) => ({ ...l, _status: "importing" as const })))
 
-    for (let i = 0; i < updated.length; i++) {
-      if (updated[i]._status === "done") continue
-      updated[i] = { ...updated[i], _status: "importing" }
-      setLeads([...updated])
-
-      try {
-        const res = await fetch("/api/leads", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: updated[i].name,
-            phone: updated[i].phone,
-            estimated_budget: updated[i].estimated_budget,
-            region: updated[i].region,
-            notes: updated[i].notes,
-          }),
-        })
-        updated[i] = { ...updated[i], _status: res.ok ? "done" : "error", _error: res.ok ? undefined : `HTTP ${res.status}` }
-      } catch (err) {
-        updated[i] = { ...updated[i], _status: "error", _error: String(err) }
+    try {
+      const body = {
+        leads: leads.map((l) => ({
+          name: l.name,
+          phone: l.phone,
+          estimated_budget: l.estimated_budget,
+          region: l.region,
+          notes: l.notes,
+        })),
       }
+      const res = await fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      })
 
-      setLeads([...updated])
+      if (res.ok) {
+        setLeads((prev) => prev.map((l) => ({ ...l, _status: "done" as const })))
+      } else {
+        const err = await res.json().catch(() => ({}))
+        setLeads((prev) => prev.map((l) => ({ ...l, _status: "error" as const, _error: err?.error ?? `HTTP ${res.status}` })))
+      }
+    } catch (err) {
+      setLeads((prev) => prev.map((l) => ({ ...l, _status: "error" as const, _error: String(err) })))
     }
 
     setImporting(false)
