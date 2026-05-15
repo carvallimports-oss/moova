@@ -30,15 +30,18 @@ function LeadCard({
   lead,
   onClick,
   onDragStart,
+  onDragEnd,
 }: {
   lead: Lead
   onClick?: () => void
   onDragStart?: (e: React.DragEvent) => void
+  onDragEnd?: () => void
 }) {
   return (
     <Card
       draggable
       onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
       onClick={onClick}
       className="border-[#E0D8CE] hover:shadow-sm transition-shadow cursor-pointer active:opacity-70 select-none"
     >
@@ -150,6 +153,7 @@ export function KanbanBoard({
                   lead={lead}
                   onClick={() => onLeadClick?.(lead)}
                   onDragStart={(e) => handleDragStart(e, lead)}
+                  onDragEnd={handleDragEnd}
                 />
               ))}
               {leads.length === 0 && (
@@ -161,8 +165,6 @@ export function KanbanBoard({
           </div>
         )
       })}
-      {/* Invisible drag-end catcher */}
-      <div onDragEnd={handleDragEnd} className="hidden" />
     </div>
   )
 }
