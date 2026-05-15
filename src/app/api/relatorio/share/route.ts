@@ -7,12 +7,24 @@ export async function POST() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  const token = randomBytes(16).toString("hex")
+  // Find the most recent diagnostico for this user
+  const { data: diag } = await supabase
+    .from("diagnostico_cora_14d")
+    .select("id, share_token")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single()
+
+  if (!diag) return NextResponse.json({ error: "No diagnostico found" }, { status: 404 })
+
+  // Reuse existing token if already shared
+  const token = diag.share_token ?? randomBytes(16).toString("hex")
 
   const { error } = await supabase
     .from("diagnostico_cora_14d")
     .update({ share_token: token, report_shared: true })
-    .eq("user_id", user.id)
+    .eq("id", diag.id)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
