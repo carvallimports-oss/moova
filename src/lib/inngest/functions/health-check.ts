@@ -1,30 +1,33 @@
 import { inngest } from "../client"
 import { checkAIHealth } from "@/lib/ai/cora"
-import { createClient } from "@supabase/supabase-js"
+import { createAdminClient } from "@/lib/supabase/admin"
 
-// Roda a cada 30 segundos via cron — detecta modo degradado
 export const aiHealthCheck = inngest.createFunction(
   {
     id: "ai-health-check",
-    triggers: [{ cron: "*/1 * * * *" }], // a cada 1 min (Inngest free tier mínimo)
+    triggers: [{ cron: "*/1 * * * *" }],
   },
   async ({ step }) => {
     const health = await step.run("check-health", () => checkAIHealth())
 
     if (!health.anyAvailable) {
+      const supabase = createAdminClient()
+
       await step.run("register-incident", async () => {
-        const supabase = createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.SUPABASE_SERVICE_ROLE_KEY!
-        )
         await supabase.from("fallback_incidents").insert({
           openai_status: health.openai,
           anthropic_status: health.anthropic,
           started_at: new Date().toISOString(),
+          affected_conversations: 0,
         })
       })
 
-      // TODO: enviar push + SMS + email para todos os corretores afetados
+      await step.run("notify-brokers", async () => {
+        await inngest.send({
+          name: "ai/degraded.detected",
+          data: { affectedLeads: 0, incidentAt: new Date().toISOString() },
+        })
+      })
     }
 
     return { health, timestamp: new Date().toISOString() }

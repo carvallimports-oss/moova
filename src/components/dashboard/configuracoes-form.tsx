@@ -12,6 +12,14 @@ import { Wifi, WifiOff, RefreshCw, Shield, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
+type HumanApprovalCategories = {
+  visita: boolean
+  valor: boolean
+  contraproposta: boolean
+  fechamento: boolean
+  alto_valor: boolean
+}
+
 type Profile = {
   name: string
   creci: string
@@ -20,6 +28,7 @@ type Profile = {
   cora_formality: string
   cora_custom_prompt: string | null
   human_approval_active: boolean
+  human_approval_categories: HumanApprovalCategories | null
 } | null
 
 type WAAccount = {
@@ -42,6 +51,11 @@ export function ConfiguracoesForm({
   const [formality, setFormality] = useState(profile?.cora_formality ?? "informal")
   const [customPrompt, setCustomPrompt] = useState(profile?.cora_custom_prompt ?? "")
   const [humanApproval, setHumanApproval] = useState(profile?.human_approval_active ?? true)
+  const [approvalCategories, setApprovalCategories] = useState<HumanApprovalCategories>(
+    profile?.human_approval_categories ?? {
+      visita: true, valor: true, contraproposta: true, fechamento: true, alto_valor: true,
+    }
+  )
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [qrCode, setQrCode] = useState<string | null>(null)
@@ -95,11 +109,13 @@ export function ConfiguracoesForm({
         .from("users")
         .update({
           name: name || undefined,
+          broker_name: name || undefined,
           phone: phone || undefined,
           creci: creci || undefined,
           cora_formality: formality,
           cora_custom_prompt: customPrompt || null,
           human_approval_active: humanApproval,
+          human_approval_categories: approvalCategories,
         })
         .eq("id", user!.id)
       setSaved(true)
@@ -275,9 +291,39 @@ export function ConfiguracoesForm({
             </button>
           </div>
           {humanApproval && (
-            <p className="text-xs text-[#8A8A8A] bg-[#EAE3D9] rounded-lg p-3">
-              Obrigatório nos primeiros 30 dias. Você pode desativar por categoria após o período de calibragem.
-            </p>
+            <div className="space-y-3">
+              <p className="text-xs text-[#8A8A8A] bg-[#EAE3D9] rounded-lg p-3">
+                Obrigatório nos primeiros 30 dias. Após a calibragem, você pode desativar por categoria.
+              </p>
+              <div className="space-y-2">
+                {(Object.entries(approvalCategories) as [keyof HumanApprovalCategories, boolean][]).map(([cat, active]) => {
+                  const labels: Record<keyof HumanApprovalCategories, string> = {
+                    visita: "Proposta de visita",
+                    valor: "Envio de preço / valor",
+                    contraproposta: "Contraproposta",
+                    fechamento: "Confirmação de fechamento",
+                    alto_valor: "Leads com budget acima de R$ 50k",
+                  }
+                  return (
+                    <div key={cat} className="flex items-center justify-between py-1">
+                      <span className="text-xs text-[#5A5A5A]">{labels[cat]}</span>
+                      <button
+                        onClick={() => setApprovalCategories((prev) => ({ ...prev, [cat]: !prev[cat] }))}
+                        className={cn(
+                          "w-8 h-4 rounded-full transition-colors relative shrink-0",
+                          active ? "bg-[#2D4A3E]" : "bg-[#E0D8CE]"
+                        )}
+                      >
+                        <span className={cn(
+                          "absolute top-0.5 w-3 h-3 bg-white rounded-full shadow-sm transition-all",
+                          active ? "left-[18px]" : "left-0.5"
+                        )} />
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
           )}
         </CardContent>
       </Card>

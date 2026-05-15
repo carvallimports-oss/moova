@@ -33,6 +33,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true })
   }
 
+  const instanceName = (body as Record<string, unknown>).instance as string | undefined
+
   await inngest.send({
     name: "whatsapp/message.received",
     data: {
@@ -43,6 +45,7 @@ export async function POST(req: NextRequest) {
       imageUrl: incoming.imageUrl,
       timestamp: incoming.timestamp,
       messageId: incoming.messageId,
+      instanceName,
     },
   })
 

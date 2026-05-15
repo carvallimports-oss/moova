@@ -140,6 +140,122 @@ export function modoDesgradadoAlertEmail(params: {
   }
 }
 
+export function diagnosticoMarcoEmail(params: {
+  brokerName: string
+  dayNumber: 3 | 7 | 11 | 14
+  messageContent: string
+  leadsAttended: number
+  visitsScheduled: number
+  estimatedCommission: number
+  dashboardUrl: string
+}): { subject: string; html: string } {
+  const fmt = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
+  const actLabels: Record<number, string> = {
+    3: "Ato I — A dúvida",
+    7: "Ato II — A evidência",
+    11: "Ato II — A evidência",
+    14: "Ato III — A decisão",
+  }
+  return {
+    subject: `Cora · Dia ${params.dayNumber} — ${actLabels[params.dayNumber]}`,
+    html: `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#FAF7F2;font-family:Georgia,serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#FAF7F2;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;border:1px solid #E0D8CE;overflow:hidden;">
+        <tr><td style="background:#2D4A3E;padding:28px 40px;text-align:center;">
+          <p style="margin:0;color:#B87333;font-size:11px;letter-spacing:2px;text-transform:uppercase;">Diagnóstico Cora · Dia ${params.dayNumber}</p>
+          <h1 style="margin:8px 0 0;color:#fff;font-size:22px;font-weight:normal;">${params.brokerName},</h1>
+        </td></tr>
+        <tr><td style="padding:40px;">
+          <p style="color:#2D4A3E;font-size:16px;line-height:1.6;">${params.messageContent}</p>
+          <table width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;">
+            <tr>
+              <td width="30%" style="background:#F5F0E8;border-radius:8px;padding:16px;text-align:center;">
+                <p style="margin:0;font-size:28px;font-weight:bold;color:#2D4A3E;">${params.leadsAttended}</p>
+                <p style="margin:4px 0 0;font-size:12px;color:#5A5A5A;">leads atendidos</p>
+              </td>
+              <td width="5%"></td>
+              <td width="30%" style="background:#F5F0E8;border-radius:8px;padding:16px;text-align:center;">
+                <p style="margin:0;font-size:28px;font-weight:bold;color:#B87333;">${params.visitsScheduled}</p>
+                <p style="margin:4px 0 0;font-size:12px;color:#5A5A5A;">visitas agendadas</p>
+              </td>
+              <td width="5%"></td>
+              <td width="30%" style="background:#2D4A3E;border-radius:8px;padding:16px;text-align:center;">
+                <p style="margin:0;font-size:20px;font-weight:bold;color:#B87333;">${fmt(params.estimatedCommission)}</p>
+                <p style="margin:4px 0 0;font-size:12px;color:#E0D8CE;">comissão estimada</p>
+              </td>
+            </tr>
+          </table>
+          <table width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;">
+            <tr><td align="center">
+              <a href="${params.dashboardUrl}" style="display:inline-block;background:#2D4A3E;color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-size:14px;">Ver painel completo</a>
+            </td></tr>
+          </table>
+          <hr style="border:none;border-top:1px solid #E0D8CE;margin:24px 0;">
+          <p style="color:#B87333;font-size:12px;margin:0;">Cora · Moova</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`,
+  }
+}
+
+export function pactoMarcoEmail(params: {
+  brokerName: string
+  dayNumber: 30 | 45 | 75
+  messageContent: string
+  commissionAchieved: number
+  meta: number
+  goodFaithScore: number
+  dashboardUrl: string
+}): { subject: string; html: string } {
+  const fmt = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
+  const pct = Math.min(100, Math.round((params.commissionAchieved / params.meta) * 100))
+  return {
+    subject: `Pacto Moova 90 · Dia ${params.dayNumber} — atualização`,
+    html: `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#FAF7F2;font-family:Georgia,serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#FAF7F2;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;border:1px solid #E0D8CE;overflow:hidden;">
+        <tr><td style="background:#2D4A3E;padding:28px 40px;text-align:center;">
+          <p style="margin:0;color:#B87333;font-size:11px;letter-spacing:2px;text-transform:uppercase;">Pacto Moova 90 · Dia ${params.dayNumber}</p>
+          <h1 style="margin:8px 0 0;color:#fff;font-size:22px;font-weight:normal;">${params.brokerName},</h1>
+        </td></tr>
+        <tr><td style="padding:40px;">
+          <p style="color:#2D4A3E;font-size:16px;line-height:1.6;">${params.messageContent}</p>
+          <div style="background:#F5F0E8;border-radius:8px;padding:20px;margin:20px 0;">
+            <p style="margin:0 0 8px;font-size:13px;color:#5A5A5A;">Progresso para a meta de ${fmt(params.meta)}</p>
+            <div style="background:#E0D8CE;border-radius:4px;height:8px;overflow:hidden;">
+              <div style="background:#B87333;height:8px;width:${pct}%;border-radius:4px;"></div>
+            </div>
+            <p style="margin:8px 0 0;font-size:22px;font-weight:bold;color:#2D4A3E;">${fmt(params.commissionAchieved)} <span style="font-size:13px;color:#8A8A8A;font-weight:normal;">(${pct}%)</span></p>
+          </div>
+          <table width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;">
+            <tr><td align="center">
+              <a href="${params.dashboardUrl}" style="display:inline-block;background:#2D4A3E;color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-size:14px;">Acompanhar no painel</a>
+            </td></tr>
+          </table>
+          <hr style="border:none;border-top:1px solid #E0D8CE;margin:24px 0;">
+          <p style="color:#B87333;font-size:12px;margin:0;">Cora · Moova</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`,
+  }
+}
+
 export function pactoVeredito90Email(params: {
   brokerName: string
   scenario: "A" | "B" | "C" | "D"

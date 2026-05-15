@@ -3,11 +3,13 @@
 const ELEVENLABS_BASE = "https://api.elevenlabs.io/v1"
 const DEFAULT_VOICE_ID = "EXAVITQu4vr4xnSDxMaL" // Rachel — pt-BR compatible
 
-export async function textToSpeech(text: string, voiceId = DEFAULT_VOICE_ID): Promise<Uint8Array> {
+export async function textToSpeech(text: string, voiceId?: string): Promise<Uint8Array> {
   const apiKey = process.env.ELEVENLABS_API_KEY
   if (!apiKey) throw new Error("ELEVENLABS_API_KEY not set")
 
-  const res = await fetch(`${ELEVENLABS_BASE}/text-to-speech/${voiceId}`, {
+  const effectiveVoiceId = voiceId ?? DEFAULT_VOICE_ID
+
+  const res = await fetch(`${ELEVENLABS_BASE}/text-to-speech/${effectiveVoiceId}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

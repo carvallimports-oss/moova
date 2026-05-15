@@ -1,8 +1,8 @@
 import { inngest } from "../client"
-import { createClient } from "@supabase/supabase-js"
+import { createAdminClient } from "@/lib/supabase/admin"
+import { sendEmail } from "@/lib/email/send"
+import { diagnosticoMarcoEmail } from "@/lib/email/templates"
 
-// Arco narrativo 3 atos do Diagnóstico Cora 14 Dias
-// Triggers: evento disparado quando marco é atingido
 export const sendDiagnosticoMarco = inngest.createFunction(
   {
     id: "send-diagnostico-marco",
@@ -16,29 +16,34 @@ export const sendDiagnosticoMarco = inngest.createFunction(
       dayNumber: 3 | 7 | 11 | 14
     }
 
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
+    const supabase = createAdminClient()
 
-    // Busca dados do diagnóstico
-    const diagResult = await step.run("fetch-diagnostico", async () => {
-      const res = await supabase
+    const context = await step.run("fetch-context", async () => {
+      const { data: diag } = await supabase
         .from("diagnostico_cora_14d")
         .select("leads_attended, cold_leads_reactivated, visits_scheduled, estimated_commission")
         .eq("id", diagnosticoId)
         .single()
-      return res.data
+
+      const { data: user } = await supabase
+        .from("users")
+        .select("broker_name, name, email")
+        .eq("id", userId)
+        .single()
+
+      return { diag, user }
     })
 
-    const diag = diagResult as { leads_attended: number; cold_leads_reactivated: number; visits_scheduled: number; estimated_commission: number } | null
-    if (!diag) return { skipped: true }
+    const { diag, user } = context
+    if (!diag || !user) return { skipped: true }
 
-    // Mensagem por ato narrativo
+    const brokerName = user.broker_name ?? user.name ?? "Corretor"
+    const commission = Number(diag.estimated_commission)
+
     const messages: Record<number, string> = {
       3: `Cora está rodando há 3 dias. Já atendeu ${diag.leads_attended} leads. Como tá sendo a experiência?`,
       7: `Uma semana com a Cora! ${diag.visits_scheduled} visitas agendadas, ${diag.cold_leads_reactivated} frios reativados. Você está na metade do Diagnóstico.`,
-      11: `Faltam 3 dias. Projeção: R$ ${Number(diag.estimated_commission).toLocaleString("pt-BR")} em comissão potencial. Prepare-se para o relatório final.`,
+      11: `Faltam 3 dias. Projeção: R$ ${commission.toLocaleString("pt-BR")} em comissão potencial. Prepare-se para o relatório final.`,
       14: `Diagnóstico concluído! Veja o relatório completo no dashboard. A Cora está pronta para continuar — conheça o Pacto Moova 90.`,
     }
 
@@ -54,31 +59,41 @@ export const sendDiagnosticoMarco = inngest.createFunction(
       }, { onConflict: "diagnostico_id,day_number" })
     )
 
-    // TODO: enviar push notification + email com o marco
+    if (user.email) {
+      await step.run("send-email", async () => {
+        const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/relatorio`
+        const { subject, html } = diagnosticoMarcoEmail({
+          brokerName,
+          dayNumber,
+          messageContent,
+          leadsAttended: diag.leads_attended,
+          visitsScheduled: diag.visits_scheduled,
+          estimatedCommission: commission,
+          dashboardUrl,
+        })
+        await sendEmail({ to: user.email!, subject, html })
+      })
+    }
+
     return { userId, dayNumber, messageContent }
   }
 )
 
-// Cron que verifica marcos pendentes toda hora
 export const checkDiagnosticoMarcos = inngest.createFunction(
   {
     id: "check-diagnostico-marcos",
     triggers: [{ cron: "0 * * * *" }],
   },
   async ({ step }) => {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
+    const supabase = createAdminClient()
 
-    // Diagnósticos ativos
     const diagnosticos = await step.run("fetch-active", async () => {
-      const res = await supabase
+      const { data } = await supabase
         .from("diagnostico_cora_14d")
         .select("id, user_id, started_at")
         .eq("converted_to_subscription", false)
         .gt("ends_at", new Date().toISOString())
-      return res.data as { id: string; user_id: string; started_at: string }[] | null
+      return data as { id: string; user_id: string; started_at: string }[] | null
     })
 
     const events: { name: string; data: object }[] = []
@@ -105,13 +120,8 @@ export const checkDiagnosticoMarcos = inngest.createFunction(
       }
     }
 
-    // Enfileira eventos de marco pendentes
     if (events.length > 0) {
-      await step.run("send-events", async () => {
-        const { Inngest } = await import("inngest")
-        const client = new Inngest({ id: "moova" })
-        await client.send(events)
-      })
+      await step.run("send-events", () => inngest.send(events))
     }
 
     return { checked: diagnosticos?.length ?? 0, eventsSent: events.length }

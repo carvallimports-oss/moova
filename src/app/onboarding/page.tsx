@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
-import { CheckCircle2, Loader2, RefreshCw } from "lucide-react"
+import { CheckCircle2, Loader2, RefreshCw, AlertTriangle } from "lucide-react"
 
 const STEPS = [
   { id: 1, label: "Seus dados" },
@@ -24,10 +24,12 @@ export default function OnboardingPage() {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [lgpdAccepted, setLgpdAccepted] = useState(false)
+  const [capFull, setCapFull] = useState(false)
 
   const [form, setForm] = useState({
     name: "",
     phone: "",
+    cpf: "",
     creci: "",
     creci_state: "SP",
   })
@@ -38,21 +40,34 @@ export default function OnboardingPage() {
 
   useEffect(() => () => { if (pollRef.current) clearInterval(pollRef.current) }, [])
 
+  // Verificar cap de 30 corretores
+  useEffect(() => {
+    async function checkCap() {
+      const { count } = await supabase
+        .from("diagnostico_cora_14d")
+        .select("id", { count: "exact", head: true })
+        .eq("converted_to_subscription", false)
+        .gt("ends_at", new Date().toISOString())
+      setCapFull((count ?? 0) >= 30)
+    }
+    checkCap()
+  }, [])
+
   function update(field: string, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
-  async function handleStep1() {
-    if (!form.name || !form.phone) return
+  function handleStep1() {
+    if (!form.name || !form.phone || !form.cpf) return
     setStep(2)
   }
 
-  async function handleStep2() {
+  function handleStep2() {
     if (!form.creci || !form.creci_state) return
     setStep(3)
   }
 
-  async function handleStep3() {
+  function handleStep3() {
     if (!lgpdAccepted) return
     setStep(4)
   }
@@ -93,7 +108,9 @@ export default function OnboardingPage() {
       id: user.id,
       email: user.email!,
       name: form.name,
+      broker_name: form.name,
       phone: form.phone,
+      cpf: form.cpf,
       creci: form.creci,
       creci_state: form.creci_state,
       creci_validation_status: "pending",
@@ -112,7 +129,6 @@ export default function OnboardingPage() {
       source: "scraping",
     })
 
-    // Cria registro de diagnóstico inicial
     await supabase.from("diagnostico_cora_14d").insert({
       user_id: user.id,
       started_at: new Date().toISOString(),
@@ -125,17 +141,36 @@ export default function OnboardingPage() {
 
   const pct = ((step - 1) / (STEPS.length - 1)) * 100
 
+  if (capFull) {
+    return (
+      <div className="min-h-screen bg-[#FAF7F2] flex flex-col items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md text-center space-y-6">
+          <div className="w-8 h-1 bg-[#B87333] rounded-full mx-auto" />
+          <h1 className="font-serif text-2xl text-[#2D4A3E]">Lista de espera</h1>
+          <div className="bg-[#EAE3D9] rounded-2xl p-8 space-y-3">
+            <AlertTriangle className="w-8 h-8 text-[#B87333] mx-auto" />
+            <p className="text-[#5A5A5A] text-sm leading-relaxed">
+              No momento estamos com o cap de 30 corretores simultâneos preenchido.
+              Seu cadastro foi registrado e você será o próximo na fila quando uma vaga abrir.
+            </p>
+            <p className="text-xs text-[#8A8A8A]">
+              Você receberá um email quando sua vaga estiver disponível.
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-[#FAF7F2] flex flex-col items-center justify-center px-4 py-12">
       <div className="w-full max-w-md space-y-8">
-        {/* Header */}
         <div className="text-center space-y-2">
           <div className="w-8 h-1 bg-[#B87333] rounded-full mx-auto" />
           <h1 className="font-serif text-3xl text-[#2D4A3E]">Bem-vindo à Moova</h1>
           <p className="text-sm text-[#8A8A8A]">Configure sua conta em 4 passos</p>
         </div>
 
-        {/* Steps indicator */}
         <div className="space-y-3">
           <Progress value={pct} className="h-1 bg-[#E0D8CE]" />
           <div className="flex justify-between">
@@ -170,12 +205,17 @@ export default function OnboardingPage() {
                       placeholder="João da Silva" className="border-[#E0D8CE]" />
                   </div>
                   <div className="space-y-1.5">
+                    <Label>CPF</Label>
+                    <Input value={form.cpf} onChange={(e) => update("cpf", e.target.value)}
+                      placeholder="000.000.000-00" className="border-[#E0D8CE]" />
+                  </div>
+                  <div className="space-y-1.5">
                     <Label>WhatsApp (com DDD)</Label>
                     <Input value={form.phone} onChange={(e) => update("phone", e.target.value)}
                       placeholder="11 99999-9999" className="border-[#E0D8CE]" />
                   </div>
                 </div>
-                <Button onClick={handleStep1} disabled={!form.name || !form.phone}
+                <Button onClick={handleStep1} disabled={!form.name || !form.phone || !form.cpf}
                   className="w-full bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white">
                   Continuar
                 </Button>
@@ -205,9 +245,7 @@ export default function OnboardingPage() {
                   A validação do CRECI é feita em até 24h úteis. Você pode continuar a configuração enquanto aguarda.
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" onClick={() => setStep(1)} className="flex-1 border-[#E0D8CE]">
-                    Voltar
-                  </Button>
+                  <Button variant="outline" onClick={() => setStep(1)} className="flex-1 border-[#E0D8CE]">Voltar</Button>
                   <Button onClick={handleStep2} disabled={!form.creci}
                     className="flex-1 bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white">
                     Continuar
