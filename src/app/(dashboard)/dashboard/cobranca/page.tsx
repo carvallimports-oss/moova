@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { CheckCircle2, AlertCircle, XCircle, CreditCard } from "lucide-react"
+import { CheckCircle2, AlertCircle, XCircle, CreditCard, Users } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
@@ -131,6 +131,32 @@ export default async function CobrancaPage() {
           <p className="text-sm text-[#8A8A8A]">Nenhum pagamento registrado ainda.</p>
         )}
       </div>
+
+      {/* Círculo Moova */}
+      {(status === "active" || status === "trial") && (
+        <div className="space-y-3">
+          <h2 className="font-serif text-lg text-[#2D4A3E]">Círculo Moova</h2>
+          <Card className="border-[#2D4A3E]/20 bg-[#2D4A3E]">
+            <CardContent className="p-5 flex items-start gap-4">
+              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+                <Users className="w-5 h-5 text-[#B87333]" />
+              </div>
+              <div className="space-y-2">
+                <p className="font-medium text-white">Comunidade exclusiva de corretores Moova</p>
+                <p className="text-sm text-[#B0D0C0] leading-relaxed">
+                  O link de acesso ao Círculo Moova (Discord) é enviado por email após a confirmação do seu primeiro pagamento.
+                  A comunidade começa na semana 20 do programa.
+                </p>
+                <div className="flex flex-wrap gap-2 text-xs">
+                  {["Case da semana", "Cora me ajudou", "Pedido de feature", "Selo Fundador"].map((tag) => (
+                    <span key={tag} className="bg-white/10 text-[#B0D0C0] px-2.5 py-1 rounded-full">{tag}</span>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Cancelamento */}
       {status === "active" && (

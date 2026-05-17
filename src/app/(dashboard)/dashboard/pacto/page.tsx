@@ -4,6 +4,7 @@ import Link from "next/link"
 import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { CheckCircle2, Clock, AlertCircle, ArrowLeft } from "lucide-react"
+import { FechamentosForm } from "@/components/dashboard/fechamentos-form"
 
 export const dynamic = "force-dynamic"
 
@@ -43,13 +44,26 @@ export default async function PactoPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect("/login")
 
-  const { data: pacto } = await supabase
-    .from("pacto_moova_90_audit")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .single()
+  const [{ data: pacto }, { data: transactions }, { data: closedLeads }] = await Promise.all([
+    supabase
+      .from("pacto_moova_90_audit")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single(),
+    supabase
+      .from("transactions")
+      .select("id, description, commission, closed_at, leads(id, name)")
+      .eq("user_id", user.id)
+      .order("closed_at", { ascending: false }),
+    supabase
+      .from("leads")
+      .select("id, name")
+      .eq("user_id", user.id)
+      .eq("status", "em_negociacao")
+      .order("name", { ascending: true }),
+  ])
 
   const started = pacto?.started_at ? new Date(pacto.started_at) : null
   const ends = pacto?.ends_at ? new Date(pacto.ends_at) : null
@@ -153,6 +167,19 @@ export default async function PactoPage() {
           )}
         </>
       )}
+
+      {/* Fechamentos / comissões reais */}
+      <div className="border border-[#E0D8CE] rounded-2xl p-6 space-y-4 bg-white">
+        <h2 className="font-serif text-lg text-[#2D4A3E]">Registrar fechamento</h2>
+        <p className="text-sm text-[#5A5A5A]">
+          Registre cada venda concluída para que o sistema atualize automaticamente sua comissão acumulada no Pacto.
+        </p>
+        <FechamentosForm
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          initialTransactions={(transactions ?? []) as any}
+          availableLeads={(closedLeads ?? []) as { id: string; name: string }[]}
+        />
+      </div>
 
       {/* Regras */}
       <div className="border border-[#E0D8CE] rounded-2xl p-6 space-y-4 bg-white">
