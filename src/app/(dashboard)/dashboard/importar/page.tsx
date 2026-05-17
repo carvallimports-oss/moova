@@ -126,6 +126,13 @@ export default function ImportarPage() {
                 </Button>
               </div>
 
+              {leads.length < 100 && !done && (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-xs text-amber-800">
+                  <strong>Atenção:</strong> o critério de acesso à Moova requer no mínimo 100 contatos válidos.
+                  Seu arquivo tem {leads.length} lead{leads.length !== 1 ? "s" : ""} — adicione mais contatos ao CSV para atingir o mínimo.
+                </div>
+              )}
+
               <div className="max-h-64 overflow-y-auto space-y-1">
                 {leads.map((lead, i) => (
                   <div key={i} className="flex items-center gap-3 py-1.5 px-3 rounded-lg bg-[#FAF7F2] text-sm">

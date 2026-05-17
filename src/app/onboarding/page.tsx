@@ -14,8 +14,9 @@ import { CheckCircle2, Loader2, RefreshCw, AlertTriangle } from "lucide-react"
 const STEPS = [
   { id: 1, label: "Seus dados" },
   { id: 2, label: "CRECI" },
-  { id: 3, label: "LGPD" },
-  { id: 4, label: "WhatsApp" },
+  { id: 3, label: "Comprovante" },
+  { id: 4, label: "LGPD" },
+  { id: 5, label: "WhatsApp" },
 ]
 
 export default function OnboardingPage() {
@@ -33,6 +34,10 @@ export default function OnboardingPage() {
     creci: "",
     creci_state: "SP",
   })
+  const [saleProofFile, setSaleProofFile] = useState<File | null>(null)
+  const [uploadingProof, setUploadingProof] = useState(false)
+  const saleProofRef = useRef<HTMLInputElement>(null)
+
   const [qrCode, setQrCode] = useState<string | null>(null)
   const [waConnecting, setWaConnecting] = useState(false)
   const [waConnected, setWaConnected] = useState(false)
@@ -67,9 +72,30 @@ export default function OnboardingPage() {
     setStep(3)
   }
 
-  function handleStep3() {
-    if (!lgpdAccepted) return
+  async function handleStep3() {
+    setUploadingProof(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (saleProofFile && user) {
+        const ext = saleProofFile.name.split(".").pop()
+        const path = `${user.id}/comprovante.${ext}`
+        const { data: uploaded } = await supabase.storage
+          .from("sale-proofs")
+          .upload(path, saleProofFile, { upsert: true })
+        if (uploaded) {
+          const { data: { publicUrl } } = supabase.storage.from("sale-proofs").getPublicUrl(path)
+          await supabase.from("users").upsert({ id: user.id, email: user.email!, name: form.name || "Corretor", creci: form.creci, creci_state: form.creci_state, phone: form.phone, sale_proof_url: publicUrl })
+        }
+      }
+    } finally {
+      setUploadingProof(false)
+    }
     setStep(4)
+  }
+
+  function handleStep4() {
+    if (!lgpdAccepted) return
+    setStep(5)
   }
 
   async function handleConnectWA() {
@@ -254,8 +280,60 @@ export default function OnboardingPage() {
               </>
             )}
 
-            {/* Step 3 — LGPD */}
+            {/* Step 3 — Comprovante de venda */}
             {step === 3 && (
+              <>
+                <h2 className="font-serif text-xl text-[#2D4A3E]">Comprovante de venda</h2>
+                <p className="text-sm text-[#8A8A8A]">
+                  Faça o upload de um comprovante de venda concluída (RGI, escritura, ou recibo). Usado apenas para validação do KYC.
+                </p>
+                <div
+                  onClick={() => saleProofRef.current?.click()}
+                  className={cn(
+                    "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors",
+                    saleProofFile
+                      ? "border-[#2D4A3E] bg-[#F0F5F2]"
+                      : "border-[#E0D8CE] hover:border-[#B87333]"
+                  )}
+                >
+                  {saleProofFile ? (
+                    <div className="space-y-1">
+                      <CheckCircle2 className="w-8 h-8 text-[#2D4A3E] mx-auto" />
+                      <p className="text-sm text-[#2D4A3E] font-medium">{saleProofFile.name}</p>
+                      <p className="text-xs text-[#8A8A8A]">{(saleProofFile.size / 1024).toFixed(0)} KB</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-1">
+                      <p className="text-[#8A8A8A] text-sm">Clique para selecionar o arquivo</p>
+                      <p className="text-[#B0A898] text-xs">PDF, JPG ou PNG até 10MB</p>
+                    </div>
+                  )}
+                </div>
+                <input
+                  ref={saleProofRef}
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png,.webp"
+                  className="hidden"
+                  onChange={(e) => setSaleProofFile(e.target.files?.[0] ?? null)}
+                />
+                <p className="text-xs text-[#8A8A8A] bg-[#EAE3D9] rounded-lg p-3">
+                  Não tem o arquivo em mãos? Você pode pular e enviar depois nas configurações.
+                </p>
+                <div className="flex gap-3">
+                  <Button variant="outline" onClick={() => setStep(2)} className="flex-1 border-[#E0D8CE]">Voltar</Button>
+                  <Button
+                    onClick={handleStep3}
+                    disabled={uploadingProof}
+                    className="flex-1 bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white"
+                  >
+                    {uploadingProof ? "Enviando..." : saleProofFile ? "Enviar e continuar" : "Pular por agora"}
+                  </Button>
+                </div>
+              </>
+            )}
+
+            {/* Step 4 — LGPD (was step 3) */}
+            {step === 4 && (
               <>
                 <h2 className="font-serif text-xl text-[#2D4A3E]">Termos e LGPD</h2>
                 <div className="text-sm text-[#5A5A5A] space-y-3 max-h-48 overflow-y-auto bg-[#EAE3D9] rounded-lg p-4">
@@ -280,8 +358,8 @@ export default function OnboardingPage() {
                   </span>
                 </button>
                 <div className="flex gap-3">
-                  <Button variant="outline" onClick={() => setStep(2)} className="flex-1 border-[#E0D8CE]">Voltar</Button>
-                  <Button onClick={handleStep3} disabled={!lgpdAccepted}
+                  <Button variant="outline" onClick={() => setStep(3)} className="flex-1 border-[#E0D8CE]">Voltar</Button>
+                  <Button onClick={handleStep4} disabled={!lgpdAccepted}
                     className="flex-1 bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white">
                     Aceitar e continuar
                   </Button>
@@ -289,8 +367,8 @@ export default function OnboardingPage() {
               </>
             )}
 
-            {/* Step 4 — WhatsApp */}
-            {step === 4 && (
+            {/* Step 5 — WhatsApp */}
+            {step === 5 && (
               <>
                 <h2 className="font-serif text-xl text-[#2D4A3E]">Conectar WhatsApp</h2>
                 <p className="text-sm text-[#8A8A8A]">
@@ -326,7 +404,7 @@ export default function OnboardingPage() {
                   O WhatsApp permanece no seu celular normalmente.
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" onClick={() => setStep(3)} className="flex-1 border-[#E0D8CE]">Voltar</Button>
+                  <Button variant="outline" onClick={() => setStep(4)} className="flex-1 border-[#E0D8CE]">Voltar</Button>
                   <Button onClick={handleFinish} disabled={loading}
                     className="flex-1 bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white">
                     {loading ? "Criando conta..." : waConnected ? "Continuar →" : "Conectar depois →"}

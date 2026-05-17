@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { createClient } from "@/lib/supabase/client"
-import { Wifi, WifiOff, RefreshCw, Shield, Loader2, Mic, MicOff, Calendar, CheckCircle2, Clock } from "lucide-react"
+import { Wifi, WifiOff, RefreshCw, Shield, Loader2, Mic, MicOff, Calendar, CheckCircle2, Clock, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
@@ -76,6 +76,7 @@ export function ConfiguracoesForm({
   const [workEnd, setWorkEnd] = useState(profile?.cora_work_end ?? 20)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [analyzingTone, setAnalyzingTone] = useState(false)
   const [qrCode, setQrCode] = useState<string | null>(null)
   const [connecting, setConnecting] = useState(false)
   const [connected, setConnected] = useState(waAccount?.status === "connected")
@@ -230,6 +231,24 @@ export function ConfiguracoesForm({
       toast.error("Erro ao conectar WhatsApp")
     } finally {
       setConnecting(false)
+    }
+  }
+
+  async function handleAnalyzeTone() {
+    setAnalyzingTone(true)
+    try {
+      const res = await fetch("/api/cora/analyze-tone", { method: "POST" })
+      const data = await res.json()
+      if (!res.ok) {
+        toast.error(data.error ?? "Erro ao analisar tom")
+        return
+      }
+      setCustomPrompt(data.customPrompt)
+      toast.success("Tom analisado! Revise o texto gerado e salve.")
+    } catch {
+      toast.error("Erro ao analisar tom")
+    } finally {
+      setAnalyzingTone(false)
     }
   }
 
@@ -543,6 +562,20 @@ export function ConfiguracoesForm({
               rows={3}
               className="w-full text-sm border border-[#E0D8CE] rounded-lg px-3 py-2.5 bg-white resize-none focus:outline-none focus:border-[#2D4A3E] text-[#2A2A2A] placeholder:text-[#8A8A8A]"
             />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleAnalyzeTone}
+              disabled={analyzingTone}
+              className="w-full border-[#E0D8CE] text-[#5A5A5A] text-xs gap-1.5 hover:border-[#2D4A3E] hover:text-[#2D4A3E]"
+            >
+              {analyzingTone
+                ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                : <Sparkles className="w-3.5 h-3.5" />
+              }
+              {analyzingTone ? "Analisando suas mensagens..." : "Analisar meu estilo de comunicação (IA)"}
+            </Button>
             <p className="text-xs text-[#8A8A8A]">O piso de identidade da Cora Constitution nunca é alterado.</p>
           </div>
         </CardContent>
