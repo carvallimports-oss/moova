@@ -22,6 +22,12 @@ import {
   Home,
   TrendingUp,
   ImagePlay,
+  Dumbbell,
+  Scale,
+  Briefcase,
+  UserCheck,
+  ClipboardList,
+  Calculator,
 } from "lucide-react"
 import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
@@ -39,6 +45,12 @@ const navItems = [
   { href: "/dashboard/imoveis", label: "Imóveis", icon: Building2 },
   { href: "/dashboard/publicacoes", label: "Publicações", icon: ImagePlay },
   { href: "/dashboard/visitas", label: "Visitas", icon: Calendar },
+  { href: "/dashboard/treina", label: "Cora Treina", icon: Dumbbell },
+  { href: "/dashboard/defende", label: "Cora Defende", icon: Scale },
+  { href: "/dashboard/servicos", label: "Serviços", icon: Briefcase },
+  { href: "/dashboard/apresenta", label: "Cora Apresenta", icon: UserCheck },
+  { href: "/dashboard/vistoria", label: "Vistoria", icon: ClipboardList },
+  { href: "/dashboard/estimativa", label: "Estimativa", icon: Calculator },
   { href: "/dashboard/relatorio", label: "Diagnóstico", icon: BarChart3 },
   { href: "/dashboard/pacto", label: "Pacto 90", icon: ShieldCheck },
   { href: "/dashboard/planos", label: "Planos", icon: TrendingUp },

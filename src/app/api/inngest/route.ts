@@ -16,6 +16,7 @@ import { thinkingFollowup } from "@/lib/inngest/functions/thinking-followup"
 import { suspendOverdue } from "@/lib/inngest/functions/suspend-overdue"
 import { sendDiarioImovel } from "@/lib/inngest/functions/send-diario-imovel"
 import { checkUpgradeEligibility } from "@/lib/inngest/functions/check-upgrade-eligibility"
+import { sendCoraContaNewsletter } from "@/lib/inngest/functions/send-cora-conta"
 
 export const { GET, POST, PUT } = serve({
   client: inngest,
@@ -36,5 +37,6 @@ export const { GET, POST, PUT } = serve({
     suspendOverdue,
     sendDiarioImovel,
     checkUpgradeEligibility,
+    sendCoraContaNewsletter,
   ],
 })

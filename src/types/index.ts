@@ -107,6 +107,98 @@ export interface UpgradeOffer {
   sent_via: "nara" | "dashboard" | "email"
 }
 
+// ── Camada 2 — C2.1/C2.2 ────────────────────────────────────────────────────
+
+export type ServiceStatus = "pending" | "in_progress" | "completed" | "cancelled"
+
+export interface ExtraService {
+  id: string
+  user_id: string
+  name: string
+  description?: string
+  price?: number
+  client_name?: string
+  client_phone?: string
+  due_date?: string
+  notes?: string
+  status: ServiceStatus
+  created_at: string
+  updated_at: string
+}
+
+export interface NegotiationSession {
+  id: string
+  user_id: string
+  lead_id?: string
+  context: string
+  briefing: string
+  meeting_at?: string
+  outcome?: "fechou" | "perdeu" | "adiou" | "pendente"
+  created_at: string
+}
+
+export interface LegalConsultation {
+  id: string
+  user_id: string
+  category: "geral" | "contrato" | "distrato" | "locacao" | "despejo" | "iptu" | "itbi"
+  question: string
+  answer: string
+  disclaimer: string
+  created_at: string
+}
+
+export type RoomCondition = "otimo" | "bom" | "regular" | "ruim" | "pessimo"
+
+export interface InspectionRoom {
+  name: string
+  condition: RoomCondition
+  observations?: string
+}
+
+export interface InspectionSupport {
+  id: string
+  user_id: string
+  property_id?: string
+  address: string
+  property_type?: string
+  area_sqm?: number
+  rooms: InspectionRoom[]
+  general_observations?: string
+  report: string
+  status: "pending" | "ready"
+  created_at: string
+}
+
+export interface PropertyEstimateResult {
+  price_min: number
+  price_max: number
+  price_suggested: number
+  price_per_sqm: number
+  margin_of_error: string
+  market_context: string
+  factors_positive: string[]
+  factors_negative: string[]
+  comparables: Array<{ description: string; price: number; distance: string }>
+  recommendation: string
+}
+
+export interface PropertyEstimate {
+  id: string
+  user_id: string
+  property_id?: string
+  address: string
+  city: string
+  state: string
+  property_type: string
+  area_sqm: number
+  bedrooms?: number
+  condition: string
+  extra_notes?: string
+  result: PropertyEstimateResult
+  disclaimer: string
+  created_at: string
+}
+
 export type LeadStatus = "novo" | "qualificado" | "em_consideracao" | "visita_agendada" | "visitou" | "em_negociacao" | "fechou" | "perdido"
 
 export type LeadTemperature = "QUENTE" | "MORNO" | "FRIO" | "INERTE"
