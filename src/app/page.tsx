@@ -6,7 +6,7 @@ import { CheckCircle2, MessageSquare, BarChart3, Shield, Zap, Star } from "lucid
 const FEATURES = [
   {
     icon: MessageSquare,
-    title: "Cora atende 24/7",
+    title: "Nara atende 24/7",
     desc: "Sua assistente de IA responde leads no WhatsApp enquanto você está em visita, reunião ou dormindo.",
   },
   {
@@ -17,19 +17,19 @@ const FEATURES = [
   {
     icon: BarChart3,
     title: "Diagnóstico 14 dias",
-    desc: "Nos primeiros 14 dias a Cora prova o que consegue fazer pelo seu negócio, com relatório compartilhável.",
+    desc: "Nos primeiros 14 dias a Nara prova o que consegue fazer pelo seu negócio, com relatório compartilhável.",
   },
   {
     icon: Shield,
     title: "Pacto Moova 90",
-    desc: "Garantia reversa real. Se a Cora não entregar e você fez sua parte, devolvemos até 70% do valor pago.",
+    desc: "Garantia reversa real. Se a Nara não entregar e você fez sua parte, devolvemos até 70% do valor pago.",
   },
 ]
 
 const STEPS = [
-  { step: "01", title: "Conecte o WhatsApp", desc: "Leva 2 minutos. Escaneia o QR e a Cora já começa a atender." },
+  { step: "01", title: "Conecte o WhatsApp", desc: "Leva 2 minutos. Escaneia o QR e a Nara já começa a atender." },
   { step: "02", title: "Configure o tom", desc: "Formal ou informal. Adicione instruções específicas do seu mercado." },
-  { step: "03", title: "Importe sua base", desc: "Upload CSV com seus leads. A Cora começa a trabalhar na hora." },
+  { step: "03", title: "Importe sua base", desc: "Upload CSV com seus leads. A Nara começa a trabalhar na hora." },
   { step: "04", title: "Acompanhe no painel", desc: "Pipeline em tempo real, aprovação de mensagens, relatórios." },
 ]
 
@@ -39,7 +39,7 @@ const PLANS = [
     price: "R$ 799",
     period: "/mês",
     provider: "Evolution API",
-    items: ["Cora ativa 24/7", "Diagnóstico 14 dias", "Pacto Moova 90", "Pipeline e CRM", "Importação CSV", "Aprovação humana"],
+    items: ["Nara ativa 24/7", "Diagnóstico 14 dias", "Pacto Moova 90", "Pipeline e CRM", "Importação CSV", "Aprovação humana"],
     cta: "Começar agora",
     highlight: false,
   },
@@ -48,7 +48,7 @@ const PLANS = [
     price: "R$ 1.199",
     period: "/mês",
     provider: "BSP Oficial (em breve)",
-    items: ["Tudo do Starter", "BSP oficial (maior estabilidade)", "Voz da Cora personalizada", "Suporte prioritário", "Relatório Stories 9:16", "API de integração"],
+    items: ["Tudo do Starter", "BSP oficial (maior estabilidade)", "Voz da Nara personalizada", "Suporte prioritário", "Relatório Stories 9:16", "API de integração"],
     cta: "Entrar na lista de espera",
     highlight: true,
   },
@@ -56,8 +56,8 @@ const PLANS = [
 
 const FAQ = [
   {
-    q: "A Cora finge ser humana?",
-    a: "Não. A Cora sempre se apresenta como assistente de IA e informa quando o corretor será acionado. É uma regra inviolável do sistema.",
+    q: "A Nara finge ser humana?",
+    a: "Não. A Nara sempre se apresenta como assistente de IA e informa quando o corretor será acionado. É uma regra inviolável do sistema.",
   },
   {
     q: "Como funciona a aprovação humana?",
@@ -65,7 +65,7 @@ const FAQ = [
   },
   {
     q: "E se a Cora errar algo?",
-    a: "Você pode assumir qualquer conversa a qualquer momento e devolver para a Cora quando quiser.",
+    a: "Você pode assumir qualquer conversa a qualquer momento e devolver para a Nara quando quiser.",
   },
   {
     q: "O Pacto Moova 90 é de verdade?",
@@ -106,7 +106,7 @@ export default function Home() {
           A nova infraestrutura do corretor brasileiro
         </h1>
         <p className="text-[#5A5A5A] text-lg max-w-xl mx-auto leading-relaxed">
-          A Cora atende seus leads no WhatsApp 24 horas por dia, qualifica, agenda visitas e te avisa só quando é a hora de fechar.
+          A Nara atende seus leads no WhatsApp 24 horas por dia, qualifica, agenda visitas e te avisa só quando é a hora de fechar.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
           <Link href="/signup" className={cn(buttonVariants({ size: "lg" }), "bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white text-base")}>
@@ -153,11 +153,11 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Cora Constitution destaque */}
+      {/* Nara Constitution destaque */}
       <section className="bg-[#2D4A3E] py-16">
         <div className="max-w-3xl mx-auto px-6 text-center space-y-6">
-          <p className="text-[#B87333] text-xs uppercase tracking-widest font-mono">Cora Constitution</p>
-          <h2 className="font-serif text-3xl text-white">A Cora nunca inventa, nunca pressiona, nunca mente</h2>
+          <p className="text-[#B87333] text-xs uppercase tracking-widest font-mono">Nara Constitution</p>
+          <h2 className="font-serif text-3xl text-white">A Nara nunca inventa, nunca pressiona, nunca mente</h2>
           <p className="text-[#B0D0C0] leading-relaxed">
             Três atributos não-negociáveis: <strong className="text-white">Precisa</strong> (informação certa, fonte clara),
             {" "}<strong className="text-white">Calorosa</strong> (tom humano, brasileiro, sem corporativês),
@@ -233,7 +233,7 @@ export default function Home() {
       {/* CTA Final */}
       <section className="max-w-5xl mx-auto px-6 py-20 text-center space-y-6">
         <h2 className="font-serif text-4xl text-[#2D4A3E] max-w-xl mx-auto">
-          Sua Cora está pronta. Seus leads estão esperando.
+          Sua Nara está pronta. Seus leads estão esperando.
         </h2>
         <Link href="/signup" className={cn(buttonVariants({ size: "lg" }), "bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white text-base px-10")}>
           Solicitar acesso ao beta

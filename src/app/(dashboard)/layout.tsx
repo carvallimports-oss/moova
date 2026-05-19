@@ -24,7 +24,7 @@ export default async function DashboardLayout({
       .eq("user_id", user.id)
       .is("resolved_at", null),
     supabase
-      .from("diagnostico_cora_14d")
+      .from("diagnostico_nara_14d")
       .select("started_at, completed_at")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })

@@ -1,6 +1,6 @@
 import { inngest } from "../client"
 import { createAdminClient } from "@/lib/supabase/admin"
-import { buildCoraSystemPrompt, generateCoraResponse } from "@/lib/ai/cora"
+import { buildNaraSystemPrompt, generateNaraResponse } from "@/lib/ai/nara"
 import { createWhatsAppProvider } from "@/lib/whatsapp/provider"
 
 // Cron diário 9h: retomada de leads que disseram "vou pensar" há 3 dias
@@ -18,7 +18,7 @@ export const thinkingFollowup = inngest.createFunction(
         .from("leads")
         .select(`
           id, name, phone, user_id, status,
-          users!leads_user_id_fkey(broker_name, name, phone, cora_formality, cora_custom_prompt)
+          users!leads_user_id_fkey(broker_name, name, phone, nara_formality, nara_custom_prompt)
         `)
         .lte("thinking_followup_at", now.toISOString())
         .not("status", "in", "(fechou,perdido)")
@@ -45,14 +45,14 @@ export const thinkingFollowup = inngest.createFunction(
 
         if (!wa?.instance_name) return
 
-        const systemPrompt = buildCoraSystemPrompt(
+        const systemPrompt = buildNaraSystemPrompt(
           brokerName,
           broker.phone,
-          (broker.cora_formality as "formal" | "informal") ?? "informal",
-          broker.cora_custom_prompt ?? undefined
+          (broker.nara_formality as "formal" | "informal") ?? "informal",
+          broker.nara_custom_prompt ?? undefined
         )
 
-        const msg = await generateCoraResponse(systemPrompt, [{
+        const msg = await generateNaraResponse(systemPrompt, [{
           role: "user",
           content: `[SISTEMA] O lead ${lead.name} disse que ia pensar há 3 dias e ainda não retornou. Envie uma mensagem de retomada leve e não invasiva — sem pressão. Seja caloroso e ofereça ajuda para tirar dúvidas.`,
         }])
@@ -81,7 +81,7 @@ export const thinkingFollowup = inngest.createFunction(
             user_id: lead.user_id,
             content: msg,
             type: "text",
-            sender: "cora",
+            sender: "nara",
             flags: ["thinking_followup"],
           })
         }

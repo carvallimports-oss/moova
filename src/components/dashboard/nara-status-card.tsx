@@ -28,7 +28,7 @@ function StatusBadge({ status }: { status: ServiceStatus }) {
   return <Badge className="bg-[#EAE3D9] text-[#8A8A8A] text-xs">Verificando...</Badge>
 }
 
-export function CoraStatusCard() {
+export function NaraStatusCard() {
   const [health, setHealth] = useState<HealthData | null>(null)
   const [error, setError] = useState(false)
 
@@ -49,7 +49,7 @@ export function CoraStatusCard() {
             allOk === null ? "bg-[#E0D8CE] animate-pulse" :
             allOk ? "bg-green-500" : "bg-red-500"
           }`} />
-          Cora — Status
+          Nara — Status
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -68,7 +68,7 @@ export function CoraStatusCard() {
         {!error && !health?.services.evolution && health && (
           <div className="flex items-center gap-2 mt-4 text-xs text-[#8A8A8A] bg-[#EAE3D9] rounded-lg px-3 py-2">
             <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-            Configure o WhatsApp em Configurações para a Cora começar a atender.
+            Configure o WhatsApp em Configurações para a Nara começar a atender.
           </div>
         )}
       </CardContent>

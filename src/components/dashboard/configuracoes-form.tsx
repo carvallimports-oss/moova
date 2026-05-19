@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
 const VOICE_PROMPTS = [
-  "Olá! Sou a Cora, assistente do corretor pelo Moova. Como posso ajudar?",
+  "Olá! Sou a Nara, assistente do corretor pelo Moova. Como posso ajudar?",
   "Ótimo! Vou verificar as informações desse imóvel para você agora mesmo.",
   "Que excelente escolha! Podemos agendar uma visita amanhã às 10h?",
   "Perfeito. Vou passar todas as informações para o corretor agora.",
@@ -33,14 +33,14 @@ type Profile = {
   creci: string
   phone: string
   whatsapp_provider: string
-  cora_formality: string
-  cora_custom_prompt: string | null
+  nara_formality: string
+  nara_custom_prompt: string | null
   human_approval_active: boolean
   human_approval_categories: HumanApprovalCategories | null
   google_calendar_connected: boolean
   eleven_labs_voice_id: string | null
-  cora_work_start: number | null
-  cora_work_end: number | null
+  nara_work_start: number | null
+  nara_work_end: number | null
 } | null
 
 type WAAccount = {
@@ -64,16 +64,16 @@ export function ConfiguracoesForm({
   const [name, setName] = useState(profile?.name ?? "")
   const [phone, setPhone] = useState(profile?.phone ?? "")
   const [creci, setCreci] = useState(profile?.creci ?? "")
-  const [formality, setFormality] = useState(profile?.cora_formality ?? "informal")
-  const [customPrompt, setCustomPrompt] = useState(profile?.cora_custom_prompt ?? "")
+  const [formality, setFormality] = useState(profile?.nara_formality ?? "informal")
+  const [customPrompt, setCustomPrompt] = useState(profile?.nara_custom_prompt ?? "")
   const [humanApproval, setHumanApproval] = useState(profile?.human_approval_active ?? true)
   const [approvalCategories, setApprovalCategories] = useState<HumanApprovalCategories>(
     profile?.human_approval_categories ?? {
       visita: true, valor: true, contraproposta: true, fechamento: true, alto_valor: true,
     }
   )
-  const [workStart, setWorkStart] = useState(profile?.cora_work_start ?? 8)
-  const [workEnd, setWorkEnd] = useState(profile?.cora_work_end ?? 20)
+  const [workStart, setWorkStart] = useState(profile?.nara_work_start ?? 8)
+  const [workEnd, setWorkEnd] = useState(profile?.nara_work_end ?? 20)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [analyzingTone, setAnalyzingTone] = useState(false)
@@ -237,7 +237,7 @@ export function ConfiguracoesForm({
   async function handleAnalyzeTone() {
     setAnalyzingTone(true)
     try {
-      const res = await fetch("/api/cora/analyze-tone", { method: "POST" })
+      const res = await fetch("/api/nara/analyze-tone", { method: "POST" })
       const data = await res.json()
       if (!res.ok) {
         toast.error(data.error ?? "Erro ao analisar tom")
@@ -263,12 +263,12 @@ export function ConfiguracoesForm({
           broker_name: name || undefined,
           phone: phone || undefined,
           creci: creci || undefined,
-          cora_formality: formality,
-          cora_custom_prompt: customPrompt || null,
+          nara_formality: formality,
+          nara_custom_prompt: customPrompt || null,
           human_approval_active: humanApproval,
           human_approval_categories: approvalCategories,
-          cora_work_start: workStart,
-          cora_work_end: workEnd,
+          nara_work_start: workStart,
+          nara_work_end: workEnd,
         })
         .eq("id", user!.id)
       setSaved(true)
@@ -387,7 +387,7 @@ export function ConfiguracoesForm({
                   <CheckCircle2 className="w-4 h-4" />
                   Google Agenda conectada
                 </p>
-                <p className="text-xs text-green-600 mt-0.5">A Cora verifica sua disponibilidade ao agendar visitas</p>
+                <p className="text-xs text-green-600 mt-0.5">A Nara verifica sua disponibilidade ao agendar visitas</p>
               </div>
               <Button
                 variant="outline"
@@ -401,7 +401,7 @@ export function ConfiguracoesForm({
           ) : (
             <>
               <p className="text-sm text-[#5A5A5A]">
-                Conecte sua agenda para que a Cora sugira visitas apenas em horários livres.
+                Conecte sua agenda para que a Nara sugira visitas apenas em horários livres.
               </p>
               <a
                 href="/api/calendar/auth"
@@ -416,19 +416,19 @@ export function ConfiguracoesForm({
                 </p>
               )}
               <p className="text-xs text-[#8A8A8A]">
-                Acesso somente leitura. A Cora não cria nem modifica eventos.
+                Acesso somente leitura. A Nara não cria nem modifica eventos.
               </p>
             </>
           )}
         </CardContent>
       </Card>
 
-      {/* Voz da Cora */}
+      {/* Voz da Nara */}
       <Card className="border-[#E0D8CE]">
         <CardHeader className="pb-3">
           <CardTitle className="font-serif text-lg text-[#2D4A3E] flex items-center gap-2">
             <Mic className="w-4 h-4" />
-            Voz da Cora
+            Voz da Nara
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -439,7 +439,7 @@ export function ConfiguracoesForm({
                   <CheckCircle2 className="w-4 h-4" />
                   Voz personalizada ativa
                 </p>
-                <p className="text-xs text-green-600 mt-0.5">A Cora usa sua voz clonada nos áudios</p>
+                <p className="text-xs text-green-600 mt-0.5">A Nara usa sua voz clonada nos áudios</p>
               </div>
               <Button
                 variant="outline"
@@ -453,7 +453,7 @@ export function ConfiguracoesForm({
           ) : (
             <>
               <p className="text-sm text-[#5A5A5A]">
-                Grave as frases abaixo para que a Cora envie áudios com uma voz próxima à sua.
+                Grave as frases abaixo para que a Nara envie áudios com uma voz próxima à sua.
               </p>
               <div className="space-y-2">
                 {VOICE_PROMPTS.map((prompt, i) => (
@@ -523,10 +523,10 @@ export function ConfiguracoesForm({
         </CardContent>
       </Card>
 
-      {/* Tom da Cora */}
+      {/* Tom da Nara */}
       <Card className="border-[#E0D8CE]">
         <CardHeader className="pb-3">
-          <CardTitle className="font-serif text-lg text-[#2D4A3E]">Tom da Cora</CardTitle>
+          <CardTitle className="font-serif text-lg text-[#2D4A3E]">Tom da Nara</CardTitle>
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="space-y-2">
@@ -554,7 +554,7 @@ export function ConfiguracoesForm({
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-sm text-[#2A2A2A]">Instruções extras para a Cora (opcional)</Label>
+            <Label className="text-sm text-[#2A2A2A]">Instruções extras para a Nara (opcional)</Label>
             <textarea
               value={customPrompt}
               onChange={(e) => setCustomPrompt(e.target.value)}
@@ -576,7 +576,7 @@ export function ConfiguracoesForm({
               }
               {analyzingTone ? "Analisando suas mensagens..." : "Analisar meu estilo de comunicação (IA)"}
             </Button>
-            <p className="text-xs text-[#8A8A8A]">O piso de identidade da Cora Constitution nunca é alterado.</p>
+            <p className="text-xs text-[#8A8A8A]">O piso de identidade da Nara Constitution nunca é alterado.</p>
           </div>
         </CardContent>
       </Card>
@@ -591,7 +591,7 @@ export function ConfiguracoesForm({
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-[#5A5A5A]">
-            Fora desse horário, a Cora envia uma mensagem automática informando o horário de retorno.
+            Fora desse horário, a Nara envia uma mensagem automática informando o horário de retorno.
           </p>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">

@@ -169,7 +169,7 @@ export function LeadModal({ lead, open, onClose, onSaved }: Props) {
           <div className="flex items-center justify-between py-2 px-3 rounded-lg border border-[#E0D8CE] bg-[#FAF7F2]">
             <div>
               <p className="text-sm font-medium text-[#2A2A2A]">Lead VIP</p>
-              <p className="text-xs text-[#8A8A8A]">A Cora prioriza respostas e aprovações humanas para VIPs</p>
+              <p className="text-xs text-[#8A8A8A]">A Nara prioriza respostas e aprovações humanas para VIPs</p>
             </div>
             <button
               type="button"

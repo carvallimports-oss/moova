@@ -19,7 +19,7 @@ export default function PrivacidadePage() {
 
           <section className="space-y-3">
             <h2 className="font-serif text-lg text-[#2D4A3E]">2. Dados Coletados</h2>
-            <p><strong>Do corretor:</strong> nome, e-mail, telefone, CRECI, estado, preferências de tom da Cora.</p>
+            <p><strong>Do corretor:</strong> nome, e-mail, telefone, CRECI, estado, preferências de tom da Nara.</p>
             <p><strong>Dos leads (tratados pelo corretor):</strong> nome, telefone WhatsApp, histórico de conversas, estimativa de orçamento, região de interesse.</p>
             <p><strong>Dados automáticos:</strong> logs de acesso, eventos do sistema (Inngest), status de conexão WhatsApp.</p>
           </section>
@@ -27,7 +27,7 @@ export default function PrivacidadePage() {
           <section className="space-y-3">
             <h2 className="font-serif text-lg text-[#2D4A3E]">3. Finalidade do Tratamento</h2>
             <ul className="list-disc pl-5 space-y-1">
-              <li>Prestação do serviço de assistente de IA (Cora)</li>
+              <li>Prestação do serviço de assistente de IA (Nara)</li>
               <li>Processamento de pagamentos via Asaas</li>
               <li>Envio de comunicações transacionais (Resend)</li>
               <li>Diagnóstico e métricas de desempenho do corretor</li>

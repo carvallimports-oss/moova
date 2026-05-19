@@ -109,7 +109,7 @@ export function ConversasList({ conversations: initial }: { conversations: Conve
         setConversations((prev) =>
           prev.map((c) => c.id === convId ? { ...c, broker_took_over: takeover } : c)
         )
-        toast.success(takeover ? "Conversa assumida" : "Conversa devolvida para a Cora")
+        toast.success(takeover ? "Conversa assumida" : "Conversa devolvida para a Nara")
       } else {
         toast.error("Erro ao atualizar conversa")
       }
@@ -147,7 +147,7 @@ export function ConversasList({ conversations: initial }: { conversations: Conve
       <div className="text-center py-16 text-[#8A8A8A]">
         <MessageSquare className="w-10 h-10 mx-auto mb-3 opacity-30" />
         <p className="text-sm">Nenhuma conversa ativa ainda.</p>
-        <p className="text-xs mt-1">A Cora vai aparecer aqui quando o WhatsApp estiver conectado.</p>
+        <p className="text-xs mt-1">A Nara vai aparecer aqui quando o WhatsApp estiver conectado.</p>
       </div>
     )
   }
@@ -189,8 +189,8 @@ export function ConversasList({ conversations: initial }: { conversations: Conve
                     <p className="text-xs text-[#8A8A8A] mt-0.5">{conv.leads?.phone}</p>
                     {lastMsg && (
                       <p className="text-xs text-[#5A5A5A] mt-1.5 truncate">
-                        <span className={cn("font-medium mr-1", lastMsg.sender === "cora" ? "text-[#2D4A3E]" : "text-[#B87333]")}>
-                          {lastMsg.sender === "cora" ? "Cora:" : lastMsg.sender === "corretor" ? "Você:" : "Lead:"}
+                        <span className={cn("font-medium mr-1", lastMsg.sender === "nara" ? "text-[#2D4A3E]" : "text-[#B87333]")}>
+                          {lastMsg.sender === "nara" ? "Nara:" : lastMsg.sender === "corretor" ? "Você:" : "Lead:"}
                         </span>
                         {lastMsg.content}
                       </p>
@@ -237,7 +237,7 @@ export function ConversasList({ conversations: initial }: { conversations: Conve
                 )}
               >
                 <User className="w-3.5 h-3.5 mr-1.5" />
-                {selectedConv.broker_took_over ? "Devolver para Cora" : "Assumir conversa"}
+                {selectedConv.broker_took_over ? "Devolver para Nara" : "Assumir conversa"}
               </Button>
             </div>
 
@@ -250,7 +250,7 @@ export function ConversasList({ conversations: initial }: { conversations: Conve
                       "max-w-[80%] rounded-2xl px-4 py-2.5 text-sm",
                       msg.sender === "lead"
                         ? "bg-[#EAE3D9] text-[#2A2A2A] self-start"
-                        : msg.sender === "cora"
+                        : msg.sender === "nara"
                         ? "bg-[#2D4A3E] text-white self-end ml-auto"
                         : "bg-[#B87333] text-white self-end ml-auto"
                     )}

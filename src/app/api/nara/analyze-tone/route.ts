@@ -5,7 +5,7 @@ import OpenAI from "openai"
 
 export const dynamic = "force-dynamic"
 
-// POST /api/cora/analyze-tone — M04A: analisa mensagens do corretor e gera prompt personalizado
+// POST /api/nara/analyze-tone — M04A: analisa mensagens do corretor e gera prompt personalizado
 export async function POST() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -38,7 +38,7 @@ export async function POST() {
       {
         role: "system",
         content: `Você é um especialista em análise de comunicação para corretores de imóveis brasileiros.
-Analise o estilo de escrita do corretor e gere instruções para que a IA assistente (Cora) mimetize seu tom.
+Analise o estilo de escrita do corretor e gere instruções para que a IA assistente (Nara) mimetize seu tom.
 Responda APENAS com o texto do prompt personalizado (sem explicações, sem cabeçalho, no máximo 200 palavras).
 O prompt deve completar a frase: "Além das instruções acima, adote também estas características específicas deste corretor:"`,
       },
@@ -53,11 +53,11 @@ O prompt deve completar a frase: "Além das instruções acima, adote também es
   if (!customPrompt) return NextResponse.json({ error: "Falha na análise" }, { status: 500 })
 
   const adminClient = createAdminClient()
-  await adminClient.from("users").update({ cora_custom_prompt: customPrompt }).eq("id", user.id)
+  await adminClient.from("users").update({ nara_custom_prompt: customPrompt }).eq("id", user.id)
 
   await adminClient.from("audit_logs").insert({
     user_id: user.id,
-    action: "cora_tone_analyzed",
+    action: "nara_tone_analyzed",
     entity_type: "user",
     entity_id: user.id,
     payload: { messagesSampled: messages.length, promptLength: customPrompt.length },

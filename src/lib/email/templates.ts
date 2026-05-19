@@ -2,7 +2,7 @@
 
 export function welcomeEmail(params: { brokerName: string; loginUrl: string }): { subject: string; html: string } {
   return {
-    subject: "Bem-vindo ao Moova — sua Cora está pronta",
+    subject: "Bem-vindo ao Moova — sua Nara está pronta",
     html: `
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -16,7 +16,7 @@ export function welcomeEmail(params: { brokerName: string; loginUrl: string }): 
           <h1 style="margin:8px 0 0;color:#fff;font-size:28px;font-weight:normal;">Bem-vindo, ${params.brokerName}</h1>
         </td></tr>
         <tr><td style="padding:40px;">
-          <p style="color:#2D4A3E;font-size:16px;line-height:1.6;">Sua Cora já está configurada e pronta para começar a trabalhar com você.</p>
+          <p style="color:#2D4A3E;font-size:16px;line-height:1.6;">Sua Nara já está configurada e pronta para começar a trabalhar com você.</p>
           <p style="color:#5A5A5A;font-size:15px;line-height:1.7;">Nos próximos 14 dias ela vai mostrar exatamente o que consegue fazer pelo seu negócio — leads qualificados, agendamentos feitos, clientes engajados enquanto você cuida do que só você pode fazer.</p>
           <table width="100%" cellpadding="0" cellspacing="0" style="margin:32px 0;">
             <tr><td align="center">
@@ -45,7 +45,7 @@ export function diagnosticoReportEmail(params: {
 }): { subject: string; html: string } {
   const fmt = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
   return {
-    subject: "Diagnóstico Cora 14 dias — seus resultados",
+    subject: "Diagnóstico Nara 14 dias — seus resultados",
     html: `
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -55,7 +55,7 @@ export function diagnosticoReportEmail(params: {
     <tr><td align="center">
       <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;border:1px solid #E0D8CE;overflow:hidden;">
         <tr><td style="background:#2D4A3E;padding:32px 40px;text-align:center;">
-          <p style="margin:0;color:#B87333;font-size:12px;letter-spacing:2px;text-transform:uppercase;">Diagnóstico Cora · 14 dias</p>
+          <p style="margin:0;color:#B87333;font-size:12px;letter-spacing:2px;text-transform:uppercase;">Diagnóstico Nara · 14 dias</p>
           <h1 style="margin:8px 0 0;color:#fff;font-size:26px;font-weight:normal;">${params.brokerName}, aqui está o balanço</h1>
         </td></tr>
         <tr><td style="padding:40px;">
@@ -107,7 +107,7 @@ export function modoDesgradadoAlertEmail(params: {
   dashboardUrl: string
 }): { subject: string; html: string } {
   return {
-    subject: "Alerta Moova — Cora operando em modo alternativo",
+    subject: "Alerta Moova — Nara operando em modo alternativo",
     html: `
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -118,11 +118,11 @@ export function modoDesgradadoAlertEmail(params: {
       <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;border:1px solid #E0D8CE;overflow:hidden;">
         <tr><td style="background:#8B1A1A;padding:28px 40px;text-align:center;">
           <p style="margin:0;color:#FFD0D0;font-size:13px;letter-spacing:2px;text-transform:uppercase;">Alerta · Modo Alternativo</p>
-          <h1 style="margin:8px 0 0;color:#fff;font-size:24px;font-weight:normal;">Cora está operando em modo reduzido</h1>
+          <h1 style="margin:8px 0 0;color:#fff;font-size:24px;font-weight:normal;">Nara está operando em modo reduzido</h1>
         </td></tr>
         <tr><td style="padding:40px;">
           <p style="color:#2D4A3E;font-size:15px;line-height:1.6;">${params.brokerName}, detectamos uma instabilidade nos serviços de IA às <strong>${params.incidentAt}</strong>.</p>
-          <p style="color:#5A5A5A;font-size:15px;line-height:1.7;">Durante este período, a Cora enviou mensagens padrão para <strong>${params.affectedLeads} lead(s)</strong> informando que retornará em breve. As mensagens foram enfileiradas e serão reprocessadas automaticamente quando o serviço for restaurado.</p>
+          <p style="color:#5A5A5A;font-size:15px;line-height:1.7;">Durante este período, a Nara enviou mensagens padrão para <strong>${params.affectedLeads} lead(s)</strong> informando que retornará em breve. As mensagens foram enfileiradas e serão reprocessadas automaticamente quando o serviço for restaurado.</p>
           <p style="color:#5A5A5A;font-size:14px;line-height:1.6;background:#FFF8F0;border-left:3px solid #B87333;padding:12px 16px;border-radius:0 8px 8px 0;">Nenhuma ação sua é necessária. Você será notificado quando tudo voltar ao normal.</p>
           <table width="100%" cellpadding="0" cellspacing="0" style="margin:32px 0;">
             <tr><td align="center">
@@ -157,7 +157,7 @@ export function diagnosticoMarcoEmail(params: {
     14: "Ato III — A decisão",
   }
   return {
-    subject: `Cora · Dia ${params.dayNumber} — ${actLabels[params.dayNumber]}`,
+    subject: `Nara · Dia ${params.dayNumber} — ${actLabels[params.dayNumber]}`,
     html: `
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -167,7 +167,7 @@ export function diagnosticoMarcoEmail(params: {
     <tr><td align="center">
       <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;border:1px solid #E0D8CE;overflow:hidden;">
         <tr><td style="background:#2D4A3E;padding:28px 40px;text-align:center;">
-          <p style="margin:0;color:#B87333;font-size:11px;letter-spacing:2px;text-transform:uppercase;">Diagnóstico Cora · Dia ${params.dayNumber}</p>
+          <p style="margin:0;color:#B87333;font-size:11px;letter-spacing:2px;text-transform:uppercase;">Diagnóstico Nara · Dia ${params.dayNumber}</p>
           <h1 style="margin:8px 0 0;color:#fff;font-size:22px;font-weight:normal;">${params.brokerName},</h1>
         </td></tr>
         <tr><td style="padding:40px;">
@@ -196,7 +196,7 @@ export function diagnosticoMarcoEmail(params: {
             </td></tr>
           </table>
           <hr style="border:none;border-top:1px solid #E0D8CE;margin:24px 0;">
-          <p style="color:#B87333;font-size:12px;margin:0;">Cora · Moova</p>
+          <p style="color:#B87333;font-size:12px;margin:0;">Nara · Moova</p>
         </td></tr>
       </table>
     </td></tr>
@@ -246,7 +246,7 @@ export function pactoMarcoEmail(params: {
             </td></tr>
           </table>
           <hr style="border:none;border-top:1px solid #E0D8CE;margin:24px 0;">
-          <p style="color:#B87333;font-size:12px;margin:0;">Cora · Moova</p>
+          <p style="color:#B87333;font-size:12px;margin:0;">Nara · Moova</p>
         </td></tr>
       </table>
     </td></tr>
@@ -267,7 +267,7 @@ export function pactoVeredito90Email(params: {
   const scenarioText: Record<string, { title: string; body: string; color: string }> = {
     A: {
       title: "Meta atingida — parabéns!",
-      body: "Você chegou lá. A Cora trabalhou com você durante 90 dias e os resultados falam por si. Sem devolução, sem burocracia — você segue para o próximo ciclo com tudo que conquistou.",
+      body: "Você chegou lá. A Nara trabalhou com você durante 90 dias e os resultados falam por si. Sem devolução, sem burocracia — você segue para o próximo ciclo com tudo que conquistou.",
       color: "#2D4A3E",
     },
     B: {

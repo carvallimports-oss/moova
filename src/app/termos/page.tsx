@@ -19,7 +19,7 @@ export default function TermosPage() {
 
           <section className="space-y-3">
             <h2 className="font-serif text-lg text-[#2D4A3E]">2. O Serviço</h2>
-            <p>O Moova é uma plataforma de assistente de IA (Cora) para corretores de imóveis brasileiros. A Cora atende leads via WhatsApp de forma automatizada, dentro dos parâmetros configurados pelo corretor.</p>
+            <p>O Moova é uma plataforma de assistente de IA (Nara) para corretores de imóveis brasileiros. A Nara atende leads via WhatsApp de forma automatizada, dentro dos parâmetros configurados pelo corretor.</p>
           </section>
 
           <section className="space-y-3">

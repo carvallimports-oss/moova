@@ -88,7 +88,7 @@ export default async function CobrancaPage() {
                     <p className="text-[#B87333] font-bold text-xl mt-1">{plan.price}</p>
                   </div>
                   <div className="space-y-1.5 text-sm text-[#5A5A5A]">
-                    <p>✓ Cora ativa 24/7</p>
+                    <p>✓ Nara ativa 24/7</p>
                     <p>✓ Diagnóstico 14 dias</p>
                     <p>✓ Pacto Moova 90</p>
                     <p>✓ {plan.provider}</p>

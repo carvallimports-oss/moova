@@ -1,6 +1,6 @@
 import { inngest } from "@/lib/inngest/client"
 import { createAdminClient } from "@/lib/supabase/admin"
-import { generateCoraResponse, buildCoraSystemPrompt } from "@/lib/ai/cora"
+import { generateNaraResponse, buildNaraSystemPrompt } from "@/lib/ai/nara"
 import { createWhatsAppProvider } from "@/lib/whatsapp/provider"
 
 // Sequência M05B: 3 mensagens com espaçamento 2-5 dias para leads frios
@@ -36,7 +36,7 @@ export const reactivateColdLeads = inngest.createFunction(
         .from("leads")
         .select(`
           id, name, phone, user_id, reactivation_step, temperature,
-          users!leads_user_id_fkey(broker_name, name, phone, cora_formality, cora_custom_prompt)
+          users!leads_user_id_fkey(broker_name, name, phone, nara_formality, nara_custom_prompt)
         `)
         .gt("reactivation_step", 0)
         .lte("reactivation_next_at", now.toISOString())
@@ -45,7 +45,7 @@ export const reactivateColdLeads = inngest.createFunction(
       return (data ?? []) as unknown as Array<{
         id: string; name: string; phone: string; user_id: string
         reactivation_step: number; temperature: string | null
-        users: { broker_name: string | null; name: string; phone: string; cora_formality: string | null; cora_custom_prompt: string | null } | null
+        users: { broker_name: string | null; name: string; phone: string; nara_formality: string | null; nara_custom_prompt: string | null } | null
       }>
     })
 
@@ -56,7 +56,7 @@ export const reactivateColdLeads = inngest.createFunction(
         .select(`
           id, name, phone, user_id,
           conversations(id, messages(created_at, sender)),
-          users!leads_user_id_fkey(broker_name, name, phone, cora_formality, cora_custom_prompt)
+          users!leads_user_id_fkey(broker_name, name, phone, nara_formality, nara_custom_prompt)
         `)
         .in("temperature", ["FRIO", "INERTE"])
         .not("status", "in", "(fechou,perdido)")
@@ -67,7 +67,7 @@ export const reactivateColdLeads = inngest.createFunction(
       return ((data ?? []) as unknown as Array<{
         id: string; name: string; phone: string; user_id: string
         conversations: Array<{ id: string; messages: Array<{ created_at: string; sender: string }> }>
-        users: { broker_name: string | null; name: string; phone: string; cora_formality: string | null; cora_custom_prompt: string | null } | null
+        users: { broker_name: string | null; name: string; phone: string; nara_formality: string | null; nara_custom_prompt: string | null } | null
       }>).filter((lead) => {
         const allMessages = lead.conversations.flatMap((c) => c.messages ?? [])
         if (!allMessages.length) return true
@@ -100,15 +100,15 @@ export const reactivateColdLeads = inngest.createFunction(
         if (!waAccount?.instance_name) return
 
         const broker = lead.users
-        const systemPrompt = buildCoraSystemPrompt(
+        const systemPrompt = buildNaraSystemPrompt(
           broker?.broker_name ?? broker?.name ?? "o corretor",
           broker?.phone ?? "",
-          (broker?.cora_formality as "formal" | "informal") ?? "informal",
-          broker?.cora_custom_prompt ?? undefined
+          (broker?.nara_formality as "formal" | "informal") ?? "informal",
+          broker?.nara_custom_prompt ?? undefined
         )
 
         const promptFn = STEP_PROMPTS[currentStep] ?? STEP_PROMPTS[2]
-        const message = await generateCoraResponse(systemPrompt, [{
+        const message = await generateNaraResponse(systemPrompt, [{
           role: "user",
           content: promptFn(lead.name),
         }])
@@ -143,7 +143,7 @@ export const reactivateColdLeads = inngest.createFunction(
             user_id: lead.user_id,
             content: message,
             type: "text",
-            sender: "cora",
+            sender: "nara",
             flags: [`reactivation_step_${currentStep}`],
           })
         }
@@ -161,7 +161,7 @@ export const reactivateColdLeads = inngest.createFunction(
         }
         for (const [userId, count] of byUser) {
           const { data: diag } = await supabase
-            .from("diagnostico_cora_14d")
+            .from("diagnostico_nara_14d")
             .select("id, cold_leads_reactivated")
             .eq("user_id", userId)
             .eq("converted_to_subscription", false)
@@ -169,7 +169,7 @@ export const reactivateColdLeads = inngest.createFunction(
             .single()
           if (diag) {
             await supabase
-              .from("diagnostico_cora_14d")
+              .from("diagnostico_nara_14d")
               .update({ cold_leads_reactivated: (diag.cold_leads_reactivated ?? 0) + count })
               .eq("id", diag.id)
           }

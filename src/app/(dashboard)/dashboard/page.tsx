@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { CoraStatusCard } from "@/components/dashboard/cora-status-card"
+import { NaraStatusCard } from "@/components/dashboard/nara-status-card"
 import {
   MessageSquare,
   TrendingUp,
@@ -73,7 +73,7 @@ export default async function DashboardPage() {
     supabase.from("visits").select("*", { count: "exact", head: true })
       .eq("user_id", user!.id).in("status", ["pendente", "confirmada"])
       .gte("scheduled_at", new Date().toISOString()),
-    supabase.from("diagnostico_cora_14d").select("*")
+    supabase.from("diagnostico_nara_14d").select("*")
       .eq("user_id", user!.id).order("created_at", { ascending: false }).limit(1).single(),
     supabase.from("visits")
       .select(`id, scheduled_at, status, address, leads(name)`)
@@ -131,7 +131,7 @@ export default async function DashboardPage() {
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
                   <Zap className="w-4 h-4 text-[#B87333]" />
-                  <span className="text-sm font-medium text-[#2D4A3E]">Diagnóstico Cora 14 Dias</span>
+                  <span className="text-sm font-medium text-[#2D4A3E]">Diagnóstico Nara 14 Dias</span>
                   <Badge className="bg-[#B87333]/10 text-[#B87333] text-[10px] border-0">
                     {diasRestantes} dias restantes
                   </Badge>
@@ -175,7 +175,7 @@ export default async function DashboardPage() {
         />
       </div>
 
-      {/* Próximos compromissos + Status Cora */}
+      {/* Próximos compromissos + Status Nara */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Próximas visitas */}
         <Card className="border-[#E0D8CE]">
@@ -229,8 +229,8 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Status Cora */}
-        <CoraStatusCard />
+        {/* Status Nara */}
+        <NaraStatusCard />
       </div>
 
       {/* Timeline de incidentes */}

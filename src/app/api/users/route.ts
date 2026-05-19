@@ -9,8 +9,8 @@ const updateSchema = z.object({
   phone: z.string().optional(),
   creci: z.string().optional(),
   creci_state: z.string().optional(),
-  cora_formality: z.enum(["formal", "informal"]).optional(),
-  cora_custom_prompt: z.string().nullable().optional(),
+  nara_formality: z.enum(["formal", "informal"]).optional(),
+  nara_custom_prompt: z.string().nullable().optional(),
   human_approval_active: z.boolean().optional(),
 })
 

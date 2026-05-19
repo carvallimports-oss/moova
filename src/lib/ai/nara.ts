@@ -15,9 +15,9 @@ function getAnthropic(): Anthropic {
   return _anthropic
 }
 
-// Piso de identidade da Cora Constitution — não-negociável
-const CORA_IDENTITY_FLOOR = `
-Você é a Cora, assistente de IA de um corretor de imóveis brasileiro.
+// Piso de identidade da Nara Constitution — não-negociável
+const NARA_IDENTITY_FLOOR = `
+Você é a Nara, assistente de IA de um corretor de imóveis brasileiro.
 
 ATRIBUTOS CONSTANTES (nunca mudam):
 - Precisa: informação certa, fonte clara, número exato. Não inventa, não "acha".
@@ -37,13 +37,13 @@ NUNCA:
 - Usar mais de 1 emoji por mensagem
 
 Se perguntada "você é robô?":
-Responda: "Sou a Cora, assistente de IA do [Nome]. Quer falar direto com ele? Chamo na hora."
+Responda: "Sou a Nara, assistente de IA do [Nome]. Quer falar direto com ele? Chamo na hora."
 
 DISCLAIMER na primeira mensagem com cada lead:
-"Oi! Aqui é a Cora, assistente do [Nome do corretor] pelo Moova. Atendo enquanto ele tá com outros clientes. Se quiser falar direto com ele, é só pedir — chamo na hora."
+"Oi! Aqui é a Nara, assistente do [Nome do corretor] pelo Moova. Atendo enquanto ele tá com outros clientes. Se quiser falar direto com ele, é só pedir — chamo na hora."
 `
 
-export function buildCoraSystemPrompt(
+export function buildNaraSystemPrompt(
   brokerName: string,
   brokerPhone: string,
   formality: "formal" | "informal",
@@ -59,10 +59,10 @@ export function buildCoraSystemPrompt(
 
   const hoursGuide =
     workStart != null && workEnd != null
-      ? `HORÁRIO DE ATENDIMENTO: ${workStart}h às ${workEnd}h (horário de Brasília). Fora desse horário, a Cora já enviou mensagem automática de fora do horário — não responda mais até o próximo dia útil.`
+      ? `HORÁRIO DE ATENDIMENTO: ${workStart}h às ${workEnd}h (horário de Brasília). Fora desse horário, a Nara já enviou mensagem automática de fora do horário — não responda mais até o próximo dia útil.`
       : ""
 
-  return `${CORA_IDENTITY_FLOOR}
+  return `${NARA_IDENTITY_FLOOR}
 
 CORRETOR: ${brokerName}
 TELEFONE DO CORRETOR: ${brokerPhone}
@@ -98,7 +98,7 @@ export async function checkAIHealth(): Promise<{
   }
 }
 
-export async function generateCoraResponse(
+export async function generateNaraResponse(
   systemPrompt: string,
   messages: { role: "user" | "assistant"; content: string }[],
   preferFallback = false

@@ -96,7 +96,7 @@ export function ImoveisClient({ initialProperties }: { initialProperties: DbProp
         <div className="text-center py-20 text-[#8A8A8A]">
           <Building2 className="w-12 h-12 mx-auto mb-3 opacity-20" />
           <p className="text-sm font-medium">Nenhum imóvel cadastrado</p>
-          <p className="text-xs mt-1">A Cora usa a carteira de imóveis para qualificar e sugerir ao lead.</p>
+          <p className="text-xs mt-1">A Nara usa a carteira de imóveis para qualificar e sugerir ao lead.</p>
           <Button onClick={openCreate} className="mt-4 bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white text-sm gap-2">
             <Plus className="w-4 h-4" />
             Adicionar primeiro imóvel

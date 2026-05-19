@@ -54,7 +54,7 @@ export async function POST(req: Request) {
 
   // Update diagnostico visits_scheduled counter
   const { data: diag } = await supabase
-    .from("diagnostico_cora_14d")
+    .from("diagnostico_nara_14d")
     .select("id, visits_scheduled")
     .eq("user_id", user.id)
     .eq("converted_to_subscription", false)
@@ -63,7 +63,7 @@ export async function POST(req: Request) {
 
   if (diag) {
     await supabase
-      .from("diagnostico_cora_14d")
+      .from("diagnostico_nara_14d")
       .update({ visits_scheduled: (diag.visits_scheduled ?? 0) + 1 })
       .eq("id", diag.id)
   }

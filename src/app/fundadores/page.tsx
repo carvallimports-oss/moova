@@ -124,9 +124,9 @@ export default function FundadoresPage() {
       {/* Origin Cora */}
       <section className="bg-white border-y border-[#E0D8CE] py-12">
         <div className="max-w-2xl mx-auto px-6 text-center space-y-5">
-          <p className="text-xs text-[#B87333] uppercase tracking-widest font-mono">A origem da Cora</p>
+          <p className="text-xs text-[#B87333] uppercase tracking-widest font-mono">A origem da Nara</p>
           <blockquote className="font-serif text-lg text-[#2D4A3E] leading-relaxed">
-            &ldquo;A Cora foi desenhada num sábado à noite, depois que um corretor parceiro perdeu um fechamento de R$ 1,8 milhão porque o WhatsApp dele tinha 47 mensagens não lidas no domingo de manhã. A regra de design foi simples: a Cora precisa atender o lead como o melhor estagiário que o corretor já teve — preciso, caloroso, direto — e nunca, nunca soar como robô de banco.&rdquo;
+            &ldquo;A Nara foi desenhada num sábado à noite, depois que um corretor parceiro perdeu um fechamento de R$ 1,8 milhão porque o WhatsApp dele tinha 47 mensagens não lidas no domingo de manhã. A regra de design foi simples: a Nara precisa atender o lead como o melhor estagiário que o corretor já teve — preciso, caloroso, direto — e nunca, nunca soar como robô de banco.&rdquo;
           </blockquote>
         </div>
       </section>

@@ -1,11 +1,11 @@
 import { inngest } from "../client"
 import {
   checkAIHealth,
-  buildCoraSystemPrompt,
+  buildNaraSystemPrompt,
   buildOutsideHoursMessage,
-  generateCoraResponse,
+  generateNaraResponse,
   DEGRADED_MODE_MESSAGE,
-} from "@/lib/ai/cora"
+} from "@/lib/ai/nara"
 import { createWhatsAppProvider } from "@/lib/whatsapp/provider"
 import { speechToText } from "@/lib/ai/voice"
 import { createAdminClient } from "@/lib/supabase/admin"
@@ -66,7 +66,7 @@ export const processWhatsAppMessage = inngest.createFunction(
 
       const { data: user } = await supabase
         .from("users")
-        .select("id, broker_name, name, phone, email, cora_formality, cora_custom_prompt, human_approval_active, human_approval_disabled_at, human_approval_categories, created_at, google_calendar_connected, cora_work_start, cora_work_end")
+        .select("id, broker_name, name, phone, email, nara_formality, nara_custom_prompt, human_approval_active, human_approval_disabled_at, human_approval_categories, created_at, google_calendar_connected, nara_work_start, nara_work_end")
         .eq("id", wa.user_id)
         .single()
 
@@ -193,8 +193,8 @@ export const processWhatsAppMessage = inngest.createFunction(
 
     // 6b. Verificar horário de operação (M04E) — envia msg fora do horário e encerra
     const outsideHours = await step.run("check-operating-hours", async () => {
-      const workStart = broker.cora_work_start ?? 8
-      const workEnd = broker.cora_work_end ?? 20
+      const workStart = broker.nara_work_start ?? 8
+      const workEnd = broker.nara_work_end ?? 20
       const hourBR = new Date().toLocaleString("en-US", {
         timeZone: "America/Sao_Paulo", hour: "numeric", hour12: false,
       })
@@ -206,7 +206,7 @@ export const processWhatsAppMessage = inngest.createFunction(
       await step.run("send-outside-hours", async () => {
         const provider = createWhatsAppProvider((broker.provider ?? "evolution") as "evolution" | "bsp")
         const brokerName = broker.broker_name ?? broker.name ?? "o corretor"
-        const workStart = broker.cora_work_start ?? 8
+        const workStart = broker.nara_work_start ?? 8
         await provider.sendMessage({
           to: from,
           text: buildOutsideHoursMessage(brokerName, workStart),
@@ -226,7 +226,7 @@ export const processWhatsAppMessage = inngest.createFunction(
         const provider = createWhatsAppProvider((broker.provider ?? "evolution") as "evolution" | "bsp")
         await provider.sendMessage({
           to: from,
-          text: "Entendido! Removemos seu contato da lista de atendimento da Cora. Caso mude de ideia, é só entrar em contato diretamente com o corretor. Obrigado!",
+          text: "Entendido! Removemos seu contato da lista de atendimento da Nara. Caso mude de ideia, é só entrar em contato diretamente com o corretor. Obrigado!",
         })
 
         await supabase.from("audit_logs").insert({
@@ -300,7 +300,7 @@ export const processWhatsAppMessage = inngest.createFunction(
       }
     })
 
-    // 9. Se broker assumiu a conversa, não gerar resposta da Cora
+    // 9. Se broker assumiu a conversa, não gerar resposta da Nara
     if (conversation.broker_took_over) {
       return { status: "broker_took_over", convId: conversation.id }
     }
@@ -311,7 +311,7 @@ export const processWhatsAppMessage = inngest.createFunction(
         .from("messages")
         .select("id", { count: "exact", head: true })
         .eq("conversation_id", conversation.id)
-        .eq("sender", "cora")
+        .eq("sender", "nara")
       return (count ?? 0) === 0
     })
 
@@ -336,24 +336,24 @@ export const processWhatsAppMessage = inngest.createFunction(
       return getFreeSlots(supabase, broker.id)
     })
 
-    // 12. Gerar resposta da Cora
-    const systemPrompt = buildCoraSystemPrompt(
+    // 12. Gerar resposta da Nara
+    const systemPrompt = buildNaraSystemPrompt(
       brokerName,
       brokerPhone,
-      (broker.cora_formality as "formal" | "informal") ?? "informal",
-      broker.cora_custom_prompt ?? undefined,
+      (broker.nara_formality as "formal" | "informal") ?? "informal",
+      broker.nara_custom_prompt ?? undefined,
       calendarContext,
-      broker.cora_work_start ?? 8,
-      broker.cora_work_end ?? 20
+      broker.nara_work_start ?? 8,
+      broker.nara_work_end ?? 20
     )
 
-    const coraResponse = await step.run("generate-cora-response", async () => {
+    const naraResponse = await step.run("generate-nara-response", async () => {
       const disclaimer = isFirstInteraction
-        ? `Oi! Aqui é a Cora, assistente do ${brokerName} pelo Moova. Atendo enquanto ele tá com outros clientes. Se quiser falar direto com ele, é só pedir — chamo na hora.\n\n`
+        ? `Oi! Aqui é a Nara, assistente do ${brokerName} pelo Moova. Atendo enquanto ele tá com outros clientes. Se quiser falar direto com ele, é só pedir — chamo na hora.\n\n`
         : ""
 
       const useAnthropicFallback = health.openai === "degraded"
-      const response = await generateCoraResponse(
+      const response = await generateNaraResponse(
         systemPrompt,
         [...history, { role: "user", content: messageText }],
         useAnthropicFallback
@@ -377,14 +377,14 @@ export const processWhatsAppMessage = inngest.createFunction(
       }
 
       if (inCalibragem) {
-        const cat = detectApprovalCategory(coraResponse)
+        const cat = detectApprovalCategory(naraResponse)
         if (cat && categories[cat]) return { needed: true, category: cat }
         // Alto valor: lead com budget > 50k
         if (lead.estimated_budget && lead.estimated_budget > 50000 && categories.alto_valor) {
           return { needed: true, category: "alto_valor" }
         }
       } else {
-        const cat = detectApprovalCategory(coraResponse)
+        const cat = detectApprovalCategory(naraResponse)
         if (cat && categories[cat]) return { needed: true, category: cat }
       }
 
@@ -392,16 +392,16 @@ export const processWhatsAppMessage = inngest.createFunction(
     })
 
     // 13. Salvar mensagem da Cora
-    const coraMessage = await step.run("save-cora-message", async () => {
+    const naraMessage = await step.run("save-cora-message", async () => {
       const { data } = await supabase
         .from("messages")
         .insert({
           conversation_id: conversation.id,
           lead_id: lead.id,
           user_id: broker.id,
-          content: coraResponse,
+          content: naraResponse,
           type: "text",
-          sender: "cora",
+          sender: "nara",
           requires_approval: requiresApproval.needed,
           flags: [],
         })
@@ -411,11 +411,11 @@ export const processWhatsAppMessage = inngest.createFunction(
     })
 
     // 14. Se precisa aprovação → enfileirar e encerrar
-    if (requiresApproval.needed && coraMessage?.id) {
+    if (requiresApproval.needed && naraMessage?.id) {
       await step.run("queue-approval", async () => {
         await supabase.from("human_approvals_queue").insert({
           user_id: broker.id,
-          message_id: coraMessage.id,
+          message_id: naraMessage.id,
           category: requiresApproval.category ?? "geral",
         })
       })
@@ -425,17 +425,17 @@ export const processWhatsAppMessage = inngest.createFunction(
     // 15. Enviar resposta pelo WhatsApp
     await step.run("send-response", async () => {
       const provider = createWhatsAppProvider((broker.provider ?? "evolution") as "evolution" | "bsp")
-      await provider.sendMessage({ to: from, text: coraResponse })
+      await provider.sendMessage({ to: from, text: naraResponse })
 
       await supabase.from("messages")
         .update({ sent_at: new Date().toISOString() })
-        .eq("id", coraMessage?.id)
+        .eq("id", naraMessage?.id)
     })
 
     // 16. Atualizar contadores do diagnóstico
     await step.run("update-diagnostico", async () => {
       const { data: diag } = await supabase
-        .from("diagnostico_cora_14d")
+        .from("diagnostico_nara_14d")
         .select("id, leads_attended, started_at")
         .eq("user_id", broker.id)
         .eq("converted_to_subscription", false)
@@ -470,7 +470,7 @@ export const processWhatsAppMessage = inngest.createFunction(
         (sum, l) => sum + ((l.estimated_budget ?? 0) * 0.06), 0
       )
 
-      await supabase.from("diagnostico_cora_14d").update({
+      await supabase.from("diagnostico_nara_14d").update({
         leads_attended: leadsCount ?? diag.leads_attended,
         leads_contacted: leadsCount ?? 0,
         visits_scheduled: visitsCount ?? 0,
@@ -482,9 +482,9 @@ export const processWhatsAppMessage = inngest.createFunction(
     await step.run("audit-log", async () => {
       await supabase.from("audit_logs").insert({
         user_id: broker.id,
-        action: "cora_message_sent",
+        action: "nara_message_sent",
         entity_type: "message",
-        entity_id: coraMessage?.id,
+        entity_id: naraMessage?.id,
         payload: { from, type, requires_approval: requiresApproval.needed },
       })
     })

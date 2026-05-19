@@ -161,7 +161,7 @@ export function ImovelModal({ property, open, onClose, onSaved }: Props) {
           <div className="space-y-1.5">
             <Label>Descrição</Label>
             <Textarea value={form.description} onChange={(e) => set("description", e.target.value)}
-              placeholder="Descreva o imóvel para a Cora usar nas conversas..." rows={3}
+              placeholder="Descreva o imóvel para a Nara usar nas conversas..." rows={3}
               className="border-[#E0D8CE] resize-none" />
           </div>
         </div>

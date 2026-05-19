@@ -88,7 +88,7 @@ export default async function PactoPage() {
         <p className="text-xs text-[#B87333] uppercase tracking-widest font-mono">Pacto Moova 90</p>
         <h1 className="font-serif text-3xl text-[#2D4A3E]">Garantia reversa real</h1>
         <p className="text-sm text-[#8A8A8A]">
-          Se a Cora não entregar e você fez sua parte, devolvemos até 70% do valor investido.
+          Se a Nara não entregar e você fez sua parte, devolvemos até 70% do valor investido.
         </p>
       </div>
 

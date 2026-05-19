@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { checkAIHealth } from "@/lib/ai/cora"
+import { checkAIHealth } from "@/lib/ai/nara"
 
 export const dynamic = "force-dynamic"
 

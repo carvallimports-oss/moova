@@ -177,7 +177,7 @@ export function VisitasClient({
         <div className="text-center py-16 text-[#8A8A8A]">
           <Calendar className="w-10 h-10 mx-auto mb-3 opacity-20" />
           <p className="text-sm">Nenhuma visita agendada ainda.</p>
-          <p className="text-xs mt-1">A Cora agenda visitas automaticamente ao qualificar leads quentes.</p>
+          <p className="text-xs mt-1">A Nara agenda visitas automaticamente ao qualificar leads quentes.</p>
         </div>
       ) : (
         <div className="space-y-8">

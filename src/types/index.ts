@@ -6,13 +6,13 @@ export type LeadTemperature = "QUENTE" | "MORNO" | "FRIO" | "INERTE"
 
 export type PactoScenario = "A" | "B" | "C" | "D"
 
-export type CoraFlag =
-  | "cora_self_correction"
-  | "cora_alert"
+export type NaraFlag =
+  | "nara_self_correction"
+  | "nara_alert"
   | "lead_abusive"
   | "human_approval_required"
 
-export interface CoraTone {
+export interface NaraTone {
   formality: "formal" | "informal"
   customPrompt?: string
 }
@@ -24,7 +24,7 @@ export interface User {
   creci: string
   phone: string
   whatsapp_provider: WhatsAppProvider
-  cora_tone: CoraTone
+  nara_tone: NaraTone
   human_approval_active: boolean
   created_at: string
 }
@@ -53,14 +53,14 @@ export interface Message {
   user_id: string
   content: string
   type: "text" | "audio" | "image"
-  sender: "lead" | "cora" | "corretor"
-  flags: CoraFlag[]
+  sender: "lead" | "nara" | "corretor"
+  flags: NaraFlag[]
   requires_approval: boolean
   approved_at?: string
   created_at: string
 }
 
-export interface DiagnosticoCora14d {
+export interface DiagnosticoNara14d {
   id: string
   user_id: string
   started_at: string

@@ -49,7 +49,7 @@ export default function OnboardingPage() {
   useEffect(() => {
     async function checkCap() {
       const { count } = await supabase
-        .from("diagnostico_cora_14d")
+        .from("diagnostico_nara_14d")
         .select("id", { count: "exact", head: true })
         .eq("converted_to_subscription", false)
         .gt("ends_at", new Date().toISOString())
@@ -155,7 +155,7 @@ export default function OnboardingPage() {
       source: "scraping",
     })
 
-    await supabase.from("diagnostico_cora_14d").insert({
+    await supabase.from("diagnostico_nara_14d").insert({
       user_id: user.id,
       started_at: new Date().toISOString(),
       ends_at: new Date(Date.now() + 14 * 86400000).toISOString(),
@@ -338,7 +338,7 @@ export default function OnboardingPage() {
                 <h2 className="font-serif text-xl text-[#2D4A3E]">Termos e LGPD</h2>
                 <div className="text-sm text-[#5A5A5A] space-y-3 max-h-48 overflow-y-auto bg-[#EAE3D9] rounded-lg p-4">
                   <p className="font-medium text-[#2D4A3E]">Termo de Uso e Privacidade — Moova</p>
-                  <p>Ao usar a Moova, você autoriza que a Cora atenda seus leads via WhatsApp em seu nome, sempre com disclaimer automático ao lead informando que é uma IA.</p>
+                  <p>Ao usar a Moova, você autoriza que a Nara atenda seus leads via WhatsApp em seu nome, sempre com disclaimer automático ao lead informando que é uma IA.</p>
                   <p>Seus leads têm direito a: pedir atendimento humano (escalação imediata), opt-out instantâneo, exclusão de dados em 15 dias, portabilidade em 15 dias.</p>
                   <p>Todos os dados são armazenados com criptografia e logs auditáveis por 5 anos, conforme LGPD.</p>
                   <p>Leia o contrato completo em moova.com.br/termos.</p>
@@ -372,14 +372,14 @@ export default function OnboardingPage() {
               <>
                 <h2 className="font-serif text-xl text-[#2D4A3E]">Conectar WhatsApp</h2>
                 <p className="text-sm text-[#8A8A8A]">
-                  A Cora vai atender seus leads pelo seu número do WhatsApp.
+                  A Nara vai atender seus leads pelo seu número do WhatsApp.
                 </p>
 
                 {waConnected ? (
                   <div className="bg-green-50 border border-green-200 rounded-xl p-6 text-center space-y-2">
                     <CheckCircle2 className="w-10 h-10 text-green-600 mx-auto" />
                     <p className="font-medium text-green-700">WhatsApp conectado!</p>
-                    <p className="text-xs text-green-600">A Cora já pode começar a atender.</p>
+                    <p className="text-xs text-green-600">A Nara já pode começar a atender.</p>
                   </div>
                 ) : qrCode ? (
                   <div className="bg-white border border-[#E0D8CE] rounded-xl p-4 text-center space-y-2">

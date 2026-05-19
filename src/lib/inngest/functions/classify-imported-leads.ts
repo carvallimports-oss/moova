@@ -61,7 +61,7 @@ export const classifyImportedLeads = inngest.createFunction(
     // Atualizar comissão estimada no diagnóstico
     await step.run("update-diagnostico-commission", async () => {
       const { data: diag } = await supabase
-        .from("diagnostico_cora_14d")
+        .from("diagnostico_nara_14d")
         .select("id")
         .eq("user_id", userId)
         .eq("converted_to_subscription", false)
@@ -81,7 +81,7 @@ export const classifyImportedLeads = inngest.createFunction(
         (sum, l) => sum + ((l.estimated_budget ?? 0) * 0.06), 0
       )
 
-      await supabase.from("diagnostico_cora_14d")
+      await supabase.from("diagnostico_nara_14d")
         .update({ estimated_commission: estimatedCommission })
         .eq("id", diag.id)
     })

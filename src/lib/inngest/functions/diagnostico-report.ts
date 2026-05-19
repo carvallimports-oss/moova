@@ -17,7 +17,7 @@ export const generateDiagnosticoReport = inngest.createFunction(
     const stats = await step.run("compute-stats", async () => {
       const [{ data: user }, { data: diag }] = await Promise.all([
         supabase.from("users").select("broker_name, email").eq("id", userId).single(),
-        supabase.from("diagnostico_cora_14d").select("started_at").eq("id", diagnosticoId).single(),
+        supabase.from("diagnostico_nara_14d").select("started_at").eq("id", diagnosticoId).single(),
       ])
 
       const startedAt = diag?.started_at ?? new Date(Date.now() - 14 * 86400000).toISOString()
@@ -64,7 +64,7 @@ export const generateDiagnosticoReport = inngest.createFunction(
     // Persist final stats on diagnostico record
     await step.run("persist-stats", async () => {
       await supabase
-        .from("diagnostico_cora_14d")
+        .from("diagnostico_nara_14d")
         .update({
           completed_at: new Date().toISOString(),
           leads_contacted: stats.leadsContacted,

@@ -12,7 +12,7 @@ export default async function PublicRelatorioPage({ params }: { params: Promise<
   const supabase = createAdminClient()
 
   const { data: diag } = await supabase
-    .from("diagnostico_cora_14d")
+    .from("diagnostico_nara_14d")
     .select("*, users(broker_name)")
     .eq("share_token", token)
     .single()
@@ -32,7 +32,7 @@ export default async function PublicRelatorioPage({ params }: { params: Promise<
         {/* Header */}
         <div className="text-center space-y-1">
           <div className="w-8 h-1 bg-[#B87333] rounded-full mx-auto" />
-          <p className="text-xs text-[#B87333] uppercase tracking-widest font-mono">Diagnóstico Cora · 14 dias</p>
+          <p className="text-xs text-[#B87333] uppercase tracking-widest font-mono">Diagnóstico Nara · 14 dias</p>
           <h1 className="font-serif text-2xl text-[#2D4A3E]">{brokerName}</h1>
           <p className="text-[#8A8A8A] text-xs">
             {started.toLocaleDateString("pt-BR")} – {ends.toLocaleDateString("pt-BR")}

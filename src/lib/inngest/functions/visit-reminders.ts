@@ -1,7 +1,7 @@
 import { inngest } from "../client"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { createWhatsAppProvider } from "@/lib/whatsapp/provider"
-import { buildCoraSystemPrompt, generateCoraResponse } from "@/lib/ai/cora"
+import { buildNaraSystemPrompt, generateNaraResponse } from "@/lib/ai/nara"
 
 // Cron a cada 30min: lembrete 24h antes + follow-up 2h depois
 export const visitReminders = inngest.createFunction(
@@ -22,7 +22,7 @@ export const visitReminders = inngest.createFunction(
         .select(`
           id, scheduled_at, user_id, address,
           leads(id, name, phone),
-          users!visits_user_id_fkey(broker_name, name, phone, cora_formality, cora_custom_prompt)
+          users!visits_user_id_fkey(broker_name, name, phone, nara_formality, nara_custom_prompt)
         `)
         .gte("scheduled_at", in24h.toISOString())
         .lte("scheduled_at", in25h.toISOString())
@@ -64,7 +64,7 @@ export const visitReminders = inngest.createFunction(
           user_id: visit.user_id,
           content: msg,
           type: "text",
-          sender: "cora",
+          sender: "nara",
           flags: [],
         })
       })
@@ -80,7 +80,7 @@ export const visitReminders = inngest.createFunction(
         .select(`
           id, scheduled_at, user_id,
           leads(id, name, phone),
-          users!visits_user_id_fkey(broker_name, name, phone, cora_formality, cora_custom_prompt)
+          users!visits_user_id_fkey(broker_name, name, phone, nara_formality, nara_custom_prompt)
         `)
         .gte("scheduled_at", twoAndHalfHoursAgo.toISOString())
         .lte("scheduled_at", twoHoursAgo.toISOString())
@@ -97,12 +97,12 @@ export const visitReminders = inngest.createFunction(
       await step.run(`follow-up-${visit.id}`, async () => {
         const broker = visit.users
         const brokerName = broker.broker_name ?? broker.name
-        const systemPrompt = buildCoraSystemPrompt(
+        const systemPrompt = buildNaraSystemPrompt(
           brokerName, broker.phone,
-          (broker.cora_formality as "formal" | "informal") ?? "informal",
-          broker.cora_custom_prompt ?? undefined
+          (broker.nara_formality as "formal" | "informal") ?? "informal",
+          broker.nara_custom_prompt ?? undefined
         )
-        const followUpMsg = await generateCoraResponse(systemPrompt, [{
+        const followUpMsg = await generateNaraResponse(systemPrompt, [{
           role: "user",
           content: `[SISTEMA] O lead ${visit.leads!.name} acabou de fazer uma visita ao imóvel há 2 horas. Envie uma mensagem calorosa perguntando como foi, se gostou e se tem dúvidas. Seja direto e não seja invasivo.`,
         }])
@@ -124,7 +124,7 @@ export const visitReminders = inngest.createFunction(
           user_id: visit.user_id,
           content: followUpMsg,
           type: "text",
-          sender: "cora",
+          sender: "nara",
           flags: [],
         })
       })
@@ -181,7 +181,7 @@ export const visitReminders = inngest.createFunction(
           user_id: visit.user_id,
           content: msg,
           type: "text",
-          sender: "cora",
+          sender: "nara",
           flags: [],
         })
       })

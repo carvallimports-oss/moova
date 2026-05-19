@@ -24,7 +24,7 @@ export default async function RelatorioPage() {
 
   const [{ data: diag }, { data: profile }, { data: leadsByStatus }] = await Promise.all([
     supabase
-      .from("diagnostico_cora_14d")
+      .from("diagnostico_nara_14d")
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
@@ -66,7 +66,7 @@ export default async function RelatorioPage() {
     <div className="p-6 lg:p-8 pt-20 lg:pt-8 max-w-2xl mx-auto space-y-8 pb-12">
       {/* Header */}
       <div className="text-center space-y-2 pt-4">
-        <p className="text-xs text-[#B87333] uppercase tracking-widest font-mono">Diagnóstico Cora · 14 dias</p>
+        <p className="text-xs text-[#B87333] uppercase tracking-widest font-mono">Diagnóstico Nara · 14 dias</p>
         <h1 className="font-serif text-3xl text-[#2D4A3E]">{brokerName}, aqui está o resultado</h1>
         <p className="text-[#8A8A8A] text-sm">
           {isCompleted
@@ -182,7 +182,7 @@ export default async function RelatorioPage() {
                   {day === 14 && "Veredito"}
                 </p>
                 <p className="text-xs text-[#8A8A8A] mt-0.5">
-                  {day === 3 && "Cora já entrou em contato com todos os leads e identificou os mais quentes."}
+                  {day === 3 && "Nara já entrou em contato com todos os leads e identificou os mais quentes."}
                   {day === 7 && "Leads qualificados estão sendo trabalhados. Visitas começando a acontecer."}
                   {day === 11 && "Negociações em andamento. Momento de você assumir os mais avançados."}
                   {day === 14 && "Diagnóstico completo. Hora de decidir: continuar com o Moova ou acionar o Pacto."}

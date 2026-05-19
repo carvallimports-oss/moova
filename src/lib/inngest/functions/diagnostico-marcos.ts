@@ -20,7 +20,7 @@ export const sendDiagnosticoMarco = inngest.createFunction(
 
     const context = await step.run("fetch-context", async () => {
       const { data: diag } = await supabase
-        .from("diagnostico_cora_14d")
+        .from("diagnostico_nara_14d")
         .select("leads_attended, cold_leads_reactivated, visits_scheduled, estimated_commission")
         .eq("id", diagnosticoId)
         .single()
@@ -41,16 +41,16 @@ export const sendDiagnosticoMarco = inngest.createFunction(
     const commission = Number(diag.estimated_commission)
 
     const messages: Record<number, string> = {
-      3: `Cora está rodando há 3 dias. Já atendeu ${diag.leads_attended} leads. Como tá sendo a experiência?`,
-      7: `Uma semana com a Cora! ${diag.visits_scheduled} visitas agendadas, ${diag.cold_leads_reactivated} frios reativados. Você está na metade do Diagnóstico.`,
+      3: `Nara está rodando há 3 dias. Já atendeu ${diag.leads_attended} leads. Como tá sendo a experiência?`,
+      7: `Uma semana com a Nara! ${diag.visits_scheduled} visitas agendadas, ${diag.cold_leads_reactivated} frios reativados. Você está na metade do Diagnóstico.`,
       11: `Faltam 3 dias. Projeção: R$ ${commission.toLocaleString("pt-BR")} em comissão potencial. Prepare-se para o relatório final.`,
-      14: `Diagnóstico concluído! Veja o relatório completo no dashboard. A Cora está pronta para continuar — conheça o Pacto Moova 90.`,
+      14: `Diagnóstico concluído! Veja o relatório completo no dashboard. A Nara está pronta para continuar — conheça o Pacto Moova 90.`,
     }
 
     const messageContent = messages[dayNumber]
 
     await step.run("save-marco", () =>
-      supabase.from("diagnostico_cora_marcos").upsert({
+      supabase.from("diagnostico_nara_marcos").upsert({
         diagnostico_id: diagnosticoId,
         user_id: userId,
         day_number: dayNumber,
@@ -99,7 +99,7 @@ export const checkDiagnosticoMarcos = inngest.createFunction(
 
     const diagnosticos = await step.run("fetch-active", async () => {
       const { data } = await supabase
-        .from("diagnostico_cora_14d")
+        .from("diagnostico_nara_14d")
         .select("id, user_id, started_at")
         .eq("converted_to_subscription", false)
         .gt("ends_at", new Date().toISOString())
@@ -114,7 +114,7 @@ export const checkDiagnosticoMarcos = inngest.createFunction(
       )
 
       const { data: existingMarcos } = await supabase
-        .from("diagnostico_cora_marcos")
+        .from("diagnostico_nara_marcos")
         .select("day_number")
         .eq("diagnostico_id", diag.id)
 

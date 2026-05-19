@@ -13,7 +13,7 @@ export default async function StoryPage({ params }: { params: Promise<{ token: s
   const supabase = createAdminClient()
 
   const { data: diag } = await supabase
-    .from("diagnostico_cora_14d")
+    .from("diagnostico_nara_14d")
     .select("*, users(broker_name)")
     .eq("share_token", token)
     .single()
@@ -51,7 +51,7 @@ export default async function StoryPage({ params }: { params: Promise<{ token: s
 
         {/* Broker + period */}
         <div className="px-8 pb-8">
-          <p className="text-[#B87333] text-xs uppercase tracking-widest font-mono">Diagnóstico Cora · 14 dias</p>
+          <p className="text-[#B87333] text-xs uppercase tracking-widest font-mono">Diagnóstico Nara · 14 dias</p>
           <h1 className="font-serif text-white text-2xl mt-1 leading-tight">{brokerName}</h1>
           <p className="text-[#6AA88A] text-xs mt-1">
             {started.toLocaleDateString("pt-BR")} – {ends.toLocaleDateString("pt-BR")}

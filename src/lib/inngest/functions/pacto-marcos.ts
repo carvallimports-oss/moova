@@ -45,9 +45,9 @@ export const sendPactoMarco = inngest.createFunction(
     const diasRestantes = Math.ceil((new Date(pacto.ends_at).getTime() - Date.now()) / 86400000)
 
     const messages: Record<number, string> = {
-      30: `Primeiro mês do Pacto Moova 90! A Cora ainda está em calibragem. Aprovação humana obrigatória é normal nessa fase.`,
+      30: `Primeiro mês do Pacto Moova 90! A Nara ainda está em calibragem. Aprovação humana obrigatória é normal nessa fase.`,
       45: `Metade do Pacto! Comissão acumulada: R$ ${comissao.toLocaleString("pt-BR")}. Faltam R$ ${falta.toLocaleString("pt-BR")} para a meta. Continue acompanhando no dashboard.`,
-      75: `Reta final! Faltam ${diasRestantes} dias e R$ ${falta.toLocaleString("pt-BR")} para a meta de R$ 50k. A Cora está acelerando.`,
+      75: `Reta final! Faltam ${diasRestantes} dias e R$ ${falta.toLocaleString("pt-BR")} para a meta de R$ 50k. A Nara está acelerando.`,
       90: `Pacto Moova 90 concluído! Resultado: R$ ${comissao.toLocaleString("pt-BR")}. O veredito será enviado por email em até 24h úteis pela equipe Moova.`,
     }
 

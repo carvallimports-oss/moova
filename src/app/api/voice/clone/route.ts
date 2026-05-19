@@ -24,11 +24,11 @@ export async function POST(req: Request) {
     .single()
 
   const brokerName = profile?.broker_name ?? profile?.name ?? "Corretor"
-  const voiceName = body.name ?? `Cora — ${brokerName}`
+  const voiceName = body.name ?? `Nara — ${brokerName}`
 
   const formData = new FormData()
   formData.append("name", voiceName)
-  formData.append("description", `Voz clonada da Cora para o corretor ${brokerName} — Moova`)
+  formData.append("description", `Voz clonada da Nara para o corretor ${brokerName} — Moova`)
 
   for (let i = 0; i < Math.min(body.audios.length, 5); i++) {
     const audio = body.audios[i]

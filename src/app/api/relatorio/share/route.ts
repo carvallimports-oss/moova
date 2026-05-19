@@ -9,7 +9,7 @@ export async function POST() {
 
   // Find the most recent diagnostico for this user
   const { data: diag } = await supabase
-    .from("diagnostico_cora_14d")
+    .from("diagnostico_nara_14d")
     .select("id, share_token")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
@@ -22,7 +22,7 @@ export async function POST() {
   const token = diag.share_token ?? randomBytes(16).toString("hex")
 
   const { error } = await supabase
-    .from("diagnostico_cora_14d")
+    .from("diagnostico_nara_14d")
     .update({ share_token: token, report_shared: true })
     .eq("id", diag.id)
 

@@ -46,7 +46,7 @@ export default async function ConversasPage() {
       {(pendingApprovals ?? 0) > 0 && (
         <Card className="border-[#B87333]/40 bg-[#B87333]/5">
           <CardContent className="p-4 text-sm text-[#B87333] font-medium">
-            A Cora está aguardando sua aprovação em {pendingApprovals} mensagem(ns) crítica(s).
+            A Nara está aguardando sua aprovação em {pendingApprovals} mensagem(ns) crítica(s).
             Verifique a fila abaixo para não atrasar o atendimento.
           </CardContent>
         </Card>

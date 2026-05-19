@@ -1,5 +1,5 @@
 import { inngest } from "../client"
-import { checkAIHealth } from "@/lib/ai/cora"
+import { checkAIHealth } from "@/lib/ai/nara"
 import { createAdminClient } from "@/lib/supabase/admin"
 
 export const aiHealthCheck = inngest.createFunction(

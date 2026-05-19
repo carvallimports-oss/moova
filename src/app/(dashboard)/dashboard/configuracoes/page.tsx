@@ -14,7 +14,7 @@ export default async function ConfiguracoesPage({
 
   const { data: profile } = await supabase
     .from("users")
-    .select("name, creci, phone, whatsapp_provider, cora_formality, cora_custom_prompt, human_approval_active, human_approval_categories, google_calendar_connected, eleven_labs_voice_id, cora_work_start, cora_work_end")
+    .select("name, creci, phone, whatsapp_provider, nara_formality, nara_custom_prompt, human_approval_active, human_approval_categories, google_calendar_connected, eleven_labs_voice_id, nara_work_start, nara_work_end")
     .eq("id", user!.id)
     .single()
 
@@ -28,7 +28,7 @@ export default async function ConfiguracoesPage({
     <div className="p-6 lg:p-8 pt-20 lg:pt-8 max-w-2xl mx-auto space-y-6">
       <div>
         <h1 className="font-serif text-2xl text-[#2D4A3E]">Configurações</h1>
-        <p className="text-sm text-[#8A8A8A] mt-1">Personalize a Cora e sua conta</p>
+        <p className="text-sm text-[#8A8A8A] mt-1">Personalize a Nara e sua conta</p>
       </div>
       <ConfiguracoesForm
         profile={profile}
