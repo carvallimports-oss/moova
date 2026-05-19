@@ -1,7 +1,40 @@
 import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { NextResponse } from "next/server"
 
 export const dynamic = "force-dynamic"
+
+async function pollForQr(
+  evolutionUrl: string,
+  evolutionKey: string,
+  instanceName: string,
+  maxAttempts = 15,
+  intervalMs = 2000
+): Promise<string | null> {
+  for (let i = 0; i < maxAttempts; i++) {
+    await new Promise((r) => setTimeout(r, intervalMs))
+    try {
+      const res = await fetch(`${evolutionUrl}/instance/connect/${instanceName}/`, {
+        headers: { apikey: evolutionKey },
+      })
+      if (res.ok) {
+        const data = await res.json()
+        const qr = data.base64 ?? data.qrcode?.base64 ?? null
+        if (qr) return qr
+      }
+    } catch {}
+
+    // Also check if QR was stored via webhook
+    const supabase = createAdminClient()
+    const { data: row } = await supabase
+      .from("whatsapp_accounts")
+      .select("qr_code")
+      .eq("instance_name", instanceName)
+      .maybeSingle()
+    if (row?.qr_code) return row.qr_code
+  }
+  return null
+}
 
 export async function POST() {
   const supabase = await createClient()
@@ -15,39 +48,53 @@ export async function POST() {
   }
 
   const instanceName = `moova_${user.id.replace(/-/g, "").slice(0, 16)}`
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL
 
-  // Create or reset instance on Evolution API
-  const createRes = await fetch(`${evolutionUrl}/instance/create`, {
+  // Clear any stale QR code from previous attempts
+  const adminSupabase = createAdminClient()
+  await adminSupabase
+    .from("whatsapp_accounts")
+    .update({ qr_code: null })
+    .eq("user_id", user.id)
+
+  const createRes = await fetch(`${evolutionUrl}/instance/create/`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "apikey": evolutionKey },
+    headers: { "Content-Type": "application/json", apikey: evolutionKey },
     body: JSON.stringify({
       instanceName,
+      integration: "WHATSAPP-BAILEYS",
       qrcode: true,
-      webhook: `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/whatsapp`,
+      webhook: appUrl ? `${appUrl}/api/webhooks/whatsapp` : undefined,
       webhookByEvents: false,
-      events: ["MESSAGES_UPSERT", "CONNECTION_UPDATE"],
+      events: ["MESSAGES_UPSERT", "CONNECTION_UPDATE", "QRCODE_UPDATED"],
     }),
   })
 
-  if (!createRes.ok) {
-    // Instance may already exist — try fetching QR directly
-    const qrRes = await fetch(`${evolutionUrl}/instance/connect/${instanceName}`, {
-      headers: { "apikey": evolutionKey },
+  if (createRes.ok) {
+    // New instance — persist in DB
+    await adminSupabase
+      .from("whatsapp_accounts")
+      .upsert(
+        { user_id: user.id, instance_name: instanceName, status: "connecting", qr_code: null },
+        { onConflict: "user_id" }
+      )
+  } else {
+    // Instance already exists — restart to regenerate QR
+    await fetch(`${evolutionUrl}/instance/restart/${instanceName}/`, {
+      method: "POST",
+      headers: { apikey: evolutionKey },
     })
-    if (!qrRes.ok) {
-      return NextResponse.json({ error: "Failed to create WhatsApp instance" }, { status: 502 })
-    }
-    const qrData = await qrRes.json()
-    return NextResponse.json({ qr: qrData.base64 ?? qrData.qrcode?.base64 ?? null, instanceName })
   }
 
-  const createData = await createRes.json()
-  const qrBase64 = createData.qrcode?.base64 ?? createData.base64 ?? null
+  // Poll until QR is ready (up to ~30 seconds)
+  const qr = await pollForQr(evolutionUrl, evolutionKey, instanceName)
 
-  // Persist instance name for this user
-  await supabase
-    .from("whatsapp_accounts")
-    .upsert({ user_id: user.id, instance_name: instanceName, status: "connecting" }, { onConflict: "user_id" })
+  if (!qr) {
+    return NextResponse.json({
+      error: "QR code não disponível. Verifique se a Evolution API está funcionando corretamente e tente novamente.",
+      instanceName,
+    }, { status: 502 })
+  }
 
-  return NextResponse.json({ qr: qrBase64, instanceName })
+  return NextResponse.json({ qr, instanceName })
 }

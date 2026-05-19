@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { createClient } from "@/lib/supabase/client"
-import { Wifi, WifiOff, RefreshCw, Shield, Loader2, Mic, MicOff, Calendar, CheckCircle2, Clock, Sparkles } from "lucide-react"
+import { Wifi, WifiOff, RefreshCw, Shield, Loader2, Mic, MicOff, Calendar, CheckCircle2, Clock, Sparkles, Share2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
@@ -58,11 +58,17 @@ export function ConfiguracoesForm({
   waAccount,
   calendarConnectedParam,
   calendarErrorParam,
+  metaConnectedParam,
+  metaErrorParam,
+  initialMetaPageName,
 }: {
   profile: Profile
   waAccount: WAAccount
   calendarConnectedParam?: boolean
   calendarErrorParam?: boolean
+  metaConnectedParam?: boolean
+  metaErrorParam?: string | null
+  initialMetaPageName?: string | null
 }) {
   const supabase = createClient()
   const [name, setName] = useState(profile?.name ?? "")
@@ -105,10 +111,23 @@ export function ConfiguracoesForm({
   )
   const [calendarError] = useState(calendarErrorParam ?? false)
 
+  // Meta / Instagram state
+  const [metaConnected, setMetaConnected] = useState(
+    !!(profile as { meta_page_name?: string | null } | null)?.meta_page_name || (metaConnectedParam ?? false)
+  )
+  const [metaPageName, setMetaPageName] = useState<string | null>(
+    initialMetaPageName ?? (profile as { meta_page_name?: string | null } | null)?.meta_page_name ?? null
+  )
+  const [metaError] = useState(metaErrorParam ?? null)
+
   useEffect(() => {
     if (calendarConnectedParam) toast.success("Google Agenda conectada!")
     if (calendarErrorParam) toast.error("Erro ao conectar Google Agenda. Tente novamente.")
   }, [calendarConnectedParam, calendarErrorParam])
+
+  useEffect(() => {
+    if (metaConnectedParam) toast.success(`Instagram/Facebook conectado${metaPageName ? `: ${metaPageName}` : ""}!`)
+  }, [metaConnectedParam, metaPageName])
 
   useEffect(() => {
     return () => {
@@ -215,8 +234,11 @@ export function ConfiguracoesForm({
     setQrCode(null)
     try {
       const res = await fetch("/api/whatsapp/connect", { method: "POST" })
-      if (!res.ok) throw new Error()
       const data = await res.json()
+      if (!res.ok) {
+        toast.error(data.error ?? "Erro ao conectar WhatsApp")
+        return
+      }
       const qr = data.qr as string | null
       if (qr) {
         const src = qr.startsWith("data:") ? qr : `data:image/png;base64,${qr}`
@@ -772,6 +794,70 @@ export function ConfiguracoesForm({
             Feed XML para portais (ZAP, VivaReal, Imovelweb) disponível em{" "}
             <code className="font-mono text-[#2D4A3E]">/api/portal/xml</code>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Instagram / Facebook */}
+      <Card className="border-[#E0D8CE]">
+        <CardHeader className="pb-3">
+          <CardTitle className="font-serif text-lg text-[#2D4A3E] flex items-center gap-2">
+            <Share2 className="w-4 h-4" />
+            Instagram &amp; Facebook
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {metaConnected ? (
+            <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-green-700 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4" />
+                  Conta conectada{metaPageName ? `: ${metaPageName}` : ""}
+                </p>
+                <p className="text-xs text-green-600 mt-0.5">Publique posts aprovados diretamente do Moova</p>
+              </div>
+              <button
+                onClick={async () => {
+                  await fetch("/api/social/meta/disconnect", { method: "POST" })
+                  setMetaConnected(false)
+                  setMetaPageName(null)
+                  toast.success("Conta Meta desconectada.")
+                }}
+                className="text-xs text-red-500 hover:underline shrink-0 ml-4"
+              >
+                Desconectar
+              </button>
+            </div>
+          ) : (
+            <>
+              <p className="text-sm text-[#5A5A5A]">
+                Conecte sua Página do Facebook (e Instagram Business vinculado) para publicar posts aprovados diretamente do Moova.
+              </p>
+              <a
+                href="/api/social/meta/auth"
+                className="flex items-center justify-center gap-2 w-full bg-[#1877F2] hover:bg-[#166FE5] text-white text-sm py-2.5 px-4 rounded-md transition-colors"
+              >
+                <Share2 className="w-4 h-4" />
+                Conectar Instagram / Facebook
+              </a>
+              {metaError && (
+                <p className="text-xs text-red-600 bg-red-50 rounded-lg p-2 text-center">
+                  {metaError === "denied"
+                    ? "Autorização negada. Aceite as permissões para continuar."
+                    : metaError === "config"
+                    ? "META_APP_ID/META_APP_SECRET não configurados. Adicione no Vercel."
+                    : "Erro ao conectar. Tente novamente."}
+                </p>
+              )}
+              <div className="bg-[#EAE3D9] rounded-lg p-3 space-y-1.5">
+                <p className="text-xs font-medium text-[#2D4A3E]">Pré-requisitos:</p>
+                <ul className="text-xs text-[#5A5A5A] space-y-1 list-disc list-inside">
+                  <li>Página do Facebook ativa</li>
+                  <li>Conta Instagram Business conectada à página</li>
+                  <li>App Meta aprovado com permissões <code className="font-mono">pages_manage_posts</code> + <code className="font-mono">instagram_content_publish</code></li>
+                </ul>
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
 

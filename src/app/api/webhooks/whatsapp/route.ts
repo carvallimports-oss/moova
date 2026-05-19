@@ -20,6 +20,11 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json()
 
+  if (body.event === "QRCODE_UPDATED") {
+    await handleQrCodeUpdated(body)
+    return NextResponse.json({ ok: true })
+  }
+
   // Handle Evolution API CONNECTION_UPDATE events
   if (body.event === "CONNECTION_UPDATE") {
     await handleConnectionUpdate(body)
@@ -52,6 +57,21 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ ok: true })
 }
 
+async function handleQrCodeUpdated(body: Record<string, unknown>) {
+  try {
+    const instance = body.instance as string
+    const data = body.data as Record<string, unknown>
+    const qr = (data?.qrcode as Record<string, unknown>)?.base64 as string | undefined
+    if (!instance || !qr) return
+
+    const supabase = createAdminClient()
+    await supabase
+      .from("whatsapp_accounts")
+      .update({ qr_code: qr, status: "connecting" })
+      .eq("instance_name", instance)
+  } catch {}
+}
+
 async function handleConnectionUpdate(body: Record<string, unknown>) {
   try {
     const instance = body.instance as string
@@ -68,7 +88,7 @@ async function handleConnectionUpdate(body: Record<string, unknown>) {
 
     await supabase
       .from("whatsapp_accounts")
-      .update({ status })
+      .update({ status, ...(state === "open" ? { qr_code: null } : {}) })
       .eq("instance_name", instance)
   } catch {
     // Non-critical — log and continue

@@ -188,8 +188,11 @@ export default function OnboardingPage() {
     setQrCode(null)
     try {
       const res = await fetch("/api/whatsapp/connect", { method: "POST" })
-      if (!res.ok) throw new Error()
       const data = await res.json()
+      if (!res.ok) {
+        toast.error(data.error ?? "Erro ao conectar WhatsApp")
+        return
+      }
       const qr = data.qr as string | null
       if (qr) {
         const src = qr.startsWith("data:") ? qr : `data:image/png;base64,${qr}`

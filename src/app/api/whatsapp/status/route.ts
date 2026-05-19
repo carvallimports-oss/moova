@@ -26,7 +26,7 @@ export async function GET() {
     return NextResponse.json({ connected: false, status: "api_not_configured", instanceName: account.instance_name })
   }
 
-  const res = await fetch(`${evolutionUrl}/instance/connectionState/${account.instance_name}`, {
+  const res = await fetch(`${evolutionUrl}/instance/connectionState/${account.instance_name}/`, {
     headers: { "apikey": evolutionKey },
   })
 
