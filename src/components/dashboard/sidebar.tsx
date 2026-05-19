@@ -18,6 +18,7 @@ import {
   BarChart3,
   Users,
   ShieldCheck,
+  HelpCircle,
 } from "lucide-react"
 import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
@@ -38,6 +39,7 @@ const navItems = [
   { href: "/dashboard/importar", label: "Importar", icon: Upload },
   { href: "/dashboard/cobranca", label: "Cobrança", icon: CreditCard },
   { href: "/dashboard/configuracoes", label: "Configurações", icon: Settings },
+  { href: "/dashboard/ajuda", label: "Ajuda", icon: HelpCircle },
 ]
 
 function NavContent({

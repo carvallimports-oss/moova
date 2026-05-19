@@ -1,11 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Building2, Plus, BedDouble, Maximize2 } from "lucide-react"
+import { Building2, Plus, BedDouble, Maximize2, Upload, Loader2 } from "lucide-react"
 import { ImovelModal } from "@/components/dashboard/imovel-modal"
+import { toast } from "sonner"
 
 type DbProperty = {
   id: string
@@ -51,10 +52,41 @@ function coerce(p: DbProperty): Property {
   }
 }
 
+// Header aliases (PT → EN) for CSV parsing
+const CSV_ALIASES: Record<string, string> = {
+  titulo: "title", "título": "title", name: "title", nome: "title",
+  tipo: "type",
+  preco: "price", "preço": "price", valor: "price",
+  endereco: "address", "endereço": "address",
+  cidade: "city",
+  estado: "state", uf: "state",
+  quartos: "bedrooms", dormitorios: "bedrooms", "dormitórios": "bedrooms",
+  area: "area_sqm", "área": "area_sqm", "area_m2": "area_sqm", "area_sqm": "area_sqm",
+  descricao: "description", "descrição": "description",
+}
+
+function parseCSV(text: string): Record<string, string>[] {
+  const lines = text.trim().split(/\r?\n/)
+  if (lines.length < 2) return []
+  const sep = lines[0].includes(";") ? ";" : ","
+  const headers = lines[0].split(sep).map((h) => h.trim().toLowerCase().replace(/[^a-záéíóúâêôãõç_0-9]/g, ""))
+  return lines.slice(1).map((line) => {
+    const cols = line.split(sep)
+    const row: Record<string, string> = {}
+    headers.forEach((h, i) => {
+      const key = CSV_ALIASES[h] ?? h
+      row[key] = (cols[i] ?? "").trim().replace(/^["']|["']$/g, "")
+    })
+    return row
+  }).filter((r) => r.title)
+}
+
 export function ImoveisClient({ initialProperties }: { initialProperties: DbProperty[] }) {
   const [properties, setProperties] = useState(() => initialProperties.map(coerce))
   const [modalOpen, setModalOpen] = useState(false)
   const [selected, setSelected] = useState<Property | null>(null)
+  const [importing, setImporting] = useState(false)
+  const csvRef = useRef<HTMLInputElement>(null)
 
   function openCreate() {
     setSelected(null)
@@ -79,6 +111,51 @@ export function ImoveisClient({ initialProperties }: { initialProperties: DbProp
     })
   }
 
+  async function handleCSVImport(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    e.target.value = ""
+
+    setImporting(true)
+    try {
+      const text = await file.text()
+      const rows = parseCSV(text)
+      if (!rows.length) { toast.error("Nenhum imóvel encontrado no arquivo"); return }
+
+      const payload = rows.map((r) => ({
+        title: r.title,
+        type: r.type || undefined,
+        price: r.price ? Number(r.price.replace(/[^\d.,]/g, "").replace(",", ".")) || undefined : undefined,
+        address: r.address || undefined,
+        city: r.city || undefined,
+        state: r.state || undefined,
+        bedrooms: r.bedrooms ? parseInt(r.bedrooms) || undefined : undefined,
+        area_sqm: r.area_sqm ? parseFloat(r.area_sqm.replace(",", ".")) || undefined : undefined,
+        description: r.description || undefined,
+      }))
+
+      const res = await fetch("/api/properties/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+
+      if (!res.ok) throw new Error()
+      const data = await res.json() as { imported: number }
+      toast.success(`${data.imported} imóveis importados`)
+
+      const refreshed = await fetch("/api/properties")
+      if (refreshed.ok) {
+        const all = await refreshed.json() as DbProperty[]
+        setProperties(all.map(coerce))
+      }
+    } catch {
+      toast.error("Erro ao importar CSV. Verifique o formato.")
+    } finally {
+      setImporting(false)
+    }
+  }
+
   return (
     <>
       <div className="flex items-center justify-between">
@@ -86,10 +163,22 @@ export function ImoveisClient({ initialProperties }: { initialProperties: DbProp
           <h1 className="font-serif text-2xl text-[#2D4A3E]">Imóveis</h1>
           <p className="text-sm text-[#8A8A8A] mt-1">{properties.length} imóveis cadastrados</p>
         </div>
-        <Button onClick={openCreate} className="bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white text-sm gap-2">
-          <Plus className="w-4 h-4" />
-          Novo imóvel
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => csvRef.current?.click()}
+            disabled={importing}
+            className="border-[#E0D8CE] text-[#5A5A5A] hover:text-[#2D4A3E] text-sm gap-2"
+          >
+            {importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+            Importar CSV
+          </Button>
+          <input ref={csvRef} type="file" accept=".csv,.txt" className="hidden" onChange={handleCSVImport} />
+          <Button onClick={openCreate} className="bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white text-sm gap-2">
+            <Plus className="w-4 h-4" />
+            Novo imóvel
+          </Button>
+        </div>
       </div>
 
       {!properties.length ? (

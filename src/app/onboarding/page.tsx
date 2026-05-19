@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
-import { CheckCircle2, Loader2, RefreshCw, AlertTriangle } from "lucide-react"
+import { CheckCircle2, Loader2, RefreshCw, AlertTriangle, Mic, MicOff } from "lucide-react"
+import { toast } from "sonner"
 
 const STEPS = [
   { id: 1, label: "Seus dados" },
@@ -17,6 +18,15 @@ const STEPS = [
   { id: 3, label: "Comprovante" },
   { id: 4, label: "LGPD" },
   { id: 5, label: "WhatsApp" },
+  { id: 6, label: "Voz" },
+]
+
+const VOICE_PROMPTS = [
+  "Olá! Sou a Nara, assistente do corretor pelo Moova. Como posso ajudar?",
+  "Ótimo! Vou verificar as informações desse imóvel para você agora mesmo.",
+  "Que excelente escolha! Podemos agendar uma visita amanhã às 10h?",
+  "Perfeito. Vou passar todas as informações para o corretor agora.",
+  "Qualquer dúvida é só perguntar. Estou aqui para ajudar!",
 ]
 
 export default function OnboardingPage() {
@@ -43,7 +53,21 @@ export default function OnboardingPage() {
   const [waConnected, setWaConnected] = useState(false)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  useEffect(() => () => { if (pollRef.current) clearInterval(pollRef.current) }, [])
+  // Voice cloning state
+  const [voiceLgpdAccepted, setVoiceLgpdAccepted] = useState(false)
+  const [recordings, setRecordings] = useState<(string | null)[]>([null, null, null, null, null])
+  const [activeRecording, setActiveRecording] = useState<number | null>(null)
+  const [recordingTime, setRecordingTime] = useState(0)
+  const [cloningVoice, setCloningVoice] = useState(false)
+  const [voiceCloned, setVoiceCloned] = useState(false)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const voiceTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  useEffect(() => () => {
+    if (pollRef.current) clearInterval(pollRef.current)
+    if (voiceTimerRef.current) clearInterval(voiceTimerRef.current)
+    if (mediaRecorderRef.current?.state === "recording") mediaRecorderRef.current.stop()
+  }, [])
 
   // Verificar cap de 30 corretores
   useEffect(() => {
@@ -96,6 +120,67 @@ export default function OnboardingPage() {
   function handleStep4() {
     if (!lgpdAccepted) return
     setStep(5)
+  }
+
+  async function startVoiceRecording(index: number) {
+    if (activeRecording !== null) stopVoiceRecording()
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const mimeType = MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : ""
+      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined)
+      mediaRecorderRef.current = recorder
+      const chunks: Blob[] = []
+      recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data) }
+      recorder.onstop = () => {
+        stream.getTracks().forEach((t) => t.stop())
+        const blob = new Blob(chunks, { type: recorder.mimeType || "audio/webm" })
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          setRecordings((prev) => { const next = [...prev]; next[index] = reader.result as string; return next })
+        }
+        reader.readAsDataURL(blob)
+        setActiveRecording(null)
+        setRecordingTime(0)
+        if (voiceTimerRef.current) { clearInterval(voiceTimerRef.current); voiceTimerRef.current = null }
+      }
+      setActiveRecording(index)
+      recorder.start()
+      let secs = 0
+      voiceTimerRef.current = setInterval(() => {
+        secs++
+        setRecordingTime(secs)
+        if (secs >= 30) stopVoiceRecording()
+      }, 1000)
+    } catch {
+      toast.error("Permissão de microfone negada")
+    }
+  }
+
+  function stopVoiceRecording() {
+    if (mediaRecorderRef.current?.state === "recording") mediaRecorderRef.current.stop()
+    if (voiceTimerRef.current) { clearInterval(voiceTimerRef.current); voiceTimerRef.current = null }
+    setRecordingTime(0)
+  }
+
+  async function handleCloneVoice() {
+    const valid = recordings.filter(Boolean) as string[]
+    if (valid.length < 2) return
+    setCloningVoice(true)
+    try {
+      const res = await fetch("/api/voice/clone", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ audios: valid }),
+      })
+      if (!res.ok) throw new Error()
+      setVoiceCloned(true)
+      toast.success("Voz personalizada criada!")
+    } catch {
+      toast.error("Erro ao clonar voz. Tente novamente.")
+    } finally {
+      setCloningVoice(false)
+    }
   }
 
   async function handleConnectWA() {
@@ -194,7 +279,7 @@ export default function OnboardingPage() {
         <div className="text-center space-y-2">
           <div className="w-8 h-1 bg-[#B87333] rounded-full mx-auto" />
           <h1 className="font-serif text-3xl text-[#2D4A3E]">Bem-vindo à Moova</h1>
-          <p className="text-sm text-[#8A8A8A]">Configure sua conta em 4 passos</p>
+          <p className="text-sm text-[#8A8A8A]">Configure sua conta</p>
         </div>
 
         <div className="space-y-3">
@@ -367,6 +452,96 @@ export default function OnboardingPage() {
               </>
             )}
 
+            {/* Step 6 — Voz */}
+            {step === 6 && (
+              <>
+                <h2 className="font-serif text-xl text-[#2D4A3E]">Personalize a voz da Nara</h2>
+                <p className="text-sm text-[#8A8A8A]">
+                  Grave as frases abaixo para que a Nara envie áudios com uma voz próxima à sua. Mínimo 2 gravações.
+                </p>
+
+                {/* LGPD voz */}
+                <div className="bg-[#EAE3D9] rounded-lg p-3 text-xs text-[#5A5A5A] space-y-1">
+                  <p className="font-medium text-[#2D4A3E]">Termo de uso de voz (LGPD)</p>
+                  <p>Sua voz será processada pelo ElevenLabs exclusivamente para personalizar os áudios da Nara na sua conta. Você pode remover a voz clonada a qualquer momento em Configurações.</p>
+                </div>
+
+                <button onClick={() => setVoiceLgpdAccepted(!voiceLgpdAccepted)} className="flex items-start gap-3 w-full text-left">
+                  <div className={cn(
+                    "w-5 h-5 rounded border-2 shrink-0 mt-0.5 flex items-center justify-center transition-colors",
+                    voiceLgpdAccepted ? "bg-[#2D4A3E] border-[#2D4A3E]" : "border-[#E0D8CE]"
+                  )}>
+                    {voiceLgpdAccepted && <CheckCircle2 className="w-3 h-3 text-white" />}
+                  </div>
+                  <span className="text-sm text-[#5A5A5A]">
+                    Autorizo o uso da minha voz para personalizar os áudios da Nara na minha conta Moova.
+                  </span>
+                </button>
+
+                {voiceLgpdAccepted && !voiceCloned && (
+                  <div className="space-y-2">
+                    {VOICE_PROMPTS.map((prompt, i) => (
+                      <div key={i} className={cn(
+                        "border rounded-xl p-3 space-y-2 transition-colors",
+                        recordings[i] ? "border-[#2D4A3E] bg-[#F0F5F2]" : "border-[#E0D8CE]"
+                      )}>
+                        <p className="text-xs text-[#5A5A5A] italic leading-relaxed">&ldquo;{prompt}&rdquo;</p>
+                        <div className="flex items-center justify-between gap-2">
+                          {recordings[i] ? (
+                            <>
+                              <span className="text-xs text-green-700 flex items-center gap-1">
+                                <CheckCircle2 className="w-3 h-3" /> Gravado
+                              </span>
+                              <button onClick={() => setRecordings((p) => { const n = [...p]; n[i] = null; return n })} className="text-xs text-[#8A8A8A] hover:text-red-500">Regravar</button>
+                            </>
+                          ) : activeRecording === i ? (
+                            <>
+                              <span className="text-xs text-red-600 flex items-center gap-1 animate-pulse">
+                                <MicOff className="w-3 h-3" /> Gravando {recordingTime}s
+                              </span>
+                              <button onClick={stopVoiceRecording} className="text-xs bg-red-50 border border-red-200 text-red-600 rounded-lg px-2 py-1">Parar</button>
+                            </>
+                          ) : (
+                            <button
+                              onClick={() => startVoiceRecording(i)}
+                              disabled={activeRecording !== null}
+                              className="text-xs bg-[#EAE3D9] border border-[#E0D8CE] text-[#2D4A3E] rounded-lg px-2 py-1 flex items-center gap-1 disabled:opacity-40"
+                            >
+                              <Mic className="w-3 h-3" /> Gravar
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                    <Button
+                      onClick={handleCloneVoice}
+                      disabled={recordings.filter(Boolean).length < 2 || cloningVoice}
+                      className="w-full bg-[#B87333] hover:bg-[#9A6128] text-white text-sm gap-2"
+                    >
+                      {cloningVoice ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mic className="w-4 h-4" />}
+                      {cloningVoice ? "Criando voz..." : `Criar voz personalizada (${recordings.filter(Boolean).length}/5)`}
+                    </Button>
+                  </div>
+                )}
+
+                {voiceCloned && (
+                  <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+                    <CheckCircle2 className="w-8 h-8 text-green-600 mx-auto mb-1" />
+                    <p className="text-sm font-medium text-green-700">Voz personalizada criada!</p>
+                    <p className="text-xs text-green-600 mt-0.5">A Nara vai usar sua voz nos áudios.</p>
+                  </div>
+                )}
+
+                <div className="flex gap-3">
+                  <Button variant="outline" onClick={() => setStep(5)} className="flex-1 border-[#E0D8CE]">Voltar</Button>
+                  <Button onClick={handleFinish} disabled={loading}
+                    className="flex-1 bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white">
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : voiceCloned ? "Finalizar →" : "Pular por agora →"}
+                  </Button>
+                </div>
+              </>
+            )}
+
             {/* Step 5 — WhatsApp */}
             {step === 5 && (
               <>
@@ -405,9 +580,8 @@ export default function OnboardingPage() {
                 </div>
                 <div className="flex gap-3">
                   <Button variant="outline" onClick={() => setStep(4)} className="flex-1 border-[#E0D8CE]">Voltar</Button>
-                  <Button onClick={handleFinish} disabled={loading}
-                    className="flex-1 bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white">
-                    {loading ? "Criando conta..." : waConnected ? "Continuar →" : "Conectar depois →"}
+                  <Button onClick={() => setStep(6)} className="flex-1 bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white">
+                    {waConnected ? "Continuar →" : "Conectar depois →"}
                   </Button>
                 </div>
               </>
