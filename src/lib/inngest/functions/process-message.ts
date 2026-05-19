@@ -38,7 +38,7 @@ export const processWhatsAppMessage = inngest.createFunction(
     triggers: [{ event: "whatsapp/message.received" }],
   },
   async ({ event, step }) => {
-    const { from, type, text, audioBase64, imageUrl, instanceName } = event.data as {
+    const { from, type, text, audioBase64, imageUrl, instanceName, bspPhoneNumberId } = event.data as {
       from: string
       type: string
       text?: string
@@ -47,6 +47,7 @@ export const processWhatsAppMessage = inngest.createFunction(
       timestamp: number
       messageId: string
       instanceName?: string
+      bspPhoneNumberId?: string
     }
 
     const supabase = createAdminClient()
@@ -54,14 +55,26 @@ export const processWhatsAppMessage = inngest.createFunction(
     // 1. Health check das IAs
     const health = await step.run("check-ai-health", () => checkAIHealth())
 
-    // 2. Buscar broker pela instance do WhatsApp
-    const broker = await step.run("fetch-broker", async () => {
-      if (!instanceName) return null
-      const { data: wa } = await supabase
-        .from("whatsapp_accounts")
-        .select("user_id, provider")
-        .eq("instance_name", instanceName)
-        .single()
+    // 2. Buscar broker pelo instance (Evolution) ou bsp_phone_number_id (BSP)
+    const brokerWithWA = await step.run("fetch-broker", async () => {
+      let wa: { user_id: string; provider: string; instance_name: string | null; bsp_phone_number_id: string | null; bsp_access_token: string | null } | null = null
+
+      if (bspPhoneNumberId) {
+        const { data } = await supabase
+          .from("whatsapp_accounts")
+          .select("user_id, provider, instance_name, bsp_phone_number_id, bsp_access_token")
+          .eq("bsp_phone_number_id", bspPhoneNumberId)
+          .single()
+        wa = data
+      } else if (instanceName) {
+        const { data } = await supabase
+          .from("whatsapp_accounts")
+          .select("user_id, provider, instance_name, bsp_phone_number_id, bsp_access_token")
+          .eq("instance_name", instanceName)
+          .single()
+        wa = data
+      }
+
       if (!wa) return null
 
       const { data: user } = await supabase
@@ -70,10 +83,17 @@ export const processWhatsAppMessage = inngest.createFunction(
         .eq("id", wa.user_id)
         .single()
 
-      return user ? { ...user, provider: wa.provider } : null
+      return user ? {
+        ...user,
+        provider: wa.provider,
+        waInstanceName: wa.instance_name,
+        bspPhoneNumberId: wa.bsp_phone_number_id,
+        bspAccessToken: wa.bsp_access_token,
+      } : null
     })
 
-    if (!broker) return { status: "no_broker", instanceName }
+    const broker = brokerWithWA
+    if (!broker) return { status: "no_broker", instanceName, bspPhoneNumberId }
 
     const brokerName = broker.broker_name ?? broker.name ?? "o corretor"
     const brokerPhone = broker.phone ?? ""
@@ -84,7 +104,7 @@ export const processWhatsAppMessage = inngest.createFunction(
         const returnTime = new Date(Date.now() + 2 * 3600000).toLocaleTimeString("pt-BR", {
           hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo",
         })
-        const provider = createWhatsAppProvider((broker.provider ?? "evolution") as "evolution" | "bsp")
+        const provider = createWhatsAppProvider((broker.provider ?? "evolution") as "evolution" | "bsp", { instanceName: broker.waInstanceName ?? undefined, phoneNumberId: broker.bspPhoneNumberId ?? undefined, accessToken: broker.bspAccessToken ?? undefined })
         await provider.sendMessage({
           to: from,
           text: DEGRADED_MODE_MESSAGE(brokerName, brokerPhone, returnTime),
@@ -204,7 +224,7 @@ export const processWhatsAppMessage = inngest.createFunction(
 
     if (outsideHours) {
       await step.run("send-outside-hours", async () => {
-        const provider = createWhatsAppProvider((broker.provider ?? "evolution") as "evolution" | "bsp")
+        const provider = createWhatsAppProvider((broker.provider ?? "evolution") as "evolution" | "bsp", { instanceName: broker.waInstanceName ?? undefined, phoneNumberId: broker.bspPhoneNumberId ?? undefined, accessToken: broker.bspAccessToken ?? undefined })
         const brokerName = broker.broker_name ?? broker.name ?? "o corretor"
         const workStart = broker.nara_work_start ?? 8
         await provider.sendMessage({
@@ -223,7 +243,7 @@ export const processWhatsAppMessage = inngest.createFunction(
           lgpd_optout_at: new Date().toISOString(),
         }).eq("id", lead.id)
 
-        const provider = createWhatsAppProvider((broker.provider ?? "evolution") as "evolution" | "bsp")
+        const provider = createWhatsAppProvider((broker.provider ?? "evolution") as "evolution" | "bsp", { instanceName: broker.waInstanceName ?? undefined, phoneNumberId: broker.bspPhoneNumberId ?? undefined, accessToken: broker.bspAccessToken ?? undefined })
         await provider.sendMessage({
           to: from,
           text: "Entendido! Removemos seu contato da lista de atendimento da Nara. Caso mude de ideia, é só entrar em contato diretamente com o corretor. Obrigado!",
@@ -272,7 +292,7 @@ export const processWhatsAppMessage = inngest.createFunction(
         }).eq("id", conversation.id)
 
         const brokerName = broker.broker_name ?? broker.name ?? "o corretor"
-        const provider = createWhatsAppProvider((broker.provider ?? "evolution") as "evolution" | "bsp")
+        const provider = createWhatsAppProvider((broker.provider ?? "evolution") as "evolution" | "bsp", { instanceName: broker.waInstanceName ?? undefined, phoneNumberId: broker.bspPhoneNumberId ?? undefined, accessToken: broker.bspAccessToken ?? undefined })
         await provider.sendMessage({
           to: from,
           text: `Claro! Passei para o ${brokerName}. Ele entra em contato em breve! 👋`,
@@ -424,7 +444,10 @@ export const processWhatsAppMessage = inngest.createFunction(
 
     // 15. Enviar resposta pelo WhatsApp
     await step.run("send-response", async () => {
-      const provider = createWhatsAppProvider((broker.provider ?? "evolution") as "evolution" | "bsp")
+      const provider = createWhatsAppProvider(
+        (broker.provider ?? "evolution") as "evolution" | "bsp",
+        { instanceName: broker.waInstanceName ?? undefined, phoneNumberId: broker.bspPhoneNumberId ?? undefined, accessToken: broker.bspAccessToken ?? undefined }
+      )
       await provider.sendMessage({ to: from, text: naraResponse })
 
       await supabase.from("messages")

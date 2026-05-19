@@ -51,6 +51,8 @@ type WAAccount = {
   status: string
   phone_number: string | null
   provider: string
+  bsp_phone_number_id?: string | null
+  bsp_waba_id?: string | null
 } | null
 
 export function ConfiguracoesForm({
@@ -95,6 +97,14 @@ export function ConfiguracoesForm({
   const [connecting, setConnecting] = useState(false)
   const [connected, setConnected] = useState(waAccount?.status === "connected")
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const [currentProvider, setCurrentProvider] = useState<string>(waAccount?.provider ?? "evolution")
+
+  // BSP form state
+  const [bspPhoneNumberId, setBspPhoneNumberId] = useState(waAccount?.bsp_phone_number_id ?? "")
+  const [bspWabaId, setBspWabaId] = useState(waAccount?.bsp_waba_id ?? "")
+  const [bspAccessToken, setBspAccessToken] = useState("")
+  const [bspConnecting, setBspConnecting] = useState(false)
+  const [showBspForm, setShowBspForm] = useState(false)
 
   // Voice cloning state
   const [voiceCloned, setVoiceCloned] = useState(!!profile?.eleven_labs_voice_id)
@@ -264,6 +274,46 @@ export function ConfiguracoesForm({
     }
   }
 
+  async function handleBSPConnect() {
+    if (!bspPhoneNumberId.trim() || !bspAccessToken.trim()) {
+      toast.error("Phone Number ID e Access Token são obrigatórios")
+      return
+    }
+    setBspConnecting(true)
+    try {
+      const res = await fetch("/api/whatsapp/bsp-connect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone_number_id: bspPhoneNumberId.trim(),
+          waba_id: bspWabaId.trim() || undefined,
+          access_token: bspAccessToken.trim(),
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        toast.error(data.error ?? "Erro ao conectar via BSP")
+        return
+      }
+      setConnected(true)
+      setCurrentProvider("bsp")
+      setShowBspForm(false)
+      setBspAccessToken("")
+      toast.success(`WhatsApp Business conectado! ${data.phone ? `Número: ${data.phone}` : ""}`)
+    } catch {
+      toast.error("Erro ao conectar via BSP. Verifique as credenciais.")
+    } finally {
+      setBspConnecting(false)
+    }
+  }
+
+  async function handleBSPDisconnect() {
+    await fetch("/api/whatsapp/bsp-connect", { method: "DELETE" })
+    setConnected(false)
+    setCurrentProvider("evolution")
+    toast.success("Credenciais BSP removidas")
+  }
+
   async function handleAnalyzeTone() {
     setAnalyzingTone(true)
     try {
@@ -364,7 +414,7 @@ export function ConfiguracoesForm({
                 {waConnected ? waAccount?.phone_number ?? "Conectado" : "Não conectado"}
               </p>
               <p className="text-xs text-[#8A8A8A] mt-0.5">
-                Provider: {waAccount?.provider ?? profile?.whatsapp_provider ?? "evolution"}
+                {currentProvider === "bsp" ? "Meta Cloud API (BSP Oficial)" : "Evolution API"}
               </p>
             </div>
             <Badge className={cn(
@@ -377,31 +427,129 @@ export function ConfiguracoesForm({
             </Badge>
           </div>
 
-          {!waConnected && (
+          {/* Evolution: QR Code flow */}
+          {currentProvider !== "bsp" && (
             <div className="space-y-3">
-              <Button
-                onClick={handleConnect}
-                disabled={connecting}
-                className="w-full bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white text-sm gap-2"
+              {!waConnected && (
+                <>
+                  <Button
+                    onClick={handleConnect}
+                    disabled={connecting}
+                    className="w-full bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white text-sm gap-2"
+                  >
+                    {connecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                    {connecting ? "Gerando QR Code..." : "Conectar WhatsApp (QR Code)"}
+                  </Button>
+                  {qrCode && (
+                    <div className="flex flex-col items-center gap-2 p-4 bg-white border border-[#E0D8CE] rounded-xl">
+                      <p className="text-xs text-[#5A5A5A] font-medium">Escaneie com o WhatsApp</p>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={qrCode} alt="QR Code WhatsApp" className="w-48 h-48 object-contain" />
+                      <p className="text-[11px] text-[#8A8A8A]">Abrindo WhatsApp → Dispositivos vinculados → Vincular dispositivo</p>
+                    </div>
+                  )}
+                </>
+              )}
+              <button
+                onClick={() => setShowBspForm(true)}
+                className="text-xs text-[#B87333] hover:underline"
               >
-                {connecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-                {connecting ? "Gerando QR Code..." : "Conectar WhatsApp (QR Code)"}
-              </Button>
-              {qrCode && (
-                <div className="flex flex-col items-center gap-2 p-4 bg-white border border-[#E0D8CE] rounded-xl">
-                  <p className="text-xs text-[#5A5A5A] font-medium">Escaneie com o WhatsApp</p>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={qrCode} alt="QR Code WhatsApp" className="w-48 h-48 object-contain" />
-                  <p className="text-[11px] text-[#8A8A8A]">Abrindo WhatsApp → Dispositivos vinculados → Vincular dispositivo</p>
+                Tem plano BSP? Conectar via Meta Cloud API →
+              </button>
+            </div>
+          )}
+
+          {/* BSP: Meta Cloud API credentials form */}
+          {(currentProvider === "bsp" || showBspForm) && (
+            <div className="space-y-3 border border-[#E0D8CE] rounded-xl p-4 bg-[#FAF7F2]">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-[#2D4A3E]">Meta Cloud API (BSP)</p>
+                {showBspForm && currentProvider !== "bsp" && (
+                  <button onClick={() => setShowBspForm(false)} className="text-xs text-[#8A8A8A] hover:text-[#5A5A5A]">
+                    Cancelar
+                  </button>
+                )}
+              </div>
+
+              {currentProvider === "bsp" && waConnected ? (
+                <div className="space-y-2">
+                  <p className="text-xs text-[#5A5A5A]">
+                    <strong>Phone Number ID:</strong> {waAccount?.bsp_phone_number_id ?? bspPhoneNumberId}
+                  </p>
+                  {waAccount?.bsp_waba_id && (
+                    <p className="text-xs text-[#5A5A5A]">
+                      <strong>WABA ID:</strong> {waAccount.bsp_waba_id}
+                    </p>
+                  )}
+                  <p className="text-xs text-green-600">
+                    Webhook Meta: <code className="bg-white px-1 rounded text-[10px]">/api/webhooks/meta-whatsapp</code>
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleBSPDisconnect}
+                    className="text-red-600 border-red-200 hover:bg-red-50 text-xs w-full mt-1"
+                  >
+                    Remover credenciais BSP
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Phone Number ID <span className="text-red-500">*</span></Label>
+                    <Input
+                      value={bspPhoneNumberId}
+                      onChange={(e) => setBspPhoneNumberId(e.target.value)}
+                      placeholder="ex: 123456789012345"
+                      className="border-[#E0D8CE] text-sm h-8"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">WABA ID (opcional)</Label>
+                    <Input
+                      value={bspWabaId}
+                      onChange={(e) => setBspWabaId(e.target.value)}
+                      placeholder="ex: 987654321098765"
+                      className="border-[#E0D8CE] text-sm h-8"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Access Token (System User) <span className="text-red-500">*</span></Label>
+                    <Input
+                      value={bspAccessToken}
+                      onChange={(e) => setBspAccessToken(e.target.value)}
+                      type="password"
+                      placeholder="EAAxxxxxxxx..."
+                      className="border-[#E0D8CE] text-sm h-8"
+                    />
+                  </div>
+                  <div className="bg-white border border-[#E0D8CE] rounded-lg p-3 text-xs text-[#5A5A5A] space-y-1">
+                    <p className="font-medium text-[#2D4A3E]">URL do Webhook para configurar no Meta:</p>
+                    <code className="block bg-[#F5F0EB] px-2 py-1 rounded text-[10px] break-all">
+                      {typeof window !== "undefined" ? window.location.origin : "https://moovaimob.com"}/api/webhooks/meta-whatsapp
+                    </code>
+                    <p className="font-medium text-[#2D4A3E] pt-1">Verify Token:</p>
+                    <code className="block bg-[#F5F0EB] px-2 py-1 rounded text-[10px]">META_WA_VERIFY_TOKEN (env var)</code>
+                  </div>
+                  <Button
+                    onClick={handleBSPConnect}
+                    disabled={bspConnecting || !bspPhoneNumberId.trim() || !bspAccessToken.trim()}
+                    className="w-full bg-[#2D4A3E] hover:bg-[#1e3329] text-white text-sm gap-2"
+                  >
+                    {bspConnecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wifi className="w-4 h-4" />}
+                    {bspConnecting ? "Verificando credenciais..." : "Conectar via Meta Cloud API"}
+                  </Button>
                 </div>
               )}
             </div>
           )}
 
-          <div className="text-xs text-[#8A8A8A] bg-[#EAE3D9] rounded-lg p-3 space-y-1">
-            <p className="font-medium text-[#5A5A5A]">Plano atual: Evolution API — R$ 799/mês</p>
-            <p>Migração para BSP oficial (selo verde Meta) disponível no plano R$ 1.199/mês.</p>
-          </div>
+          {currentProvider !== "bsp" && !showBspForm && (
+            <div className="text-xs text-[#8A8A8A] bg-[#EAE3D9] rounded-lg p-3 space-y-1">
+              <p className="font-medium text-[#5A5A5A]">Plano Evolution API — R$ 799/mês</p>
+              <p>Migração para BSP oficial (selo verde Meta) disponível no plano R$ 1.199/mês.</p>
+            </div>
+          )}
         </CardContent>
       </Card>
 

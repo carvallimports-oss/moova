@@ -20,7 +20,7 @@ export default async function ConfiguracoesPage({
       .single(),
     supabase
       .from("whatsapp_accounts")
-      .select("status, phone_number, provider")
+      .select("status, phone_number, provider, bsp_phone_number_id, bsp_waba_id")
       .eq("user_id", user!.id)
       .single(),
   ])
