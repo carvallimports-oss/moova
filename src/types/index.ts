@@ -107,6 +107,45 @@ export interface UpgradeOffer {
   sent_via: "nara" | "dashboard" | "email"
 }
 
+// ── Camada 2 — Captação + CMA Enterprise ─────────────────────────────────────
+
+export type CaptacaoStatus = "novo" | "qualificando" | "pitch_enviado" | "reuniao_agendada" | "captado" | "perdido"
+export type CaptacaoOptinSource = "contato_existente" | "portal_moova" | "anuncio_publico" | "whatsapp_opt_in"
+
+export interface CaptacaoOptinLead {
+  id: string
+  user_id: string
+  name: string
+  phone?: string
+  email?: string
+  property_address?: string
+  property_type?: string
+  estimated_value?: number
+  optin_source: CaptacaoOptinSource
+  optin_confirmed: boolean
+  status: CaptacaoStatus
+  pitch_content?: string
+  pitch_sent_at?: string
+  meeting_at?: string
+  notes?: string
+  created_at: string
+  updated_at: string
+}
+
+export interface CmaEnterpriseRequest {
+  id: string
+  user_id?: string
+  api_key_hash: string
+  client_ref?: string
+  address: string
+  city: string
+  state: string
+  property_type: string
+  area_sqm: number
+  result: PropertyEstimateResult
+  created_at: string
+}
+
 // ── Camada 2 — C2.1/C2.2 ────────────────────────────────────────────────────
 
 export type ServiceStatus = "pending" | "in_progress" | "completed" | "cancelled"

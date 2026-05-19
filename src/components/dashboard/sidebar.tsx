@@ -28,6 +28,9 @@ import {
   UserCheck,
   ClipboardList,
   Calculator,
+  Target,
+  Wand2,
+  Database,
 } from "lucide-react"
 import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
@@ -42,7 +45,9 @@ const navItems = [
   { href: "/dashboard/leads", label: "Leads", icon: Users },
   { href: "/dashboard/pipeline", label: "Pipeline", icon: Kanban },
   { href: "/dashboard/proprietarios", label: "Proprietários", icon: Home },
+  { href: "/dashboard/captacao", label: "Captação", icon: Target },
   { href: "/dashboard/imoveis", label: "Imóveis", icon: Building2 },
+  { href: "/dashboard/estudio", label: "Estúdio", icon: Wand2 },
   { href: "/dashboard/publicacoes", label: "Publicações", icon: ImagePlay },
   { href: "/dashboard/visitas", label: "Visitas", icon: Calendar },
   { href: "/dashboard/treina", label: "Cora Treina", icon: Dumbbell },
@@ -51,6 +56,7 @@ const navItems = [
   { href: "/dashboard/apresenta", label: "Cora Apresenta", icon: UserCheck },
   { href: "/dashboard/vistoria", label: "Vistoria", icon: ClipboardList },
   { href: "/dashboard/estimativa", label: "Estimativa", icon: Calculator },
+  { href: "/dashboard/cma-enterprise", label: "CMA Enterprise", icon: Database },
   { href: "/dashboard/relatorio", label: "Diagnóstico", icon: BarChart3 },
   { href: "/dashboard/pacto", label: "Pacto 90", icon: ShieldCheck },
   { href: "/dashboard/planos", label: "Planos", icon: TrendingUp },
