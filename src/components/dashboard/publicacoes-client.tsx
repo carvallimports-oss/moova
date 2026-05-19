@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
-import { Check, X, Film, Loader2, Share2, type LucideIcon } from "lucide-react"
+import { Check, X, Film, Loader2, Share2, Send, ExternalLink, type LucideIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 
@@ -13,32 +13,55 @@ type Draft = {
   media_url?: string | null
   status: string
   approved_at?: string | null
+  published_at?: string | null
+  published_meta_id?: string | null
   created_at: string
   property_id?: string | null
 }
 
 const PLATFORM_LABELS: Record<string, { label: string; icon: LucideIcon; color: string }> = {
   instagram_stories: { label: "Instagram Stories", icon: Share2, color: "text-pink-600" },
-  instagram_feed: { label: "Instagram Feed", icon: Share2, color: "text-pink-600" },
-  instagram_reels: { label: "Instagram Reels", icon: Film, color: "text-pink-600" },
-  facebook_post: { label: "Facebook Post", icon: Share2, color: "text-blue-600" },
-  facebook_marketplace: { label: "Marketplace", icon: Share2, color: "text-blue-600" },
-  tiktok_reels: { label: "TikTok", icon: Film, color: "text-[#2A2A2A]" },
+  instagram_feed:    { label: "Instagram Feed",    icon: Share2, color: "text-pink-600" },
+  instagram_reels:   { label: "Instagram Reels",   icon: Film,   color: "text-pink-600" },
+  facebook_post:     { label: "Facebook Post",     icon: Share2, color: "text-blue-600" },
+  facebook_marketplace: { label: "Marketplace",    icon: Share2, color: "text-blue-600" },
+  tiktok_reels:      { label: "TikTok",            icon: Film,   color: "text-[#2A2A2A]" },
 }
 
-const STATUS_TABS = [
-  { key: "all", label: "Todos" },
-  { key: "pending", label: "Aguardando" },
-  { key: "approved", label: "Aprovados" },
-  { key: "rejected", label: "Rejeitados" },
+const AUTO_PUBLISH_PLATFORMS = [
+  "instagram_feed", "instagram_stories", "instagram_reels",
+  "facebook_post", "facebook_marketplace",
 ]
 
-function DraftCard({ draft, onUpdate }: { draft: Draft; onUpdate: (updated: Draft) => void }) {
+const STATUS_TABS = [
+  { key: "all",       label: "Todos" },
+  { key: "pending",   label: "Aguardando" },
+  { key: "approved",  label: "Aprovados" },
+  { key: "published", label: "Publicados" },
+  { key: "rejected",  label: "Rejeitados" },
+]
+
+function DraftCard({
+  draft,
+  isMetaConnected,
+  onUpdate,
+}: {
+  draft: Draft
+  isMetaConnected: boolean
+  onUpdate: (updated: Draft) => void
+}) {
   const [acting, setActing] = useState(false)
+  const [publishing, setPublishing] = useState(false)
   const [editing, setEditing] = useState(false)
   const [caption, setCaption] = useState(draft.caption ?? "")
   const platform = PLATFORM_LABELS[draft.platform] ?? { label: draft.platform, icon: Film as LucideIcon, color: "text-[#8A8A8A]" }
   const PlatformIcon = platform.icon
+
+  const isPending   = draft.status === "pending"
+  const isApproved  = draft.status === "approved"
+  const isPublished = draft.status === "published"
+  const isRejected  = draft.status === "rejected"
+  const canAutoPublish = AUTO_PUBLISH_PLATFORMS.includes(draft.platform)
 
   async function handleAction(status: "approved" | "rejected") {
     setActing(true)
@@ -79,15 +102,28 @@ function DraftCard({ draft, onUpdate }: { draft: Draft; onUpdate: (updated: Draf
     }
   }
 
-  const isPending = draft.status === "pending"
-  const isApproved = draft.status === "approved"
+  async function handlePublish() {
+    setPublishing(true)
+    try {
+      const res = await fetch(`/api/social/publish/${draft.id}`, { method: "POST" })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? "Falha ao publicar")
+      onUpdate(data.draft)
+      toast.success("Publicado com sucesso!")
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erro ao publicar.")
+    } finally {
+      setPublishing(false)
+    }
+  }
 
   return (
     <div className={cn(
       "bg-white border rounded-xl p-5 space-y-3 transition-all",
-      isPending ? "border-[#B87333]/40 shadow-sm" : "border-[#E0D8CE]",
-      isApproved && "opacity-80"
+      isPending   ? "border-[#B87333]/40 shadow-sm" : "border-[#E0D8CE]",
+      isPublished && "border-[#2D4A3E]/30 bg-[#2D4A3E]/5",
     )}>
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <PlatformIcon className={cn("w-4 h-4", platform.color)} />
@@ -95,15 +131,16 @@ function DraftCard({ draft, onUpdate }: { draft: Draft; onUpdate: (updated: Draf
         </div>
         <span className={cn(
           "text-[10px] font-medium px-2 py-0.5 rounded-full",
-          isPending && "bg-[#B87333]/10 text-[#B87333]",
-          isApproved && "bg-green-50 text-green-700",
-          draft.status === "rejected" && "bg-red-50 text-red-600",
-          draft.status === "published" && "bg-[#2D4A3E]/10 text-[#2D4A3E]",
+          isPending   && "bg-[#B87333]/10 text-[#B87333]",
+          isApproved  && "bg-green-50 text-green-700",
+          isRejected  && "bg-red-50 text-red-600",
+          isPublished && "bg-[#2D4A3E]/10 text-[#2D4A3E]",
         )}>
-          {isPending ? "Aguardando" : isApproved ? "Aprovado" : draft.status === "rejected" ? "Rejeitado" : "Publicado"}
+          {isPending ? "Aguardando" : isApproved ? "Aprovado" : isRejected ? "Rejeitado" : "Publicado"}
         </span>
       </div>
 
+      {/* Caption */}
       {editing ? (
         <div className="space-y-2">
           <textarea
@@ -134,11 +171,22 @@ function DraftCard({ draft, onUpdate }: { draft: Draft; onUpdate: (updated: Draf
         </div>
       )}
 
+      {/* Meta */}
       <p className="text-[11px] text-[#8A8A8A]">
         Gerado em {new Date(draft.created_at).toLocaleDateString("pt-BR", { day: "numeric", month: "short" })}
         {draft.approved_at && ` · Aprovado em ${new Date(draft.approved_at).toLocaleDateString("pt-BR", { day: "numeric", month: "short" })}`}
+        {draft.published_at && ` · Publicado em ${new Date(draft.published_at).toLocaleDateString("pt-BR", { day: "numeric", month: "short" })}`}
       </p>
 
+      {/* Published ID link */}
+      {isPublished && draft.published_meta_id && (
+        <div className="flex items-center gap-1.5 text-[11px] text-[#2D4A3E]">
+          <ExternalLink className="w-3 h-3" />
+          <span className="font-mono">{draft.published_meta_id}</span>
+        </div>
+      )}
+
+      {/* Actions */}
       {isPending && (
         <div className="flex gap-2 pt-1">
           <Button
@@ -162,13 +210,56 @@ function DraftCard({ draft, onUpdate }: { draft: Draft; onUpdate: (updated: Draf
           </Button>
         </div>
       )}
+
+      {isApproved && canAutoPublish && (
+        <div className="pt-1">
+          {isMetaConnected ? (
+            <Button
+              size="sm"
+              onClick={handlePublish}
+              disabled={publishing}
+              className="w-full bg-[#1877F2] hover:bg-[#166FE5] text-white text-xs gap-1.5"
+            >
+              {publishing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
+              {publishing ? "Publicando..." : "Publicar agora"}
+            </Button>
+          ) : (
+            <a href="/api/social/meta/auth">
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full border-[#1877F2] text-[#1877F2] hover:bg-[#1877F2]/5 text-xs gap-1.5"
+              >
+                <Share2 className="w-3 h-3" />
+                Conectar Instagram/Facebook para publicar
+              </Button>
+            </a>
+          )}
+        </div>
+      )}
     </div>
   )
 }
 
-export function PublicacoesClient({ initialDrafts }: { initialDrafts: Draft[] }) {
+export function PublicacoesClient({
+  initialDrafts,
+  isMetaConnected,
+  metaPageName,
+  metaJustConnected,
+}: {
+  initialDrafts: Draft[]
+  isMetaConnected: boolean
+  metaPageName: string | null
+  metaJustConnected: boolean
+}) {
   const [drafts, setDrafts] = useState(initialDrafts)
   const [tab, setTab] = useState("all")
+
+  useEffect(() => {
+    if (metaJustConnected) {
+      toast.success(`Instagram/Facebook conectado${metaPageName ? `: ${metaPageName}` : ""}!`)
+    }
+  }, [metaJustConnected, metaPageName])
 
   const filtered = tab === "all" ? drafts : drafts.filter((d) => d.status === tab)
 
@@ -176,19 +267,59 @@ export function PublicacoesClient({ initialDrafts }: { initialDrafts: Draft[] })
     setDrafts((prev) => prev.map((d) => (d.id === updated.id ? updated : d)))
   }
 
-  const pendingCount = drafts.filter((d) => d.status === "pending").length
+  const pendingCount   = drafts.filter((d) => d.status === "pending").length
+  const approvedCount  = drafts.filter((d) => d.status === "approved").length
+  const publishedCount = drafts.filter((d) => d.status === "published").length
 
   return (
     <div className="space-y-4">
+      {/* Meta connection banner */}
+      {!isMetaConnected && approvedCount > 0 && (
+        <div className="bg-[#1877F2]/5 border border-[#1877F2]/20 rounded-xl p-4 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-medium text-[#1877F2]">
+              Conecte o Instagram/Facebook para publicar automaticamente
+            </p>
+            <p className="text-xs text-[#5A5A5A] mt-0.5">
+              Você tem {approvedCount} post{approvedCount > 1 ? "s" : ""} aprovado{approvedCount > 1 ? "s" : ""} aguardando publicação.
+            </p>
+          </div>
+          <a href="/api/social/meta/auth">
+            <Button size="sm" className="bg-[#1877F2] hover:bg-[#166FE5] text-white text-xs shrink-0">
+              Conectar
+            </Button>
+          </a>
+        </div>
+      )}
+
+      {/* Meta connected badge */}
+      {isMetaConnected && (
+        <div className="bg-[#2D4A3E]/5 border border-[#2D4A3E]/20 rounded-xl px-4 py-3 flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-green-500" />
+          <p className="text-sm text-[#2D4A3E]">
+            Instagram/Facebook conectado{metaPageName ? `: ${metaPageName}` : ""}
+          </p>
+          <button
+            onClick={async () => {
+              await fetch("/api/social/meta/disconnect", { method: "POST" })
+              window.location.reload()
+            }}
+            className="ml-auto text-[11px] text-[#8A8A8A] hover:text-red-600 underline underline-offset-2"
+          >
+            Desconectar
+          </button>
+        </div>
+      )}
+
       {/* Info */}
       <div className="bg-[#EAE3D9] rounded-xl p-4 text-sm text-[#5A5A5A]">
         <span className="font-medium text-[#2D4A3E]">Como funciona?</span>{" "}
         Quando você cadastra um imóvel, a Nara gera rascunhos de post para cada rede social.
-        Revise a legenda, ajuste se quiser e aprove com um clique. Só o que você aprovar vai para publicação.
+        Revise a legenda, ajuste se quiser e aprove com um clique. Depois, publique diretamente no Instagram ou Facebook.
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-[#EAE3D9] rounded-lg p-1 w-fit">
+      <div className="flex flex-wrap gap-1 bg-[#EAE3D9] rounded-lg p-1 w-fit">
         {STATUS_TABS.map((t) => (
           <button
             key={t.key}
@@ -204,6 +335,11 @@ export function PublicacoesClient({ initialDrafts }: { initialDrafts: Draft[] })
                 {pendingCount}
               </span>
             )}
+            {t.key === "published" && publishedCount > 0 && (
+              <span className="ml-1.5 bg-[#2D4A3E] text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
+                {publishedCount}
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -215,6 +351,8 @@ export function PublicacoesClient({ initialDrafts }: { initialDrafts: Draft[] })
           <p className="text-sm">
             {tab === "pending"
               ? "Nenhum post aguardando aprovação."
+              : tab === "published"
+              ? "Nenhum post publicado ainda."
               : "Nenhum post encontrado."}
           </p>
           {tab === "all" && (
@@ -224,7 +362,7 @@ export function PublicacoesClient({ initialDrafts }: { initialDrafts: Draft[] })
       ) : (
         <div className="grid sm:grid-cols-2 gap-4">
           {filtered.map((d) => (
-            <DraftCard key={d.id} draft={d} onUpdate={handleUpdate} />
+            <DraftCard key={d.id} draft={d} isMetaConnected={isMetaConnected} onUpdate={handleUpdate} />
           ))}
         </div>
       )}

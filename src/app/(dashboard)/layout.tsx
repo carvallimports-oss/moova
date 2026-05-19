@@ -12,7 +12,7 @@ export default async function DashboardLayout({
 
   if (!user) redirect("/login")
 
-  const [{ data: profile }, { count: pendingApprovals }, { data: diag }] = await Promise.all([
+  const [{ data: profile }, { count: pendingApprovals }, { data: diag }, { data: subscription }] = await Promise.all([
     supabase
       .from("users")
       .select("name, creci, whatsapp_provider")
@@ -30,6 +30,11 @@ export default async function DashboardLayout({
       .order("created_at", { ascending: false })
       .limit(1)
       .single(),
+    supabase
+      .from("subscriptions")
+      .select("plan, status")
+      .eq("user_id", user.id)
+      .single(),
   ])
 
   if (!profile) redirect("/onboarding")
@@ -44,6 +49,7 @@ export default async function DashboardLayout({
         userName={profile.name ?? user.email ?? "Corretor"}
         pendingApprovals={pendingApprovals ?? 0}
         diagDay={diagDay}
+        plan={subscription?.plan ?? "evolution"}
       />
       <main className="flex-1 overflow-y-auto">
         {children}

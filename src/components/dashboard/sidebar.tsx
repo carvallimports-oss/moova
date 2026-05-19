@@ -31,7 +31,16 @@ import {
   Target,
   Wand2,
   Database,
+  LineChart,
 } from "lucide-react"
+
+const PLAN_LABELS: Record<string, string> = {
+  evolution: "Moova Atende",
+  bsp: "Moova Atende BSP",
+  opera: "Moova Opera",
+  inteligencia: "Moova Inteligência",
+  maestria: "Moova Maestria",
+}
 import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
@@ -57,6 +66,7 @@ const navItems = [
   { href: "/dashboard/vistoria", label: "Vistoria", icon: ClipboardList },
   { href: "/dashboard/estimativa", label: "Estimativa", icon: Calculator },
   { href: "/dashboard/cma-enterprise", label: "CMA Enterprise", icon: Database },
+  { href: "/dashboard/metricas", label: "Métricas", icon: LineChart },
   { href: "/dashboard/relatorio", label: "Diagnóstico", icon: BarChart3 },
   { href: "/dashboard/pacto", label: "Pacto 90", icon: ShieldCheck },
   { href: "/dashboard/planos", label: "Planos", icon: TrendingUp },
@@ -70,11 +80,13 @@ function NavContent({
   userName,
   pendingApprovals,
   diagDay,
+  plan,
   onNavigate,
 }: {
   userName: string
   pendingApprovals: number
   diagDay: number | null
+  plan: string
   onNavigate?: () => void
 }) {
   const pathname = usePathname()
@@ -95,12 +107,12 @@ function NavContent({
           <span className="font-serif text-xl text-[#2D4A3E]">Moova</span>
         </div>
         <p className="text-[10px] text-[#8A8A8A] mt-0.5 font-mono uppercase tracking-widest ml-4">
-          Moova Atende
+          {PLAN_LABELS[plan] ?? "Moova Atende"}
         </p>
       </div>
 
       {/* Nav items */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5">
+      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
         {navItems.map(({ href, label, icon: Icon }) => {
           const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href))
           const isConversas = href === "/dashboard/conversas"
@@ -171,10 +183,12 @@ export function DashboardSidebar({
   userName,
   pendingApprovals,
   diagDay,
+  plan,
 }: {
   userName: string
   pendingApprovals: number
   diagDay: number | null
+  plan: string
 }) {
   const [open, setOpen] = useState(false)
 
@@ -193,6 +207,7 @@ export function DashboardSidebar({
               userName={userName}
               pendingApprovals={pendingApprovals}
               diagDay={diagDay}
+              plan={plan}
               onNavigate={() => setOpen(false)}
             />
           </SheetContent>
@@ -202,7 +217,7 @@ export function DashboardSidebar({
 
       {/* Desktop */}
       <aside className="hidden lg:flex w-60 bg-white border-r border-[#E0D8CE] flex-col shrink-0">
-        <NavContent userName={userName} pendingApprovals={pendingApprovals} diagDay={diagDay} />
+        <NavContent userName={userName} pendingApprovals={pendingApprovals} diagDay={diagDay} plan={plan} />
       </aside>
     </>
   )
