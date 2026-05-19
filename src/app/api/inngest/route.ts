@@ -14,6 +14,8 @@ import { visitReminders } from "@/lib/inngest/functions/visit-reminders"
 import { classifyImportedLeads } from "@/lib/inngest/functions/classify-imported-leads"
 import { thinkingFollowup } from "@/lib/inngest/functions/thinking-followup"
 import { suspendOverdue } from "@/lib/inngest/functions/suspend-overdue"
+import { sendDiarioImovel } from "@/lib/inngest/functions/send-diario-imovel"
+import { checkUpgradeEligibility } from "@/lib/inngest/functions/check-upgrade-eligibility"
 
 export const { GET, POST, PUT } = serve({
   client: inngest,
@@ -32,5 +34,7 @@ export const { GET, POST, PUT } = serve({
     classifyImportedLeads,
     thinkingFollowup,
     suspendOverdue,
+    sendDiarioImovel,
+    checkUpgradeEligibility,
   ],
 })

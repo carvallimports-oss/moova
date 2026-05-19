@@ -19,6 +19,8 @@ import {
   Users,
   ShieldCheck,
   HelpCircle,
+  Home,
+  TrendingUp,
 } from "lucide-react"
 import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
@@ -32,10 +34,12 @@ const navItems = [
   { href: "/dashboard/conversas", label: "Conversas", icon: MessageSquare },
   { href: "/dashboard/leads", label: "Leads", icon: Users },
   { href: "/dashboard/pipeline", label: "Pipeline", icon: Kanban },
+  { href: "/dashboard/proprietarios", label: "Proprietários", icon: Home },
   { href: "/dashboard/imoveis", label: "Imóveis", icon: Building2 },
   { href: "/dashboard/visitas", label: "Visitas", icon: Calendar },
   { href: "/dashboard/relatorio", label: "Diagnóstico", icon: BarChart3 },
   { href: "/dashboard/pacto", label: "Pacto 90", icon: ShieldCheck },
+  { href: "/dashboard/planos", label: "Planos", icon: TrendingUp },
   { href: "/dashboard/importar", label: "Importar", icon: Upload },
   { href: "/dashboard/cobranca", label: "Cobrança", icon: CreditCard },
   { href: "/dashboard/configuracoes", label: "Configurações", icon: Settings },

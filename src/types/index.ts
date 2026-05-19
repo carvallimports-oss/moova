@@ -1,5 +1,112 @@
 export type WhatsAppProvider = "evolution" | "bsp"
 
+// ── Camada 2 — C2.0 ──────────────────────────────────────────────────────────
+
+export type SubscriptionPlan = "evolution" | "bsp" | "opera" | "inteligencia" | "maestria"
+
+export type LandlordStatus =
+  | "prospeccao"
+  | "em_contato"
+  | "negociando_exclusividade"
+  | "captado"
+  | "em_publicacao"
+  | "vendido"
+  | "retomado"
+
+export type LandlordOrigin =
+  | "portal_moova"
+  | "contato_existente"
+  | "anuncio_publico"
+  | "whatsapp_opt_in"
+
+export interface LandlordProfile {
+  id: string
+  user_id: string
+  name: string
+  phone?: string
+  email?: string
+  cpf?: string
+  status: LandlordStatus
+  exclusivity: boolean
+  property_id?: string
+  notes?: string
+  next_action?: string
+  next_action_at?: string
+  origin?: LandlordOrigin
+  optin_at?: string
+  optin_source?: string
+  diario_optin: boolean
+  diario_contact?: "whatsapp" | "email"
+  created_at: string
+  updated_at: string
+}
+
+export type PropertyMediaType =
+  | "photo_original"
+  | "photo_edited"
+  | "video_reel"
+  | "tour_360"
+  | "description_ai"
+
+export interface PropertyMedia {
+  id: string
+  property_id: string
+  user_id: string
+  type: PropertyMediaType
+  url: string
+  storage_path?: string
+  metadata: Record<string, unknown>
+  created_at: string
+}
+
+export type SocialPlatform =
+  | "instagram_stories"
+  | "instagram_feed"
+  | "instagram_reels"
+  | "facebook_post"
+  | "facebook_marketplace"
+  | "tiktok_reels"
+
+export type SocialPostStatus = "pending" | "approved" | "rejected" | "published"
+
+export interface SocialPostDraft {
+  id: string
+  user_id: string
+  property_id?: string
+  platform: SocialPlatform
+  caption?: string
+  media_url?: string
+  status: SocialPostStatus
+  approved_at?: string
+  published_at?: string
+  created_at: string
+}
+
+export type PortalName = "zap" | "vivareal" | "imovelweb" | "chavesnamao" | "olx"
+
+export interface PortalListing {
+  id: string
+  property_id: string
+  user_id: string
+  portal: PortalName
+  external_listing_id?: string
+  status: "pending" | "active" | "error" | "removed"
+  last_synced_at?: string
+  error_message?: string
+  created_at: string
+}
+
+export interface UpgradeOffer {
+  id: string
+  user_id: string
+  from_plan: string
+  to_plan: string
+  sent_at: string
+  responded_at?: string
+  response?: "accepted" | "rejected" | "later"
+  sent_via: "nara" | "dashboard" | "email"
+}
+
 export type LeadStatus = "novo" | "qualificado" | "em_consideracao" | "visita_agendada" | "visitou" | "em_negociacao" | "fechou" | "perdido"
 
 export type LeadTemperature = "QUENTE" | "MORNO" | "FRIO" | "INERTE"
