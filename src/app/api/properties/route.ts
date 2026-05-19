@@ -48,5 +48,17 @@ export async function POST(req: Request) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // Gera rascunhos de post para as principais plataformas em background
+  const platforms = ["instagram_feed", "instagram_stories", "facebook_post", "facebook_marketplace"] as const
+  const draftRows = platforms.map((platform) => ({
+    user_id: user.id,
+    property_id: data.id,
+    platform,
+    caption: `✨ Novo imóvel disponível: ${data.title}${data.city ? ` em ${data.city}` : ""}${data.price ? ` — R$ ${Number(data.price).toLocaleString("pt-BR")}` : ""}. Entre em contato para mais informações! 🏡`,
+    status: "pending" as const,
+  }))
+  await supabase.from("social_posts_drafts").insert(draftRows)
+
   return NextResponse.json(data, { status: 201 })
 }

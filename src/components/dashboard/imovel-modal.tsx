@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { Sparkles, Loader2 } from "lucide-react"
 
 type Property = {
   id: string
@@ -35,6 +36,7 @@ const BR_STATES = ["AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","
 
 export function ImovelModal({ property, open, onClose, onSaved }: Props) {
   const [saving, setSaving] = useState(false)
+  const [generatingDesc, setGeneratingDesc] = useState(false)
   const [form, setForm] = useState({
     title: property?.title ?? "",
     description: property?.description ?? "",
@@ -49,6 +51,35 @@ export function ImovelModal({ property, open, onClose, onSaved }: Props) {
 
   function set(key: string, value: string) {
     setForm((f) => ({ ...f, [key]: value }))
+  }
+
+  async function handleGenerateDesc() {
+    if (!form.title) { toast.error("Preencha o título antes de gerar a descrição."); return }
+    setGeneratingDesc(true)
+    try {
+      const res = await fetch("/api/studio/describe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          property_id: property?.id ?? "00000000-0000-0000-0000-000000000000",
+          title: form.title,
+          type: form.type || undefined,
+          bedrooms: form.bedrooms ? parseInt(form.bedrooms) : undefined,
+          area_sqm: form.area_sqm ? parseFloat(form.area_sqm) : undefined,
+          price: form.price ? parseFloat(form.price) : undefined,
+          address: form.address || undefined,
+          city: form.city || undefined,
+        }),
+      })
+      if (!res.ok) throw new Error()
+      const data = await res.json() as { description: string }
+      setForm((f) => ({ ...f, description: data.description }))
+      toast.success("Descrição gerada pelo Moova Estúdio!")
+    } catch {
+      toast.error("Erro ao gerar descrição. Tente novamente.")
+    } finally {
+      setGeneratingDesc(false)
+    }
   }
 
   async function handleSave() {
@@ -159,7 +190,20 @@ export function ImovelModal({ property, open, onClose, onSaved }: Props) {
           </div>
 
           <div className="space-y-1.5">
-            <Label>Descrição</Label>
+            <div className="flex items-center justify-between">
+              <Label>Descrição</Label>
+              <button
+                type="button"
+                onClick={handleGenerateDesc}
+                disabled={generatingDesc || !form.title}
+                className="flex items-center gap-1 text-xs text-[#B87333] hover:text-[#8a5520] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                {generatingDesc
+                  ? <><Loader2 className="w-3 h-3 animate-spin" /> Gerando...</>
+                  : <><Sparkles className="w-3 h-3" /> Gerar com IA</>
+                }
+              </button>
+            </div>
             <Textarea value={form.description} onChange={(e) => set("description", e.target.value)}
               placeholder="Descreva o imóvel para a Nara usar nas conversas..." rows={3}
               className="border-[#E0D8CE] resize-none" />

@@ -41,6 +41,10 @@ type Profile = {
   eleven_labs_voice_id: string | null
   nara_work_start: number | null
   nara_work_end: number | null
+  portal_slug: string | null
+  bio: string | null
+  city: string | null
+  state_uf: string | null
 } | null
 
 type WAAccount = {
@@ -74,6 +78,10 @@ export function ConfiguracoesForm({
   )
   const [workStart, setWorkStart] = useState(profile?.nara_work_start ?? 8)
   const [workEnd, setWorkEnd] = useState(profile?.nara_work_end ?? 20)
+  const [portalSlug, setPortalSlug] = useState(profile?.portal_slug ?? "")
+  const [bio, setBio] = useState(profile?.bio ?? "")
+  const [city, setCity] = useState(profile?.city ?? "")
+  const [stateUf, setStateUf] = useState(profile?.state_uf ?? "")
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [analyzingTone, setAnalyzingTone] = useState(false)
@@ -269,6 +277,10 @@ export function ConfiguracoesForm({
           human_approval_categories: approvalCategories,
           nara_work_start: workStart,
           nara_work_end: workEnd,
+          portal_slug: portalSlug || null,
+          bio: bio || null,
+          city: city || null,
+          state_uf: stateUf || null,
         })
         .eq("id", user!.id)
       setSaved(true)
@@ -689,6 +701,77 @@ export function ConfiguracoesForm({
               </div>
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Moova Portal */}
+      <Card className="border-[#E0D8CE]">
+        <CardHeader className="pb-3">
+          <CardTitle className="font-serif text-lg text-[#2D4A3E]">Moova Portal</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-[#5A5A5A]">
+            Seu site profissional gerado automaticamente com portfólio de imóveis.
+          </p>
+          <div className="space-y-1.5">
+            <Label>URL do seu portal</Label>
+            <div className="flex items-center gap-0">
+              <span className="bg-[#EAE3D9] border border-r-0 border-[#E0D8CE] rounded-l-lg px-3 py-2 text-sm text-[#8A8A8A] whitespace-nowrap">
+                moovaimob.com/p/
+              </span>
+              <Input
+                value={portalSlug}
+                onChange={(e) => setPortalSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+                placeholder="seu-nome"
+                className="border-[#E0D8CE] rounded-l-none"
+              />
+            </div>
+            {portalSlug && (
+              <a
+                href={`/p/${portalSlug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-[#B87333] hover:underline"
+              >
+                Ver portal → moovaimob.com/p/{portalSlug}
+              </a>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <Label>Bio (apresentação pública)</Label>
+            <textarea
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              placeholder="Ex: Corretor especialista em alto padrão em São Paulo há 10 anos. CRECI-SP ativo."
+              rows={3}
+              className="w-full text-sm border border-[#E0D8CE] rounded-lg px-3 py-2.5 bg-white resize-none focus:outline-none focus:border-[#2D4A3E] text-[#2A2A2A] placeholder:text-[#8A8A8A]"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label>Cidade</Label>
+              <Input
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                placeholder="São Paulo"
+                className="border-[#E0D8CE]"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Estado (UF)</Label>
+              <Input
+                value={stateUf}
+                onChange={(e) => setStateUf(e.target.value.toUpperCase().slice(0, 2))}
+                placeholder="SP"
+                maxLength={2}
+                className="border-[#E0D8CE]"
+              />
+            </div>
+          </div>
+          <div className="bg-[#EAE3D9] rounded-lg p-3 text-xs text-[#5A5A5A]">
+            Feed XML para portais (ZAP, VivaReal, Imovelweb) disponível em{" "}
+            <code className="font-mono text-[#2D4A3E]">/api/portal/xml</code>
+          </div>
         </CardContent>
       </Card>
 
