@@ -61,7 +61,7 @@ export default function PrivacidadePage() {
 
           <section className="space-y-3">
             <h2 className="font-serif text-lg text-[#2D4A3E]">7. Direitos do Titular</h2>
-            <p>Conforme LGPD, você tem direito a: acesso, correção, exclusão, portabilidade, revogação de consentimento e oposição ao tratamento. Solicitações: <strong>privacidade@moova.com.br</strong></p>
+            <p>Conforme LGPD, você tem direito a: acesso, correção, exclusão, portabilidade, revogação de consentimento e oposição ao tratamento. Solicitações: <strong>carvallimports@gmail.com</strong></p>
           </section>
 
           <section className="space-y-3">
@@ -71,7 +71,7 @@ export default function PrivacidadePage() {
 
           <section className="space-y-3">
             <h2 className="font-serif text-lg text-[#2D4A3E]">9. Contato com o DPO</h2>
-            <p>Encarregado de Proteção de Dados: <strong>privacidade@moova.com.br</strong></p>
+            <p>Encarregado de Proteção de Dados: <strong>Karine Silva</strong> — <strong>carvallimports@gmail.com</strong></p>
           </section>
         </div>
       </div>
