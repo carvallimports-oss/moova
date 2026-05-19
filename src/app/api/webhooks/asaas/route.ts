@@ -1,4 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin"
+import { sendEmail } from "@/lib/email/send"
+import { circuloMoovaWelcomeEmail } from "@/lib/email/templates"
 import { NextResponse } from "next/server"
 
 export const dynamic = "force-dynamic"
@@ -72,6 +74,21 @@ export async function POST(req: Request) {
           current_period_end: nextBillingDate.toISOString(),
           activated_at: new Date().toISOString(),
         })
+
+        // Send Círculo Moova Discord invite
+        const { data: userRow } = await supabase
+          .from("users")
+          .select("name, email")
+          .eq("id", userId)
+          .single()
+
+        if (userRow?.email) {
+          const { subject, html } = circuloMoovaWelcomeEmail({
+            brokerName: userRow.name ?? "Corretor",
+            discordUrl: "https://discord.gg/t8daGDBx",
+          })
+          await sendEmail({ to: userRow.email, subject, html })
+        }
       }
       break
     }

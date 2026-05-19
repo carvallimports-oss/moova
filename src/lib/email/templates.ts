@@ -321,3 +321,41 @@ export function pactoVeredito90Email(params: {
 </html>`,
   }
 }
+
+export function circuloMoovaWelcomeEmail(params: {
+  brokerName: string
+  discordUrl: string
+}): { subject: string; html: string } {
+  return {
+    subject: "Bem-vindo ao Círculo Moova — seu link de acesso ao Discord",
+    html: `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#FAF7F2;font-family:Georgia,serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#FAF7F2;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;border:1px solid #E0D8CE;overflow:hidden;">
+        <tr><td style="background:#2D4A3E;padding:32px 40px;text-align:center;">
+          <p style="margin:0;color:rgba(255,255,255,0.7);font-size:12px;letter-spacing:2px;text-transform:uppercase;">Círculo Moova</p>
+          <h1 style="margin:8px 0 0;color:#fff;font-size:26px;font-weight:normal;">Você faz parte da comunidade</h1>
+        </td></tr>
+        <tr><td style="padding:40px;">
+          <p style="color:#2D4A3E;font-size:16px;line-height:1.6;">${params.brokerName},</p>
+          <p style="color:#5A5A5A;font-size:15px;line-height:1.7;">Seu acesso ao <strong>Círculo Moova</strong> está liberado. É a comunidade exclusiva de corretores que usam IA para crescer — troca de experiências, estratégias e suporte direto da equipe Moova.</p>
+          <table width="100%" cellpadding="0" cellspacing="0" style="margin:32px 0;">
+            <tr><td align="center">
+              <a href="${params.discordUrl}" style="display:inline-block;background:#5865F2;color:#fff;text-decoration:none;padding:14px 36px;border-radius:8px;font-size:15px;">Entrar no Discord</a>
+            </td></tr>
+          </table>
+          <p style="color:#8A8A8A;font-size:13px;line-height:1.6;">Se o botão não funcionar, copie e cole este link:<br><span style="color:#2D4A3E;">${params.discordUrl}</span></p>
+          <hr style="border:none;border-top:1px solid #E0D8CE;margin:32px 0;">
+          <p style="color:#B87333;font-size:12px;margin:0;">Equipe Moova</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`,
+  }
+}
