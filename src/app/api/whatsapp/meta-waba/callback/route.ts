@@ -141,7 +141,7 @@ export async function GET(req: Request) {
       user_id: user.id,
       provider: "bsp",
       bsp_access_token: longToken,
-      status: "pending_manual",
+      status: "disconnected",
     }, { onConflict: "user_id" })
     if (upsertErr) console.error(`[bsp] upsert error:`, upsertErr.message)
     else console.log(`[bsp] token saved for user ${user.id}`)
