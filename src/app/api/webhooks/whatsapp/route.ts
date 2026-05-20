@@ -20,6 +20,8 @@ function isValidEvolutionRequest(req: NextRequest): boolean {
 
 export async function POST(req: NextRequest) {
   if (!isValidEvolutionRequest(req)) {
+    const header = req.headers.get("apikey") ?? req.headers.get("x-api-key") ?? "(none)"
+    console.error(`[evo-webhook] 403 — apikey header: "${header.slice(0, 20)}"`)
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
