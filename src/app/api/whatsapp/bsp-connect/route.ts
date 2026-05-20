@@ -20,20 +20,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "phone_number_id e access_token são obrigatórios" }, { status: 400 })
   }
 
-  // Validate the token + phone_number_id against Meta API
-  const verifyRes = await fetch(
-    `https://graph.facebook.com/v19.0/${phone_number_id}?fields=display_phone_number,verified_name`,
-    { headers: { Authorization: `Bearer ${access_token}` } }
-  )
-
-  if (!verifyRes.ok) {
-    const err = await verifyRes.json() as Record<string, unknown>
-    const msg = (err.error as Record<string, unknown>)?.message ?? "Credenciais inválidas"
-    return NextResponse.json({ error: `Meta API: ${msg}` }, { status: 400 })
-  }
-
-  const meta = await verifyRes.json() as { display_phone_number?: string; verified_name?: string }
-
   const adminSupabase = createAdminClient()
   await adminSupabase
     .from("whatsapp_accounts")
@@ -43,16 +29,12 @@ export async function POST(req: Request) {
       bsp_phone_number_id: phone_number_id,
       bsp_waba_id: waba_id || null,
       bsp_access_token: access_token,
-      phone_number: display_phone ?? meta.display_phone_number ?? null,
+      phone_number: display_phone ?? null,
       status: "connected",
       connected_at: new Date().toISOString(),
     }, { onConflict: "user_id" })
 
-  return NextResponse.json({
-    ok: true,
-    phone: meta.display_phone_number,
-    name: meta.verified_name,
-  })
+  return NextResponse.json({ ok: true, phone: display_phone ?? null })
 }
 
 export async function DELETE(req: Request) {
