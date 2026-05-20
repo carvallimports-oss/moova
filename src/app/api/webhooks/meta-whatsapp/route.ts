@@ -89,20 +89,23 @@ export async function POST(req: NextRequest) {
     incoming.text = undefined
   }
 
-  await inngest.send({
-    name: "whatsapp/message.received",
-    data: {
-      from: incoming.from,
-      type: incoming.type,
-      text: incoming.text,
-      audioBase64,
-      imageUrl,
-      timestamp: incoming.timestamp,
-      messageId: incoming.messageId,
-      // BSP uses phone_number_id for broker lookup (via bsp_phone_number_id)
-      bspPhoneNumberId: phoneNumberId,
-    },
-  })
+  try {
+    await inngest.send({
+      name: "whatsapp/message.received",
+      data: {
+        from: incoming.from,
+        type: incoming.type,
+        text: incoming.text,
+        audioBase64,
+        imageUrl,
+        timestamp: incoming.timestamp,
+        messageId: incoming.messageId,
+        bspPhoneNumberId: phoneNumberId,
+      },
+    })
+  } catch (err) {
+    console.error("[meta-webhook] inngest.send failed:", err)
+  }
 
   return NextResponse.json({ ok: true })
 }
