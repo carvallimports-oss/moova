@@ -7,10 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-
 export default function LoginPage() {
-  const router = useRouter()
   const supabase = createClient()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -25,10 +22,10 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
       setError("Email ou senha incorretos.")
+      setLoading(false)
     } else {
-      router.push("/dashboard")
+      window.location.href = "/dashboard"
     }
-    setLoading(false)
   }
 
   async function handleMagicLink() {
@@ -45,22 +42,22 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FAF7F2] px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#F5F0E0] px-4">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center space-y-2">
-          <div className="w-8 h-1 bg-[#B87333] rounded-full mx-auto" />
-          <h1 className="font-serif text-3xl text-[#2D4A3E]">Moova</h1>
-          <p className="text-[#8A8A8A] text-sm">Acesse sua conta</p>
+          <div className="w-8 h-1 bg-[#787F56] rounded-full mx-auto" />
+          <h1 className="font-serif text-3xl text-[#30360E]">Moova</h1>
+          <p className="text-[#7A7A6A] text-sm">Acesse sua conta</p>
         </div>
 
-        <Card className="border-[#E0D8CE] shadow-sm">
+        <Card className="border-[#D4C5A0] shadow-sm">
           <CardHeader className="pb-3" />
           <CardContent className="space-y-4">
             {magicSent ? (
               <div className="text-center space-y-3 py-4">
                 <div className="text-4xl">📬</div>
-                <p className="text-[#2D4A3E] font-medium">Link enviado!</p>
-                <p className="text-sm text-[#8A8A8A]">
+                <p className="text-[#30360E] font-medium">Link enviado!</p>
+                <p className="text-sm text-[#7A7A6A]">
                   Verifique seu email <strong>{email}</strong> e clique no link para entrar.
                 </p>
               </div>
@@ -75,7 +72,7 @@ export default function LoginPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="border-[#E0D8CE] focus:border-[#2D4A3E]"
+                    className="border-[#D4C5A0] focus:border-[#30360E]"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -87,7 +84,7 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="border-[#E0D8CE] focus:border-[#2D4A3E]"
+                    className="border-[#D4C5A0] focus:border-[#30360E]"
                   />
                 </div>
 
@@ -96,16 +93,16 @@ export default function LoginPage() {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white"
+                  className="w-full bg-[#30360E] hover:bg-[#4A5218] text-white"
                 >
                   {loading ? "Entrando..." : "Entrar"}
                 </Button>
 
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-[#E0D8CE]" />
+                    <div className="w-full border-t border-[#D4C5A0]" />
                   </div>
-                  <div className="relative flex justify-center text-xs text-[#8A8A8A]">
+                  <div className="relative flex justify-center text-xs text-[#7A7A6A]">
                     <span className="bg-white px-2">ou</span>
                   </div>
                 </div>
@@ -115,7 +112,7 @@ export default function LoginPage() {
                   variant="outline"
                   disabled={loading}
                   onClick={handleMagicLink}
-                  className="w-full border-[#E0D8CE] text-[#2D4A3E]"
+                  className="w-full border-[#D4C5A0] text-[#30360E]"
                 >
                   Entrar com link por email
                 </Button>
@@ -124,9 +121,9 @@ export default function LoginPage() {
           </CardContent>
         </Card>
 
-        <p className="text-center text-sm text-[#8A8A8A]">
+        <p className="text-center text-sm text-[#7A7A6A]">
           Não tem conta?{" "}
-          <Link href="/signup" className="text-[#B87333] hover:underline font-medium">
+          <Link href="/signup" className="text-[#787F56] hover:underline font-medium">
             Solicitar acesso
           </Link>
         </p>
