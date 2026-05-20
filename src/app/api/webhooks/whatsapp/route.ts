@@ -54,7 +54,12 @@ async function handleQrCodeUpdated(body: Record<string, unknown>) {
   try {
     const instance = body.instance as string
     const data = body.data as Record<string, unknown>
-    const qr = (data?.qrcode as Record<string, unknown>)?.base64 as string | undefined
+    // v2.2.x can put base64 in different locations
+    const qr: string | undefined =
+      ((data?.qrcode as Record<string, unknown>)?.base64 as string | undefined) ??
+      (typeof data?.qrcode === "string" ? (data.qrcode as string) : undefined) ??
+      (data?.base64 as string | undefined)
+    console.log(`[evo-webhook] QRCODE_UPDATED instance=${instance} qr_len=${qr?.length ?? 0}`)
     if (!instance || !qr) return
 
     const supabase = createAdminClient()
@@ -62,7 +67,9 @@ async function handleQrCodeUpdated(body: Record<string, unknown>) {
       .from("whatsapp_accounts")
       .update({ qr_code: qr, status: "qr_pending" })
       .eq("instance_name", instance)
-  } catch {}
+  } catch (err) {
+    console.error("[evo-webhook] handleQrCodeUpdated error:", err)
+  }
 }
 
 async function handleConnectionUpdate(body: Record<string, unknown>) {

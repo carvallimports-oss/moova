@@ -19,7 +19,7 @@ export async function POST() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL
   const adminSupabase = createAdminClient()
 
-  // Clear stale QR and set status
+  // Clear stale QR, set status to qr_pending
   await adminSupabase
     .from("whatsapp_accounts")
     .upsert(
@@ -62,37 +62,9 @@ export async function POST() {
     return NextResponse.json({ error: `Evolution API: ${msg}` }, { status: 502 })
   }
 
-  // Poll for QR — Evolution API v2 generates it asynchronously via Baileys
-  // Returns early (after 12s max) so client can show status
-  let qr: string | null = null
-  for (let i = 0; i < 4; i++) {
-    await new Promise(r => setTimeout(r, 3000))
-    try {
-      const qrRes = await fetch(`${evolutionUrl}/instance/connect/${instanceName}`, {
-        headers: { apikey: evolutionKey },
-      })
-      if (qrRes.ok) {
-        const data = await qrRes.json() as Record<string, unknown>
-        const base64 =
-          (data as { base64?: string }).base64 ??
-          (data as { qrcode?: { base64?: string } }).qrcode?.base64 ??
-          (typeof (data as { qrcode?: unknown }).qrcode === "string" ? (data as { qrcode: string }).qrcode : null) ??
-          null
-        if (base64) {
-          qr = base64
-          await adminSupabase
-            .from("whatsapp_accounts")
-            .update({ qr_code: qr })
-            .eq("user_id", user.id)
-          break
-        }
-      }
-    } catch { /* continue polling */ }
-  }
-
-  // QR not ready yet — "connecting" and "close" are both normal initial states.
-  // Return ok so the frontend starts polling /api/whatsapp/qr every 3s.
-  return NextResponse.json({ ok: true, instanceName, qr })
+  // Evolution API v2.2.x delivers QR only via QRCODE_UPDATED webhook.
+  // Return immediately so the frontend starts polling /api/whatsapp/qr every 3s.
+  return NextResponse.json({ ok: true, instanceName, qr: null })
 }
 
 export async function DELETE() {
