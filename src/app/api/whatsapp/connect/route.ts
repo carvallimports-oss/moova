@@ -36,17 +36,20 @@ export async function POST() {
   await new Promise(r => setTimeout(r, 1000))
 
   // Create fresh instance
-  const webhook = appUrl ? `${appUrl}/api/webhooks/whatsapp` : undefined
+  const webhookUrl = appUrl && !appUrl.includes("localhost")
+    ? `${appUrl}/api/webhooks/whatsapp`
+    : null
   const body: Record<string, unknown> = {
     instanceName,
     integration: "WHATSAPP-BAILEYS",
     qrcode: true,
-  }
-  // Only add webhook if appUrl is set and looks like production (not localhost)
-  if (webhook && !webhook.includes("localhost")) {
-    body.webhook = webhook
-    body.webhookByEvents = false
-    body.events = ["MESSAGES_UPSERT", "CONNECTION_UPDATE", "QRCODE_UPDATED"]
+    ...(webhookUrl ? {
+      webhook: {
+        url: webhookUrl,
+        byEvents: false,
+        events: ["MESSAGES_UPSERT", "CONNECTION_UPDATE", "QRCODE_UPDATED"],
+      }
+    } : {}),
   }
 
   const createRes = await fetch(`${evolutionUrl}/instance/create`, {
