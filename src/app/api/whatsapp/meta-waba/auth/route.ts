@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic"
 
 export async function GET() {
   const appId = process.env.META_APP_ID!
-  const base = process.env.NEXT_PUBLIC_APP_URL!
+  const base = process.env.NEXT_PUBLIC_APP_URL ?? "https://moovaimob.com"
   const redirectUri = encodeURIComponent(`${base}/api/whatsapp/meta-waba/callback`)
 
   // business_management requires Meta App Review — use only WhatsApp-specific scopes

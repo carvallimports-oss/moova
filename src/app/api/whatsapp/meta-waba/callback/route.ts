@@ -93,7 +93,7 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const code = searchParams.get("code")
   const error = searchParams.get("error_description")
-  const base = process.env.NEXT_PUBLIC_APP_URL!
+  const base = process.env.NEXT_PUBLIC_APP_URL ?? "https://moovaimob.com"
 
   if (error || !code) {
     return NextResponse.redirect(`${base}/dashboard/configuracoes?bsp_error=${encodeURIComponent(error ?? "Acesso negado")}`)
