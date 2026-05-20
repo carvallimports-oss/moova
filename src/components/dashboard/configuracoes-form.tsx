@@ -338,6 +338,8 @@ export function ConfiguracoesForm({
   async function handleConnect() {
     setConnecting(true)
     setQrCode(null)
+    if (pollRef.current) clearInterval(pollRef.current)
+
     try {
       const res = await fetch("/api/whatsapp/connect", { method: "POST" })
       const data = await res.json()
@@ -345,29 +347,37 @@ export function ConfiguracoesForm({
         toast.error(data.error ?? "Erro ao conectar WhatsApp")
         return
       }
-      const qr = data.qr as string | null
-      if (qr) {
-        const src = qr.startsWith("data:") ? qr : `data:image/png;base64,${qr}`
-        setQrCode(src)
-        pollRef.current = setInterval(async () => {
-          const statusRes = await fetch("/api/whatsapp/status")
-          if (!statusRes.ok) return
-          const status = await statusRes.json()
-          if (status.connected) {
-            setConnected(true)
-            setQrCode(null)
-            if (pollRef.current) clearInterval(pollRef.current)
-            toast.success("WhatsApp conectado!")
-          }
-        }, 4000)
-      } else {
-        toast.error("QR Code não disponível. Tente novamente.")
-      }
     } catch {
-      toast.error("Erro ao conectar WhatsApp")
+      toast.error("Erro ao iniciar conexão WhatsApp")
+      return
     } finally {
       setConnecting(false)
     }
+
+    // Poll client-side for QR and connection state
+    let attempts = 0
+    pollRef.current = setInterval(async () => {
+      attempts++
+      if (attempts > 30) {
+        clearInterval(pollRef.current!)
+        toast.error("QR Code não disponível. Verifique a Evolution API e tente novamente.")
+        return
+      }
+      try {
+        const res = await fetch("/api/whatsapp/qr")
+        if (!res.ok) return
+        const data = await res.json() as { qr?: string | null; connected?: boolean }
+        if (data.connected) {
+          setConnected(true)
+          setQrCode(null)
+          clearInterval(pollRef.current!)
+          toast.success("WhatsApp conectado!")
+        } else if (data.qr) {
+          const src = data.qr.startsWith("data:") ? data.qr : `data:image/png;base64,${data.qr}`
+          setQrCode(src)
+        }
+      } catch {}
+    }, 2000)
   }
 
   async function handleBSPConnect() {
