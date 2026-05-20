@@ -1,6 +1,16 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+
+declare global {
+  interface Window {
+    FB: {
+      init: (opts: object) => void
+      login: (cb: (r: { authResponse?: { accessToken: string } }) => void, opts?: object) => void
+    }
+    fbAsyncInit: () => void
+  }
+}
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -106,6 +116,13 @@ export function ConfiguracoesForm({
   const [bspConnecting, setBspConnecting] = useState(false)
   const [showBspForm, setShowBspForm] = useState(false)
 
+  // Meta Embedded Signup state
+  const [fbConnecting, setFbConnecting] = useState(false)
+  const [embeddedPhones, setEmbeddedPhones] = useState<Array<{ phone_number_id: string; display_phone: string; name: string; waba_id: string }>>([])
+  const [embeddedToken, setEmbeddedToken] = useState("")
+  const [showPhonePicker, setShowPhonePicker] = useState(false)
+  const [showManualForm, setShowManualForm] = useState(false)
+
   // Voice cloning state
   const [voiceCloned, setVoiceCloned] = useState(!!profile?.eleven_labs_voice_id)
   const [recordings, setRecordings] = useState<(string | null)[]>([null, null, null, null, null])
@@ -129,6 +146,73 @@ export function ConfiguracoesForm({
     initialMetaPageName ?? (profile as { meta_page_name?: string | null } | null)?.meta_page_name ?? null
   )
   const [metaError] = useState(metaErrorParam ?? null)
+
+  // Load Facebook JS SDK
+  useEffect(() => {
+    if (typeof window === "undefined" || document.getElementById("fb-sdk")) return
+    window.fbAsyncInit = function () {
+      window.FB.init({ appId: "946137871507469", cookie: true, xfbml: true, version: "v19.0" })
+    }
+    const script = document.createElement("script")
+    script.id = "fb-sdk"
+    script.src = "https://connect.facebook.net/pt_BR/sdk.js"
+    script.async = true
+    script.defer = true
+    document.body.appendChild(script)
+  }, [])
+
+  async function saveEmbeddedPhone(phone: { phone_number_id: string; display_phone: string; name: string; waba_id: string }, token: string) {
+    const res = await fetch("/api/whatsapp/bsp-connect", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone_number_id: phone.phone_number_id, waba_id: phone.waba_id, access_token: token, display_phone: phone.display_phone }),
+    })
+    if (res.ok) {
+      setConnected(true)
+      setCurrentProvider("bsp")
+      setShowPhonePicker(false)
+      setShowBspForm(false)
+      setBspPhoneNumberId(phone.phone_number_id)
+      toast.success(`WhatsApp Business conectado! ${phone.display_phone}`)
+    } else {
+      const data = await res.json() as { error?: string }
+      toast.error(data.error ?? "Erro ao salvar credenciais")
+    }
+  }
+
+  async function handleFacebookLogin() {
+    if (typeof window === "undefined" || !window.FB) {
+      toast.error("SDK do Facebook não carregou. Recarregue a página.")
+      return
+    }
+    setFbConnecting(true)
+    window.FB.login(async (response) => {
+      if (!response.authResponse) { setFbConnecting(false); return }
+      try {
+        const res = await fetch("/api/whatsapp/meta-embedded", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ access_token: response.authResponse.accessToken }),
+        })
+        const data = await res.json() as { token?: string; phones?: typeof embeddedPhones; error?: string }
+        if (!res.ok) { toast.error(data.error ?? "Erro ao buscar contas WhatsApp"); return }
+        setEmbeddedToken(data.token ?? "")
+        const phones = data.phones ?? []
+        if (phones.length === 0) {
+          toast.error("Nenhum número WhatsApp Business encontrado nessa conta Facebook.")
+        } else if (phones.length === 1) {
+          await saveEmbeddedPhone(phones[0], data.token ?? "")
+        } else {
+          setEmbeddedPhones(phones)
+          setShowPhonePicker(true)
+        }
+      } catch {
+        toast.error("Erro ao conectar com Facebook")
+      } finally {
+        setFbConnecting(false)
+      }
+    }, { scope: "whatsapp_business_management,whatsapp_business_messaging", return_scopes: true })
+  }
 
   useEffect(() => {
     if (calendarConnectedParam) toast.success("Google Agenda conectada!")
@@ -459,13 +543,13 @@ export function ConfiguracoesForm({
             </div>
           )}
 
-          {/* BSP: Meta Cloud API credentials form */}
+          {/* BSP: Meta Cloud API */}
           {(currentProvider === "bsp" || showBspForm) && (
             <div className="space-y-3 border border-[#E0D8CE] rounded-xl p-4 bg-[#FAF7F2]">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium text-[#2D4A3E]">Meta Cloud API (BSP)</p>
                 {showBspForm && currentProvider !== "bsp" && (
-                  <button onClick={() => setShowBspForm(false)} className="text-xs text-[#8A8A8A] hover:text-[#5A5A5A]">
+                  <button onClick={() => { setShowBspForm(false); setShowPhonePicker(false); setShowManualForm(false) }} className="text-xs text-[#8A8A8A] hover:text-[#5A5A5A]">
                     Cancelar
                   </button>
                 )}
@@ -481,9 +565,6 @@ export function ConfiguracoesForm({
                       <strong>WABA ID:</strong> {waAccount.bsp_waba_id}
                     </p>
                   )}
-                  <p className="text-xs text-green-600">
-                    Webhook Meta: <code className="bg-white px-1 rounded text-[10px]">/api/webhooks/meta-whatsapp</code>
-                  </p>
                   <Button
                     variant="outline"
                     size="sm"
@@ -493,52 +574,74 @@ export function ConfiguracoesForm({
                     Remover credenciais BSP
                   </Button>
                 </div>
+              ) : showPhonePicker ? (
+                <div className="space-y-2">
+                  <p className="text-xs text-[#5A5A5A] font-medium">Selecione o número WhatsApp Business:</p>
+                  {embeddedPhones.map((phone) => (
+                    <button
+                      key={phone.phone_number_id}
+                      onClick={() => saveEmbeddedPhone(phone, embeddedToken)}
+                      className="w-full text-left border border-[#E0D8CE] rounded-lg p-3 bg-white hover:bg-[#F0EBE3] transition-colors"
+                    >
+                      <p className="text-sm font-medium text-[#2D4A3E]">{phone.display_phone}</p>
+                      <p className="text-xs text-[#8A8A8A]">{phone.name}</p>
+                    </button>
+                  ))}
+                </div>
               ) : (
                 <div className="space-y-3">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs">Phone Number ID <span className="text-red-500">*</span></Label>
-                    <Input
-                      value={bspPhoneNumberId}
-                      onChange={(e) => setBspPhoneNumberId(e.target.value)}
-                      placeholder="ex: 123456789012345"
-                      className="border-[#E0D8CE] text-sm h-8"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs">WABA ID (opcional)</Label>
-                    <Input
-                      value={bspWabaId}
-                      onChange={(e) => setBspWabaId(e.target.value)}
-                      placeholder="ex: 987654321098765"
-                      className="border-[#E0D8CE] text-sm h-8"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs">Access Token (System User) <span className="text-red-500">*</span></Label>
-                    <Input
-                      value={bspAccessToken}
-                      onChange={(e) => setBspAccessToken(e.target.value)}
-                      type="password"
-                      placeholder="EAAxxxxxxxx..."
-                      className="border-[#E0D8CE] text-sm h-8"
-                    />
-                  </div>
-                  <div className="bg-white border border-[#E0D8CE] rounded-lg p-3 text-xs text-[#5A5A5A] space-y-1">
-                    <p className="font-medium text-[#2D4A3E]">URL do Webhook para configurar no Meta:</p>
-                    <code className="block bg-[#F5F0EB] px-2 py-1 rounded text-[10px] break-all">
-                      {typeof window !== "undefined" ? window.location.origin : "https://moovaimob.com"}/api/webhooks/meta-whatsapp
-                    </code>
-                    <p className="font-medium text-[#2D4A3E] pt-1">Verify Token:</p>
-                    <code className="block bg-[#F5F0EB] px-2 py-1 rounded text-[10px]">META_WA_VERIFY_TOKEN (env var)</code>
-                  </div>
+                  {/* Primary: Facebook Login */}
                   <Button
-                    onClick={handleBSPConnect}
-                    disabled={bspConnecting || !bspPhoneNumberId.trim() || !bspAccessToken.trim()}
-                    className="w-full bg-[#2D4A3E] hover:bg-[#1e3329] text-white text-sm gap-2"
+                    onClick={handleFacebookLogin}
+                    disabled={fbConnecting}
+                    className="w-full text-white text-sm gap-2 font-medium"
+                    style={{ backgroundColor: "#1877F2" }}
                   >
-                    {bspConnecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wifi className="w-4 h-4" />}
-                    {bspConnecting ? "Verificando credenciais..." : "Conectar via Meta Cloud API"}
+                    {fbConnecting ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                      </svg>
+                    )}
+                    {fbConnecting ? "Aguardando Facebook..." : "Conectar com Facebook"}
                   </Button>
+                  <p className="text-[11px] text-[#8A8A8A] text-center">
+                    Abre o login do Facebook e importa seu WhatsApp Business automaticamente
+                  </p>
+
+                  {/* Manual fallback */}
+                  {!showManualForm ? (
+                    <button
+                      onClick={() => setShowManualForm(true)}
+                      className="text-xs text-[#B87333] hover:underline w-full text-center"
+                    >
+                      Preferir inserir credenciais manualmente →
+                    </button>
+                  ) : (
+                    <div className="space-y-3 pt-2 border-t border-[#E0D8CE]">
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Phone Number ID <span className="text-red-500">*</span></Label>
+                        <Input value={bspPhoneNumberId} onChange={(e) => setBspPhoneNumberId(e.target.value)} placeholder="ex: 123456789012345" className="border-[#E0D8CE] text-sm h-8" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">WABA ID (opcional)</Label>
+                        <Input value={bspWabaId} onChange={(e) => setBspWabaId(e.target.value)} placeholder="ex: 987654321098765" className="border-[#E0D8CE] text-sm h-8" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Access Token <span className="text-red-500">*</span></Label>
+                        <Input value={bspAccessToken} onChange={(e) => setBspAccessToken(e.target.value)} type="password" placeholder="EAAxxxxxxxx..." className="border-[#E0D8CE] text-sm h-8" />
+                      </div>
+                      <Button
+                        onClick={handleBSPConnect}
+                        disabled={bspConnecting || !bspPhoneNumberId.trim() || !bspAccessToken.trim()}
+                        className="w-full bg-[#2D4A3E] hover:bg-[#1e3329] text-white text-sm gap-2"
+                      >
+                        {bspConnecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wifi className="w-4 h-4" />}
+                        {bspConnecting ? "Salvando..." : "Conectar via Meta Cloud API"}
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
