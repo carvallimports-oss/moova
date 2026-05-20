@@ -2,15 +2,6 @@
 
 import { useState, useEffect, useRef } from "react"
 
-declare global {
-  interface Window {
-    FB: {
-      init: (opts: object) => void
-      login: (cb: (r: { authResponse?: { accessToken: string; code?: string } }) => void, opts?: object) => void
-    }
-    fbAsyncInit: () => void
-  }
-}
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -18,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { createClient } from "@/lib/supabase/client"
-import { Wifi, WifiOff, RefreshCw, Shield, Loader2, Mic, MicOff, Calendar, CheckCircle2, Clock, Sparkles, Share2, ChevronDown } from "lucide-react"
+import { Wifi, WifiOff, Shield, Loader2, Mic, MicOff, Calendar, CheckCircle2, Clock, Sparkles, Share2, QrCode, RefreshCw } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
@@ -97,7 +88,6 @@ export function ConfiguracoesForm({
   bspPickerToken?: string | null
 }) {
   const supabase = createClient()
-  const [mounted, setMounted] = useState(false)
   const [name, setName] = useState(profile?.name ?? "")
   const [phone, setPhone] = useState(profile?.phone ?? "")
   const [creci, setCreci] = useState(profile?.creci ?? "")
@@ -118,27 +108,25 @@ export function ConfiguracoesForm({
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [analyzingTone, setAnalyzingTone] = useState(false)
-  const [qrCode, setQrCode] = useState<string | null>(null)
-  const [connecting, setConnecting] = useState(false)
   const [connected, setConnected] = useState(waAccount?.status === "connected")
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const [currentProvider, setCurrentProvider] = useState<string>(waAccount?.provider ?? "evolution")
 
   // BSP form state
   const [bspPhoneNumberId, setBspPhoneNumberId] = useState(waAccount?.bsp_phone_number_id ?? "")
   const [bspWabaId, setBspWabaId] = useState(waAccount?.bsp_waba_id ?? "")
   const [bspAccessToken, setBspAccessToken] = useState("")
   const [bspConnecting, setBspConnecting] = useState(false)
-  const [showBspForm, setShowBspForm] = useState(bspPickerParam ?? false)
 
-  // Meta Embedded Signup state
-  const [fbConnecting, setFbConnecting] = useState(false)
+  // QR Code (Evolution API) state
+  const [qrCode, setQrCode] = useState<string | null>(null)
+  const [qrLoading, setQrLoading] = useState(false)
+  const [showQr, setShowQr] = useState(false)
+  const qrPollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  // Meta OAuth phone picker state (populated after redirect callback)
   const [embeddedPhones, setEmbeddedPhones] = useState<BspPhone[]>(bspPickerPhones ?? [])
   const [embeddedToken, setEmbeddedToken] = useState(bspPickerToken ?? "")
   const [showPhonePicker, setShowPhonePicker] = useState(bspPickerParam ?? false)
   const [showManualForm, setShowManualForm] = useState(false)
-  const [showEvolutionQR, setShowEvolutionQR] = useState(false)
-  const embeddedPhoneIdRef = useRef<{ phone_number_id: string; waba_id: string } | null>(null)
 
   // Voice cloning state
   const [voiceCloned, setVoiceCloned] = useState(!!profile?.eleven_labs_voice_id)
@@ -164,24 +152,8 @@ export function ConfiguracoesForm({
   )
   const [metaError] = useState(metaErrorParam ?? null)
 
-  // Mark as mounted to prevent hydration mismatches from client-only state
-  useEffect(() => { setMounted(true) }, [])
 
-  // Load Facebook JS SDK (client-only, after mount)
-  useEffect(() => {
-    if (!mounted || document.getElementById("fb-sdk")) return
-    window.fbAsyncInit = function () {
-      window.FB.init({ appId: "946137871507469", cookie: true, xfbml: false, version: "v19.0" })
-    }
-    const script = document.createElement("script")
-    script.id = "fb-sdk"
-    script.src = "https://connect.facebook.net/pt_BR/sdk.js"
-    script.async = true
-    script.defer = true
-    document.body.appendChild(script)
-  }, [mounted])
-
-  async function saveEmbeddedPhone(phone: { phone_number_id: string; display_phone: string; name: string; waba_id: string }, token: string) {
+  async function savePhone(phone: { phone_number_id: string; display_phone: string; name: string; waba_id: string }, token: string) {
     const res = await fetch("/api/whatsapp/bsp-connect", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -189,9 +161,7 @@ export function ConfiguracoesForm({
     })
     if (res.ok) {
       setConnected(true)
-      setCurrentProvider("bsp")
       setShowPhonePicker(false)
-      setShowBspForm(false)
       setBspPhoneNumberId(phone.phone_number_id)
       toast.success(`WhatsApp Business conectado! ${phone.display_phone}`)
     } else {
@@ -200,64 +170,9 @@ export function ConfiguracoesForm({
     }
   }
 
-  async function handleFacebookLogin() {
-    if (typeof window === "undefined" || !window.FB) {
-      toast.error("SDK do Facebook não carregou. Recarregue a página.")
-      return
-    }
-    setFbConnecting(true)
-    embeddedPhoneIdRef.current = null
-
-    const configId = process.env.NEXT_PUBLIC_META_EMBEDDED_SIGNUP_CONFIG_ID
-    const loginOptions = configId
-      ? { config_id: configId, response_type: "code", override_default_response_type: true, extras: { setup: {}, featureType: "", sessionInfoVersion: "3" } }
-      : { scope: "whatsapp_business_management,whatsapp_business_messaging", return_scopes: true }
-
-    window.FB.login(async (response) => {
-      if (!response.authResponse) { setFbConnecting(false); return }
-      try {
-        const payload = configId && response.authResponse.code
-          ? { code: response.authResponse.code }
-          : { access_token: response.authResponse.accessToken }
-
-        const res = await fetch("/api/whatsapp/meta-embedded", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        })
-        const data = await res.json() as { token?: string; phones?: BspPhone[]; error?: string }
-        if (!res.ok) { toast.error(data.error ?? "Erro ao buscar contas WhatsApp"); return }
-
-        setEmbeddedToken(data.token ?? "")
-        const phones = data.phones ?? []
-
-        // If embedded signup FINISH already provided phone data, auto-select it
-        if (embeddedPhoneIdRef.current && phones.length > 0) {
-          const { phone_number_id, waba_id } = embeddedPhoneIdRef.current
-          const match = phones.find(p => p.phone_number_id === phone_number_id && p.waba_id === waba_id)
-          if (match) { await saveEmbeddedPhone(match, data.token ?? ""); return }
-        }
-
-        if (phones.length === 0) {
-          toast.error("Nenhum número WhatsApp Business encontrado nessa conta Facebook.")
-        } else if (phones.length === 1) {
-          await saveEmbeddedPhone(phones[0], data.token ?? "")
-        } else {
-          setEmbeddedPhones(phones)
-          setShowPhonePicker(true)
-        }
-      } catch {
-        toast.error("Erro ao conectar com Facebook")
-      } finally {
-        setFbConnecting(false)
-      }
-    }, loginOptions)
-  }
-
   useEffect(() => {
     if (bspConnectedParam) {
       setConnected(true)
-      setCurrentProvider("bsp")
       toast.success(`WhatsApp Business conectado!${bspPhoneParam ? ` Número: ${bspPhoneParam}` : ""}`)
     }
     if (bspErrorParam) toast.error(`Erro BSP: ${bspErrorParam}`)
@@ -277,34 +192,12 @@ export function ConfiguracoesForm({
 
   useEffect(() => {
     return () => {
-      if (pollRef.current) clearInterval(pollRef.current)
       if (timerRef.current) clearInterval(timerRef.current)
+      if (qrPollRef.current) clearInterval(qrPollRef.current)
       if (mediaRecorderRef.current?.state === "recording") {
         mediaRecorderRef.current.stop()
       }
     }
-  }, [])
-
-  // Meta Embedded Signup window message handler
-  useEffect(() => {
-    const handler = (event: MessageEvent) => {
-      if (event.origin !== "https://www.facebook.com") return
-      try {
-        const data = JSON.parse(event.data as string) as { type?: string; event?: string; data?: { phone_number_id?: string; waba_id?: string } }
-        if (data.type !== "WA_EMBEDDED_SIGNUP") return
-        if (data.event === "FINISH" && data.data?.phone_number_id) {
-          embeddedPhoneIdRef.current = { phone_number_id: data.data.phone_number_id, waba_id: data.data.waba_id ?? "" }
-        } else if (data.event === "CANCEL") {
-          setFbConnecting(false)
-          toast.info("Conexão cancelada")
-        } else if (data.event === "ERROR") {
-          setFbConnecting(false)
-          toast.error("Erro no processo Meta")
-        }
-      } catch { /* ignore non-JSON */ }
-    }
-    window.addEventListener("message", handler)
-    return () => window.removeEventListener("message", handler)
   }, [])
 
   async function startRecording(index: number) {
@@ -397,70 +290,42 @@ export function ConfiguracoesForm({
     toast.success("Google Agenda desconectada")
   }
 
-  async function handleConnect() {
-    if (connecting) return
-    setConnecting(true)
-    setQrCode(null)
-    if (pollRef.current) clearInterval(pollRef.current)
-
-    try {
-      // connect route polls internally for up to 12s and returns qr if available
-      const res = await fetch("/api/whatsapp/connect", { method: "POST" })
-      const data = await res.json() as { ok?: boolean; qr?: string | null; error?: string; instanceName?: string }
-
-      if (!res.ok) {
-        toast.error(data.error ?? "Erro ao conectar WhatsApp")
-        setConnecting(false)
-        return
-      }
-
-      // QR already available in the response (fast path)
-      if (data.qr) {
-        const src = data.qr.startsWith("data:") ? data.qr : `data:image/png;base64,${data.qr}`
-        setQrCode(src)
-        setConnecting(false)
-        return
-      }
-    } catch {
-      toast.error("Erro ao iniciar conexão WhatsApp")
-      setConnecting(false)
-      return
-    }
-
-    // Poll DB for QR stored via webhook (max 30s)
-    let attempts = 0
-    pollRef.current = setInterval(async () => {
-      attempts++
-      if (attempts > 15) { // 15 × 2s = 30s
-        clearInterval(pollRef.current!)
-        setConnecting(false)
-        toast.error("QR Code não disponível. A Evolution API pode estar com problema de rede. Use a opção Meta (API Oficial) acima.")
-        return
-      }
-      try {
-        const res = await fetch("/api/whatsapp/qr")
-        if (!res.ok) return
-        const data = await res.json() as { qr?: string | null; connected?: boolean }
-        if (data.connected) {
-          setConnected(true)
-          setQrCode(null)
-          setConnecting(false)
-          clearInterval(pollRef.current!)
-          toast.success("WhatsApp conectado!")
-        } else if (data.qr) {
-          const src = data.qr.startsWith("data:") ? data.qr : `data:image/png;base64,${data.qr}`
-          setQrCode(src)
-          setConnecting(false)
-          clearInterval(pollRef.current!)
-        }
-      } catch { /* ignore transient errors */ }
-    }, 2000)
+  function stopQrPoll() {
+    if (qrPollRef.current) { clearInterval(qrPollRef.current); qrPollRef.current = null }
   }
 
-  function handleCancelConnect() {
-    if (pollRef.current) clearInterval(pollRef.current)
-    setConnecting(false)
+  async function handleQRConnect() {
+    setQrLoading(true)
     setQrCode(null)
+    setShowQr(true)
+    stopQrPoll()
+    try {
+      const res = await fetch("/api/whatsapp/connect", { method: "POST" })
+      const data = await res.json() as { ok?: boolean; qr?: string; error?: string }
+      if (!res.ok) { toast.error(data.error ?? "Erro ao iniciar conexão"); setQrLoading(false); return }
+      if (data.qr) setQrCode(data.qr)
+      setQrLoading(false)
+      // Poll status + QR every 3s
+      qrPollRef.current = setInterval(async () => {
+        const [statusRes, qrRes] = await Promise.all([
+          fetch("/api/whatsapp/status"),
+          fetch("/api/whatsapp/qr"),
+        ])
+        const status = await statusRes.json() as { connected?: boolean }
+        const qrData = await qrRes.json() as { qr?: string; connected?: boolean }
+        if (status.connected || qrData.connected) {
+          stopQrPoll()
+          setConnected(true)
+          setShowQr(false)
+          toast.success("WhatsApp conectado!")
+          return
+        }
+        if (qrData.qr) setQrCode(qrData.qr)
+      }, 3000)
+    } catch {
+      toast.error("Erro ao conectar. Tente novamente.")
+      setQrLoading(false)
+    }
   }
 
   async function handleBSPConnect() {
@@ -485,8 +350,6 @@ export function ConfiguracoesForm({
         return
       }
       setConnected(true)
-      setCurrentProvider("bsp")
-      setShowBspForm(false)
       setBspAccessToken("")
       toast.success(`WhatsApp Business conectado! ${data.phone ? `Número: ${data.phone}` : ""}`)
     } catch {
@@ -499,7 +362,6 @@ export function ConfiguracoesForm({
   async function handleBSPDisconnect() {
     await fetch("/api/whatsapp/bsp-connect", { method: "DELETE" })
     setConnected(false)
-    setCurrentProvider("evolution")
     toast.success("Credenciais BSP removidas")
   }
 
@@ -560,38 +422,38 @@ export function ConfiguracoesForm({
   return (
     <div className="space-y-6">
       {/* Perfil */}
-      <Card className="border-[#E0D8CE]">
+      <Card className="border-[#D4C5A0]">
         <CardHeader className="pb-3">
-          <CardTitle className="font-serif text-lg text-[#2D4A3E]">Perfil</CardTitle>
+          <CardTitle className="font-serif text-lg text-[#30360E]">Perfil</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-1.5">
             <Label>Nome completo</Label>
             <Input value={name} onChange={(e) => setName(e.target.value)}
-              placeholder="João da Silva" className="border-[#E0D8CE]" />
+              placeholder="João da Silva" className="border-[#D4C5A0]" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label>WhatsApp (com DDD)</Label>
               <Input value={phone} onChange={(e) => setPhone(e.target.value)}
-                placeholder="11 99999-9999" className="border-[#E0D8CE]" />
+                placeholder="11 99999-9999" className="border-[#D4C5A0]" />
             </div>
             <div className="space-y-1.5">
               <Label>CRECI</Label>
               <Input value={creci} onChange={(e) => setCreci(e.target.value)}
-                placeholder="123456-SP" className="border-[#E0D8CE]" />
+                placeholder="123456-SP" className="border-[#D4C5A0]" />
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* WhatsApp */}
-      <Card className="border-[#E0D8CE]">
+      <Card className="border-[#D4C5A0]">
         <CardHeader className="pb-3">
-          <CardTitle className="font-serif text-lg text-[#2D4A3E] flex items-center gap-2">
+          <CardTitle className="font-serif text-lg text-[#30360E] flex items-center gap-2">
             {waConnected
               ? <Wifi className="w-4 h-4 text-green-600" />
-              : <WifiOff className="w-4 h-4 text-[#8A8A8A]" />
+              : <WifiOff className="w-4 h-4 text-[#7A7A6A]" />
             }
             WhatsApp
           </CardTitle>
@@ -603,8 +465,8 @@ export function ConfiguracoesForm({
               <p className="text-sm text-[#2A2A2A]">
                 {waConnected ? waAccount?.phone_number ?? "Conectado" : "Não conectado"}
               </p>
-              <p className="text-xs text-[#8A8A8A] mt-0.5">
-                {currentProvider === "bsp" ? "Meta Cloud API (Oficial)" : "Evolution API"}
+              <p className="text-xs text-[#7A7A6A] mt-0.5">
+                Meta Cloud API (Oficial)
               </p>
             </div>
             <Badge className={cn(
@@ -623,20 +485,20 @@ export function ConfiguracoesForm({
               {showPhonePicker ? (
                 /* Phone picker — multiple WABAs found */
                 <div className="space-y-2">
-                  <p className="text-xs text-[#5A5A5A] font-medium">Selecione o número WhatsApp Business:</p>
+                  <p className="text-xs text-[#4A4A3A] font-medium">Selecione o número WhatsApp Business:</p>
                   {embeddedPhones.map((p) => (
                     <button
                       key={p.phone_number_id}
-                      onClick={() => saveEmbeddedPhone(p, embeddedToken)}
-                      className="w-full text-left border border-[#E0D8CE] rounded-lg p-3 bg-white hover:bg-[#F0EBE3] transition-colors"
+                      onClick={() => savePhone(p, embeddedToken)}
+                      className="w-full text-left border border-[#D4C5A0] rounded-lg p-3 bg-white hover:bg-[#EAE2CC] transition-colors"
                     >
-                      <p className="text-sm font-medium text-[#2D4A3E]">{p.display_phone}</p>
-                      <p className="text-xs text-[#8A8A8A]">{p.name}</p>
+                      <p className="text-sm font-medium text-[#30360E]">{p.display_phone}</p>
+                      <p className="text-xs text-[#7A7A6A]">{p.name}</p>
                     </button>
                   ))}
                   <button
                     onClick={() => { setShowPhonePicker(false); setEmbeddedPhones([]); setEmbeddedToken("") }}
-                    className="text-xs text-[#8A8A8A] hover:underline"
+                    className="text-xs text-[#7A7A6A] hover:underline"
                   >
                     ← Voltar
                   </button>
@@ -644,18 +506,18 @@ export function ConfiguracoesForm({
               ) : (
                 <>
                   {/* Meta Cloud API — PRIMARY */}
-                  <div className="rounded-xl border border-[#E0D8CE] p-4 bg-[#FAF7F2] space-y-3">
+                  <div className="rounded-xl border border-[#D4C5A0] p-4 bg-[#F5F0E0] space-y-3">
                     <div className="flex items-center gap-2">
                       <svg className="w-4 h-4 shrink-0" fill="#1877F2" viewBox="0 0 24 24">
                         <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                       </svg>
-                      <p className="text-sm font-medium text-[#2D4A3E]">Conectar via Meta (API Oficial)</p>
+                      <p className="text-sm font-medium text-[#30360E]">Conectar via Meta (API Oficial)</p>
                     </div>
-                    <p className="text-xs text-[#5A5A5A]">
+                    <p className="text-xs text-[#4A4A3A]">
                       Autentique com sua conta Facebook para importar seu WhatsApp Business automaticamente.
                     </p>
 
-                    {/* OAuth redirect — main CTA */}
+                    {/* OAuth redirect — no SDK needed */}
                     <a
                       href="/api/whatsapp/meta-waba/auth"
                       className="flex items-center justify-center gap-2 w-full rounded-md px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
@@ -672,97 +534,93 @@ export function ConfiguracoesForm({
                     {!showManualForm ? (
                       <button
                         onClick={() => setShowManualForm(true)}
-                        className="text-xs text-[#B87333] hover:underline w-full text-center"
+                        className="text-xs text-[#787F56] hover:underline w-full text-center"
                       >
                         Inserir credenciais manualmente →
                       </button>
                     ) : (
-                      <div className="space-y-3 pt-2 border-t border-[#E0D8CE]">
+                      <div className="space-y-3 pt-2 border-t border-[#D4C5A0]">
                         <div className="space-y-1.5">
                           <Label className="text-xs">Phone Number ID <span className="text-red-500">*</span></Label>
-                          <Input value={bspPhoneNumberId} onChange={(e) => setBspPhoneNumberId(e.target.value)} placeholder="ex: 123456789012345" className="border-[#E0D8CE] text-sm h-8" />
+                          <Input value={bspPhoneNumberId} onChange={(e) => setBspPhoneNumberId(e.target.value)} placeholder="ex: 123456789012345" className="border-[#D4C5A0] text-sm h-8" />
                         </div>
                         <div className="space-y-1.5">
                           <Label className="text-xs">WABA ID (opcional)</Label>
-                          <Input value={bspWabaId} onChange={(e) => setBspWabaId(e.target.value)} placeholder="ex: 987654321098765" className="border-[#E0D8CE] text-sm h-8" />
+                          <Input value={bspWabaId} onChange={(e) => setBspWabaId(e.target.value)} placeholder="ex: 987654321098765" className="border-[#D4C5A0] text-sm h-8" />
                         </div>
                         <div className="space-y-1.5">
                           <Label className="text-xs">Access Token <span className="text-red-500">*</span></Label>
-                          <Input value={bspAccessToken} onChange={(e) => setBspAccessToken(e.target.value)} type="password" placeholder="EAAxxxxxxxx..." className="border-[#E0D8CE] text-sm h-8" />
+                          <Input value={bspAccessToken} onChange={(e) => setBspAccessToken(e.target.value)} type="password" placeholder="EAAxxxxxxxx..." className="border-[#D4C5A0] text-sm h-8" />
                         </div>
                         <Button
                           onClick={handleBSPConnect}
                           disabled={bspConnecting || !bspPhoneNumberId.trim() || !bspAccessToken.trim()}
-                          className="w-full bg-[#2D4A3E] hover:bg-[#1e3329] text-white text-sm gap-2"
+                          className="w-full bg-[#30360E] hover:bg-[#20240A] text-white text-sm gap-2"
                         >
                           {bspConnecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wifi className="w-4 h-4" />}
                           {bspConnecting ? "Salvando..." : "Conectar via Meta Cloud API"}
                         </Button>
-                        <button onClick={() => setShowManualForm(false)} className="text-xs text-[#8A8A8A] hover:underline w-full text-center">Cancelar</button>
+                        <button onClick={() => setShowManualForm(false)} className="text-xs text-[#7A7A6A] hover:underline w-full text-center">Cancelar</button>
                       </div>
                     )}
                   </div>
 
-                  {/* Evolution API — LEGACY/SECONDARY */}
-                  <div className="border border-[#E0D8CE] rounded-xl overflow-hidden">
-                    <button
-                      onClick={() => setShowEvolutionQR(!showEvolutionQR)}
-                      className="w-full flex items-center justify-between px-4 py-3 text-xs text-[#8A8A8A] hover:bg-[#F5F0E8] transition-colors"
-                    >
-                      <span>Alternativa: QR Code via Evolution API</span>
-                      <ChevronDown className={cn("w-3.5 h-3.5 transition-transform", showEvolutionQR && "rotate-180")} />
-                    </button>
-                    {showEvolutionQR && (
-                      <div className="px-4 pb-4 space-y-3 border-t border-[#E0D8CE] pt-3">
-                        <p className="text-xs text-[#8A8A8A]">
-                          Conecta via protocolo não-oficial (WhatsApp pessoal ou Business sem API Meta).{" "}
-                          <strong>Requer que o servidor Evolution API esteja online e com acesso à internet.</strong>
-                        </p>
-                        {!connecting && !qrCode && (
-                          <Button
-                            onClick={handleConnect}
-                            className="w-full bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white text-sm gap-2"
-                          >
-                            <RefreshCw className="w-4 h-4" />
-                            Gerar QR Code
-                          </Button>
-                        )}
-                        {connecting && !qrCode && (
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-center gap-2 py-3 text-sm text-[#5A5A5A]">
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                              Aguardando QR Code... (até 30s)
-                            </div>
-                            <button onClick={handleCancelConnect} className="text-xs text-[#8A8A8A] hover:underline w-full text-center">
-                              Cancelar
+                  {/* Evolution API — QR Code */}
+                  <div className="rounded-xl border border-[#D4C5A0] p-4 bg-white space-y-3">
+                    <div className="flex items-center gap-2">
+                      <QrCode className="w-4 h-4 text-[#30360E] shrink-0" />
+                      <p className="text-sm font-medium text-[#30360E]">Conectar via QR Code</p>
+                    </div>
+                    <p className="text-xs text-[#4A4A3A]">
+                      Escaneie o QR com o WhatsApp do celular. Qualquer número — ideal para testes.
+                    </p>
+                    {!showQr ? (
+                      <Button
+                        onClick={handleQRConnect}
+                        variant="outline"
+                        className="w-full border-[#D4C5A0] text-[#30360E] text-sm gap-2"
+                      >
+                        <QrCode className="w-4 h-4" />
+                        Gerar QR Code
+                      </Button>
+                    ) : (
+                      <div className="space-y-3">
+                        {qrLoading ? (
+                          <div className="flex flex-col items-center gap-2 py-6">
+                            <Loader2 className="w-6 h-6 animate-spin text-[#787F56]" />
+                            <p className="text-xs text-[#7A7A6A]">Gerando QR Code...</p>
+                          </div>
+                        ) : qrCode ? (
+                          <div className="flex flex-col items-center gap-2">
+                            <img src={qrCode} alt="QR Code WhatsApp" className="w-48 h-48 rounded-lg border border-[#D4C5A0]" />
+                            <p className="text-xs text-[#4A4A3A] text-center">Abra o WhatsApp → ⋮ → Aparelhos conectados → Conectar aparelho</p>
+                            <button onClick={handleQRConnect} className="flex items-center gap-1 text-xs text-[#787F56] hover:underline">
+                              <RefreshCw className="w-3 h-3" /> Gerar novo QR
                             </button>
                           </div>
-                        )}
-                        {qrCode && (
-                          <div className="flex flex-col items-center gap-2 p-4 bg-white border border-[#E0D8CE] rounded-xl">
-                            <p className="text-xs text-[#5A5A5A] font-medium">Escaneie com o WhatsApp</p>
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={qrCode} alt="QR Code WhatsApp" className="w-48 h-48 object-contain" />
-                            <p className="text-[11px] text-[#8A8A8A]">WhatsApp → Dispositivos vinculados → Vincular dispositivo</p>
-                            <button onClick={handleCancelConnect} className="text-xs text-[#8A8A8A] hover:underline">Gerar novo QR</button>
+                        ) : (
+                          <div className="text-center py-4">
+                            <p className="text-xs text-red-600">Não foi possível gerar o QR. O servidor Evolution pode estar com restrição de rede.</p>
+                            <button onClick={() => setShowQr(false)} className="text-xs text-[#7A7A6A] hover:underline mt-1">Fechar</button>
                           </div>
                         )}
                       </div>
                     )}
                   </div>
+
                 </>
               )}
             </div>
           )}
 
-          {/* CONNECTED via BSP */}
-          {waConnected && currentProvider === "bsp" && (
+          {/* CONNECTED */}
+          {waConnected && (
             <div className="space-y-2">
-              <p className="text-xs text-[#5A5A5A]">
+              <p className="text-xs text-[#4A4A3A]">
                 <strong>Phone Number ID:</strong> {waAccount?.bsp_phone_number_id ?? bspPhoneNumberId}
               </p>
               {waAccount?.bsp_waba_id && (
-                <p className="text-xs text-[#5A5A5A]">
+                <p className="text-xs text-[#4A4A3A]">
                   <strong>WABA ID:</strong> {waAccount.bsp_waba_id}
                 </p>
               )}
@@ -776,32 +634,13 @@ export function ConfiguracoesForm({
               </Button>
             </div>
           )}
-
-          {/* CONNECTED via Evolution */}
-          {waConnected && currentProvider !== "bsp" && (
-            <div className="space-y-3">
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-700">
-                Conectado via Evolution API. Migre para a API oficial Meta para maior estabilidade.
-              </div>
-              <a
-                href="/api/whatsapp/meta-waba/auth"
-                className="flex items-center justify-center gap-2 w-full rounded-md px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
-                style={{ backgroundColor: "#1877F2" }}
-              >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
-                Migrar para Meta Cloud API
-              </a>
-            </div>
-          )}
         </CardContent>
       </Card>
 
       {/* Google Agenda */}
-      <Card className="border-[#E0D8CE]">
+      <Card className="border-[#D4C5A0]">
         <CardHeader className="pb-3">
-          <CardTitle className="font-serif text-lg text-[#2D4A3E] flex items-center gap-2">
+          <CardTitle className="font-serif text-lg text-[#30360E] flex items-center gap-2">
             <Calendar className="w-4 h-4" />
             Google Agenda
           </CardTitle>
@@ -827,12 +666,12 @@ export function ConfiguracoesForm({
             </div>
           ) : (
             <>
-              <p className="text-sm text-[#5A5A5A]">
+              <p className="text-sm text-[#4A4A3A]">
                 Conecte sua agenda para que a Nara sugira visitas apenas em horários livres.
               </p>
               <a
                 href="/api/calendar/auth"
-                className="flex items-center justify-center gap-2 w-full bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white text-sm py-2.5 px-4 rounded-md transition-colors"
+                className="flex items-center justify-center gap-2 w-full bg-[#30360E] hover:bg-[#4A5218] text-white text-sm py-2.5 px-4 rounded-md transition-colors"
               >
                 <Calendar className="w-4 h-4" />
                 Conectar Google Agenda
@@ -842,7 +681,7 @@ export function ConfiguracoesForm({
                   Erro ao conectar. Verifique as credenciais e tente novamente.
                 </p>
               )}
-              <p className="text-xs text-[#8A8A8A]">
+              <p className="text-xs text-[#7A7A6A]">
                 Acesso somente leitura. A Nara não cria nem modifica eventos.
               </p>
             </>
@@ -851,9 +690,9 @@ export function ConfiguracoesForm({
       </Card>
 
       {/* Voz da Nara */}
-      <Card className="border-[#E0D8CE]">
+      <Card className="border-[#D4C5A0]">
         <CardHeader className="pb-3">
-          <CardTitle className="font-serif text-lg text-[#2D4A3E] flex items-center gap-2">
+          <CardTitle className="font-serif text-lg text-[#30360E] flex items-center gap-2">
             <Mic className="w-4 h-4" />
             Voz da Nara
           </CardTitle>
@@ -879,16 +718,16 @@ export function ConfiguracoesForm({
             </div>
           ) : (
             <>
-              <p className="text-sm text-[#5A5A5A]">
+              <p className="text-sm text-[#4A4A3A]">
                 Grave as frases abaixo para que a Nara envie áudios com uma voz próxima à sua.
               </p>
               <div className="space-y-2">
                 {VOICE_PROMPTS.map((prompt, i) => (
                   <div key={i} className={cn(
                     "border rounded-xl p-3 space-y-2 transition-colors",
-                    recordings[i] ? "border-[#2D4A3E] bg-[#F0F5F2]" : "border-[#E0D8CE]"
+                    recordings[i] ? "border-[#30360E] bg-[#EEF0E8]" : "border-[#D4C5A0]"
                   )}>
-                    <p className="text-xs text-[#5A5A5A] italic leading-relaxed">&ldquo;{prompt}&rdquo;</p>
+                    <p className="text-xs text-[#4A4A3A] italic leading-relaxed">&ldquo;{prompt}&rdquo;</p>
                     <div className="flex items-center justify-between gap-2">
                       {recordings[i] ? (
                         <>
@@ -898,7 +737,7 @@ export function ConfiguracoesForm({
                           <button
                             onClick={() => startRecording(i)}
                             disabled={activeRecording !== null}
-                            className="text-xs text-[#8A8A8A] hover:text-[#2D4A3E] transition-colors"
+                            className="text-xs text-[#7A7A6A] hover:text-[#30360E] transition-colors"
                           >
                             Re-gravar
                           </button>
@@ -919,7 +758,7 @@ export function ConfiguracoesForm({
                         <button
                           onClick={() => startRecording(i)}
                           disabled={activeRecording !== null && activeRecording !== i}
-                          className="text-xs bg-[#EAE3D9] text-[#5A5A5A] px-3 py-1 rounded-lg hover:bg-[#E0D8CE] transition-colors disabled:opacity-40 flex items-center gap-1"
+                          className="text-xs bg-[#E2D4B9] text-[#4A4A3A] px-3 py-1 rounded-lg hover:bg-[#D4C5A0] transition-colors disabled:opacity-40 flex items-center gap-1"
                         >
                           <Mic className="w-3 h-3" /> Gravar
                         </button>
@@ -932,7 +771,7 @@ export function ConfiguracoesForm({
               <Button
                 onClick={handleCloneVoice}
                 disabled={recordingsDone < 2 || cloningVoice}
-                className="w-full bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white text-sm gap-2"
+                className="w-full bg-[#30360E] hover:bg-[#4A5218] text-white text-sm gap-2"
               >
                 {cloningVoice ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mic className="w-4 h-4" />}
                 {cloningVoice
@@ -942,7 +781,7 @@ export function ConfiguracoesForm({
                   : "Criar voz personalizada"
                 }
               </Button>
-              <p className="text-xs text-[#8A8A8A] text-center">
+              <p className="text-xs text-[#7A7A6A] text-center">
                 Mínimo 2 gravações. Mais gravações = melhor qualidade.
               </p>
             </>
@@ -951,9 +790,9 @@ export function ConfiguracoesForm({
       </Card>
 
       {/* Tom da Nara */}
-      <Card className="border-[#E0D8CE]">
+      <Card className="border-[#D4C5A0]">
         <CardHeader className="pb-3">
-          <CardTitle className="font-serif text-lg text-[#2D4A3E]">Tom da Nara</CardTitle>
+          <CardTitle className="font-serif text-lg text-[#30360E]">Tom da Nara</CardTitle>
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="space-y-2">
@@ -969,12 +808,12 @@ export function ConfiguracoesForm({
                   className={cn(
                     "text-left p-3 rounded-lg border transition-all",
                     formality === key
-                      ? "border-[#2D4A3E] bg-[#2D4A3E]/5"
-                      : "border-[#E0D8CE] hover:border-[#2D4A3E]/40"
+                      ? "border-[#30360E] bg-[#30360E]/5"
+                      : "border-[#D4C5A0] hover:border-[#30360E]/40"
                   )}
                 >
                   <p className="text-sm font-medium text-[#2A2A2A]">{label}</p>
-                  <p className="text-xs text-[#8A8A8A] mt-1 italic">{ex}</p>
+                  <p className="text-xs text-[#7A7A6A] mt-1 italic">{ex}</p>
                 </button>
               ))}
             </div>
@@ -987,7 +826,7 @@ export function ConfiguracoesForm({
               onChange={(e) => setCustomPrompt(e.target.value)}
               placeholder="Ex: Sempre mencione que trabalhamos com financiamento Caixa. Foque em imóveis de alto padrão."
               rows={3}
-              className="w-full text-sm border border-[#E0D8CE] rounded-lg px-3 py-2.5 bg-white resize-none focus:outline-none focus:border-[#2D4A3E] text-[#2A2A2A] placeholder:text-[#8A8A8A]"
+              className="w-full text-sm border border-[#D4C5A0] rounded-lg px-3 py-2.5 bg-white resize-none focus:outline-none focus:border-[#30360E] text-[#2A2A2A] placeholder:text-[#7A7A6A]"
             />
             <Button
               type="button"
@@ -995,7 +834,7 @@ export function ConfiguracoesForm({
               size="sm"
               onClick={handleAnalyzeTone}
               disabled={analyzingTone}
-              className="w-full border-[#E0D8CE] text-[#5A5A5A] text-xs gap-1.5 hover:border-[#2D4A3E] hover:text-[#2D4A3E]"
+              className="w-full border-[#D4C5A0] text-[#4A4A3A] text-xs gap-1.5 hover:border-[#30360E] hover:text-[#30360E]"
             >
               {analyzingTone
                 ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -1003,21 +842,21 @@ export function ConfiguracoesForm({
               }
               {analyzingTone ? "Analisando suas mensagens..." : "Analisar meu estilo de comunicação (IA)"}
             </Button>
-            <p className="text-xs text-[#8A8A8A]">O piso de identidade da Nara Constitution nunca é alterado.</p>
+            <p className="text-xs text-[#7A7A6A]">O piso de identidade da Nara Constitution nunca é alterado.</p>
           </div>
         </CardContent>
       </Card>
 
       {/* Horário de operação */}
-      <Card className="border-[#E0D8CE]">
+      <Card className="border-[#D4C5A0]">
         <CardHeader className="pb-3">
-          <CardTitle className="font-serif text-lg text-[#2D4A3E] flex items-center gap-2">
+          <CardTitle className="font-serif text-lg text-[#30360E] flex items-center gap-2">
             <Clock className="w-4 h-4" />
             Horário de Atendimento
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-sm text-[#5A5A5A]">
+          <p className="text-sm text-[#4A4A3A]">
             Fora desse horário, a Nara envia uma mensagem automática informando o horário de retorno.
           </p>
           <div className="grid grid-cols-2 gap-4">
@@ -1026,7 +865,7 @@ export function ConfiguracoesForm({
               <select
                 value={workStart}
                 onChange={(e) => setWorkStart(Number(e.target.value))}
-                className="w-full border border-[#E0D8CE] rounded-lg px-3 py-2 text-sm bg-white text-[#2A2A2A] focus:outline-none focus:border-[#2D4A3E]"
+                className="w-full border border-[#D4C5A0] rounded-lg px-3 py-2 text-sm bg-white text-[#2A2A2A] focus:outline-none focus:border-[#30360E]"
               >
                 {Array.from({ length: 24 }, (_, i) => (
                   <option key={i} value={i}>{String(i).padStart(2, "0")}h00</option>
@@ -1038,7 +877,7 @@ export function ConfiguracoesForm({
               <select
                 value={workEnd}
                 onChange={(e) => setWorkEnd(Number(e.target.value))}
-                className="w-full border border-[#E0D8CE] rounded-lg px-3 py-2 text-sm bg-white text-[#2A2A2A] focus:outline-none focus:border-[#2D4A3E]"
+                className="w-full border border-[#D4C5A0] rounded-lg px-3 py-2 text-sm bg-white text-[#2A2A2A] focus:outline-none focus:border-[#30360E]"
               >
                 {Array.from({ length: 24 }, (_, i) => (
                   <option key={i} value={i}>{String(i).padStart(2, "0")}h00</option>
@@ -1046,16 +885,16 @@ export function ConfiguracoesForm({
               </select>
             </div>
           </div>
-          <p className="text-xs text-[#8A8A8A]">
+          <p className="text-xs text-[#7A7A6A]">
             Horário atual configurado: {String(workStart).padStart(2, "0")}h às {String(workEnd).padStart(2, "0")}h (Brasília)
           </p>
         </CardContent>
       </Card>
 
       {/* Aprovação humana */}
-      <Card className="border-[#E0D8CE]">
+      <Card className="border-[#D4C5A0]">
         <CardHeader className="pb-3">
-          <CardTitle className="font-serif text-lg text-[#2D4A3E] flex items-center gap-2">
+          <CardTitle className="font-serif text-lg text-[#30360E] flex items-center gap-2">
             <Shield className="w-4 h-4" />
             Aprovação Humana
           </CardTitle>
@@ -1064,7 +903,7 @@ export function ConfiguracoesForm({
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-[#2A2A2A]">Aprovar mensagens críticas manualmente</p>
-              <p className="text-xs text-[#8A8A8A] mt-0.5">
+              <p className="text-xs text-[#7A7A6A] mt-0.5">
                 Proposta de visita, valores, contrapropostas, fechamentos
               </p>
             </div>
@@ -1072,7 +911,7 @@ export function ConfiguracoesForm({
               onClick={() => setHumanApproval(!humanApproval)}
               className={cn(
                 "w-11 h-6 rounded-full transition-colors relative",
-                humanApproval ? "bg-[#2D4A3E]" : "bg-[#E0D8CE]"
+                humanApproval ? "bg-[#30360E]" : "bg-[#D4C5A0]"
               )}
             >
               <span className={cn(
@@ -1083,7 +922,7 @@ export function ConfiguracoesForm({
           </div>
           {humanApproval && (
             <div className="space-y-3">
-              <p className="text-xs text-[#8A8A8A] bg-[#EAE3D9] rounded-lg p-3">
+              <p className="text-xs text-[#7A7A6A] bg-[#E2D4B9] rounded-lg p-3">
                 Obrigatório nos primeiros 30 dias. Após a calibragem, você pode desativar por categoria.
               </p>
               <div className="space-y-2">
@@ -1097,12 +936,12 @@ export function ConfiguracoesForm({
                   }
                   return (
                     <div key={cat} className="flex items-center justify-between py-1">
-                      <span className="text-xs text-[#5A5A5A]">{labels[cat]}</span>
+                      <span className="text-xs text-[#4A4A3A]">{labels[cat]}</span>
                       <button
                         onClick={() => setApprovalCategories((prev) => ({ ...prev, [cat]: !prev[cat] }))}
                         className={cn(
                           "w-8 h-4 rounded-full transition-colors relative shrink-0",
-                          active ? "bg-[#2D4A3E]" : "bg-[#E0D8CE]"
+                          active ? "bg-[#30360E]" : "bg-[#D4C5A0]"
                         )}
                       >
                         <span className={cn(
@@ -1120,25 +959,25 @@ export function ConfiguracoesForm({
       </Card>
 
       {/* Moova Portal */}
-      <Card className="border-[#E0D8CE]">
+      <Card className="border-[#D4C5A0]">
         <CardHeader className="pb-3">
-          <CardTitle className="font-serif text-lg text-[#2D4A3E]">Moova Portal</CardTitle>
+          <CardTitle className="font-serif text-lg text-[#30360E]">Moova Portal</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-sm text-[#5A5A5A]">
+          <p className="text-sm text-[#4A4A3A]">
             Seu site profissional gerado automaticamente com portfólio de imóveis.
           </p>
           <div className="space-y-1.5">
             <Label>URL do seu portal</Label>
             <div className="flex items-center gap-0">
-              <span className="bg-[#EAE3D9] border border-r-0 border-[#E0D8CE] rounded-l-lg px-3 py-2 text-sm text-[#8A8A8A] whitespace-nowrap">
+              <span className="bg-[#E2D4B9] border border-r-0 border-[#D4C5A0] rounded-l-lg px-3 py-2 text-sm text-[#7A7A6A] whitespace-nowrap">
                 moovaimob.com/p/
               </span>
               <Input
                 value={portalSlug}
                 onChange={(e) => setPortalSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
                 placeholder="seu-nome"
-                className="border-[#E0D8CE] rounded-l-none"
+                className="border-[#D4C5A0] rounded-l-none"
               />
             </div>
             {portalSlug && (
@@ -1146,7 +985,7 @@ export function ConfiguracoesForm({
                 href={`/p/${portalSlug}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-[#B87333] hover:underline"
+                className="text-xs text-[#787F56] hover:underline"
               >
                 Ver portal → moovaimob.com/p/{portalSlug}
               </a>
@@ -1159,7 +998,7 @@ export function ConfiguracoesForm({
               onChange={(e) => setBio(e.target.value)}
               placeholder="Ex: Corretor especialista em alto padrão em São Paulo há 10 anos. CRECI-SP ativo."
               rows={3}
-              className="w-full text-sm border border-[#E0D8CE] rounded-lg px-3 py-2.5 bg-white resize-none focus:outline-none focus:border-[#2D4A3E] text-[#2A2A2A] placeholder:text-[#8A8A8A]"
+              className="w-full text-sm border border-[#D4C5A0] rounded-lg px-3 py-2.5 bg-white resize-none focus:outline-none focus:border-[#30360E] text-[#2A2A2A] placeholder:text-[#7A7A6A]"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -1169,7 +1008,7 @@ export function ConfiguracoesForm({
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
                 placeholder="São Paulo"
-                className="border-[#E0D8CE]"
+                className="border-[#D4C5A0]"
               />
             </div>
             <div className="space-y-1.5">
@@ -1179,21 +1018,21 @@ export function ConfiguracoesForm({
                 onChange={(e) => setStateUf(e.target.value.toUpperCase().slice(0, 2))}
                 placeholder="SP"
                 maxLength={2}
-                className="border-[#E0D8CE]"
+                className="border-[#D4C5A0]"
               />
             </div>
           </div>
-          <div className="bg-[#EAE3D9] rounded-lg p-3 text-xs text-[#5A5A5A]">
+          <div className="bg-[#E2D4B9] rounded-lg p-3 text-xs text-[#4A4A3A]">
             Feed XML para portais (ZAP, VivaReal, Imovelweb) disponível em{" "}
-            <code className="font-mono text-[#2D4A3E]">/api/portal/xml</code>
+            <code className="font-mono text-[#30360E]">/api/portal/xml</code>
           </div>
         </CardContent>
       </Card>
 
       {/* Instagram / Facebook */}
-      <Card className="border-[#E0D8CE]">
+      <Card className="border-[#D4C5A0]">
         <CardHeader className="pb-3">
-          <CardTitle className="font-serif text-lg text-[#2D4A3E] flex items-center gap-2">
+          <CardTitle className="font-serif text-lg text-[#30360E] flex items-center gap-2">
             <Share2 className="w-4 h-4" />
             Instagram &amp; Facebook
           </CardTitle>
@@ -1222,7 +1061,7 @@ export function ConfiguracoesForm({
             </div>
           ) : (
             <>
-              <p className="text-sm text-[#5A5A5A]">
+              <p className="text-sm text-[#4A4A3A]">
                 Conecte sua Página do Facebook (e Instagram Business vinculado) para publicar posts aprovados diretamente do Moova.
               </p>
               <a
@@ -1241,9 +1080,9 @@ export function ConfiguracoesForm({
                     : "Erro ao conectar. Tente novamente."}
                 </p>
               )}
-              <div className="bg-[#EAE3D9] rounded-lg p-3 space-y-1.5">
-                <p className="text-xs font-medium text-[#2D4A3E]">Pré-requisitos:</p>
-                <ul className="text-xs text-[#5A5A5A] space-y-1 list-disc list-inside">
+              <div className="bg-[#E2D4B9] rounded-lg p-3 space-y-1.5">
+                <p className="text-xs font-medium text-[#30360E]">Pré-requisitos:</p>
+                <ul className="text-xs text-[#4A4A3A] space-y-1 list-disc list-inside">
                   <li>Página do Facebook ativa</li>
                   <li>Conta Instagram Business conectada à página</li>
                   <li>App Meta aprovado com permissões <code className="font-mono">pages_manage_posts</code> + <code className="font-mono">instagram_content_publish</code></li>
@@ -1254,13 +1093,13 @@ export function ConfiguracoesForm({
         </CardContent>
       </Card>
 
-      <Separator className="bg-[#E0D8CE]" />
+      <Separator className="bg-[#D4C5A0]" />
 
       <div className="flex justify-end">
         <Button
           onClick={save}
           disabled={saving}
-          className="bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white text-sm min-w-[140px]"
+          className="bg-[#30360E] hover:bg-[#4A5218] text-white text-sm min-w-[140px]"
         >
           {saving ? "Salvando..." : saved ? "Salvo!" : "Salvar configurações"}
         </Button>
