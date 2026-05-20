@@ -112,6 +112,12 @@ export function ConfiguracoesForm({
   const [analyzingTone, setAnalyzingTone] = useState(false)
   const [connected, setConnected] = useState(waAccount?.status === "connected")
 
+  // QR Code (Evolution API) state
+  const [showQrFlow, setShowQrFlow] = useState(false)
+  const [qrLoading, setQrLoading] = useState(false)
+  const [qrCode, setQrCode] = useState<string | null>(null)
+  const qrPollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
   // BSP form state
   const [bspPhoneNumberId, setBspPhoneNumberId] = useState(waAccount?.bsp_phone_number_id ?? "")
   const [bspWabaId, setBspWabaId] = useState(waAccount?.bsp_waba_id ?? "")
@@ -192,7 +198,8 @@ export function ConfiguracoesForm({
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
-if (mediaRecorderRef.current?.state === "recording") {
+      if (qrPollRef.current) clearInterval(qrPollRef.current)
+      if (mediaRecorderRef.current?.state === "recording") {
         mediaRecorderRef.current.stop()
       }
     }
@@ -329,6 +336,55 @@ if (mediaRecorderRef.current?.state === "recording") {
     toast.success("Credenciais BSP removidas")
   }
 
+  function stopQrPoll() {
+    if (qrPollRef.current) { clearInterval(qrPollRef.current); qrPollRef.current = null }
+  }
+
+  async function startQrFlow() {
+    setShowQrFlow(true)
+    setQrLoading(true)
+    setQrCode(null)
+    stopQrPoll()
+
+    const res = await fetch("/api/whatsapp/connect", { method: "POST" })
+    const data = await res.json() as { ok?: boolean; qr?: string; error?: string }
+
+    if (!res.ok || data.error) {
+      toast.error(data.error ?? "Erro ao iniciar conexão QR")
+      setQrLoading(false)
+      return
+    }
+
+    if (data.qr) {
+      setQrCode(data.qr)
+      setQrLoading(false)
+    } else {
+      setQrLoading(false)
+    }
+
+    // Poll for QR and connection state every 3s
+    qrPollRef.current = setInterval(async () => {
+      const r = await fetch("/api/whatsapp/qr")
+      const d = await r.json() as { qr?: string | null; connected?: boolean }
+      if (d.connected) {
+        stopQrPoll()
+        setConnected(true)
+        setShowQrFlow(false)
+        setQrCode(null)
+        toast.success("WhatsApp conectado via QR Code!")
+        return
+      }
+      if (d.qr) setQrCode(d.qr)
+    }, 3000)
+  }
+
+  function cancelQrFlow() {
+    stopQrPoll()
+    setShowQrFlow(false)
+    setQrCode(null)
+    setQrLoading(false)
+  }
+
   async function handleAnalyzeTone() {
     setAnalyzingTone(true)
     try {
@@ -430,7 +486,7 @@ if (mediaRecorderRef.current?.state === "recording") {
                 {waConnected ? waAccount?.phone_number ?? "Conectado" : "Não conectado"}
               </p>
               <p className="text-xs text-[#7A7A6A] mt-0.5">
-                Meta Cloud API (Oficial)
+                {waAccount?.provider === "bsp" ? "Meta Cloud API (Oficial)" : waAccount?.provider === "evolution" ? "QR Code (Evolution)" : "WhatsApp"}
               </p>
             </div>
             <Badge className={cn(
@@ -467,24 +523,77 @@ if (mediaRecorderRef.current?.state === "recording") {
                     ← Voltar
                   </button>
                 </div>
+              ) : showQrFlow ? (
+                /* QR Code flow */
+                <div className="rounded-xl border border-[#D4C5A0] p-4 bg-[#F5F0E0] space-y-3 text-center">
+                  <p className="text-sm font-medium text-[#30360E]">Escaneie o QR Code com seu WhatsApp</p>
+                  {qrLoading ? (
+                    <div className="flex flex-col items-center gap-2 py-6">
+                      <Loader2 className="w-8 h-8 animate-spin text-[#787F56]" />
+                      <p className="text-xs text-[#7A7A6A]">Gerando QR Code...</p>
+                    </div>
+                  ) : qrCode ? (
+                    <div className="flex flex-col items-center gap-3">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={qrCode.startsWith("data:") ? qrCode : `data:image/png;base64,${qrCode}`}
+                        alt="QR Code WhatsApp"
+                        className="w-48 h-48 rounded-lg border border-[#D4C5A0]"
+                      />
+                      <p className="text-xs text-[#7A7A6A]">Abra o WhatsApp → Dispositivos vinculados → Vincular dispositivo</p>
+                      <p className="text-xs text-[#787F56] animate-pulse">Aguardando conexão...</p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-2 py-4">
+                      <p className="text-xs text-[#7A7A6A]">QR Code sendo preparado. Aguarde alguns segundos.</p>
+                    </div>
+                  )}
+                  <button onClick={cancelQrFlow} className="text-xs text-[#7A7A6A] hover:underline">Cancelar</button>
+                </div>
               ) : (
                 <>
-                  {/* Meta Cloud API — PRIMARY */}
-                  <div className="rounded-xl border border-[#D4C5A0] p-4 bg-[#F5F0E0] space-y-3">
+                  {/* OPTION 1 — QR Code (Evolution API) — simpler */}
+                  <div className="rounded-xl border-2 border-[#787F56] p-4 bg-[#F5F0E0] space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">📱</span>
+                        <p className="text-sm font-medium text-[#30360E]">Conectar via QR Code</p>
+                      </div>
+                      <span className="text-xs bg-[#787F56] text-white px-2 py-0.5 rounded-full">Mais fácil</span>
+                    </div>
+                    <p className="text-xs text-[#4A4A3A]">
+                      Use qualquer número — pessoal ou comercial. Escaneie o QR Code com o WhatsApp do seu celular e pronto.
+                    </p>
+                    <Button
+                      onClick={startQrFlow}
+                      className="w-full bg-[#787F56] hover:bg-[#5A6040] text-white text-sm gap-2"
+                    >
+                      <Wifi className="w-4 h-4" />
+                      Conectar via QR Code
+                    </Button>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-px bg-[#D4C5A0]" />
+                    <span className="text-xs text-[#7A7A6A]">ou use a API oficial</span>
+                    <div className="flex-1 h-px bg-[#D4C5A0]" />
+                  </div>
+
+                  {/* OPTION 2 — Meta Cloud API (BSP) — official */}
+                  <div className="rounded-xl border border-[#D4C5A0] p-4 bg-white space-y-3">
                     <div className="flex items-center gap-2">
                       <svg className="w-4 h-4 shrink-0" fill="#1877F2" viewBox="0 0 24 24">
                         <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                       </svg>
-                      <p className="text-sm font-medium text-[#30360E]">Conectar via Meta (API Oficial)</p>
+                      <p className="text-sm font-medium text-[#30360E]">Meta Cloud API (Oficial)</p>
+                      <span className="text-xs text-[#7A7A6A] ml-auto">Plano Premium</span>
                     </div>
-                    <p className="text-xs text-[#4A4A3A]">
-                      Autentique com sua conta Facebook para importar seu WhatsApp Business automaticamente.
+                    <p className="text-xs text-[#7A7A6A]">
+                      Requer conta Meta Business e número WhatsApp Business registrado.
                     </p>
-
-                    {/* OAuth redirect — no SDK needed */}
                     <a
                       href="/api/whatsapp/meta-waba/auth"
-                      className="flex items-center justify-center gap-2 w-full rounded-md px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                      className="flex items-center justify-center gap-2 w-full rounded-md px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
                       style={{ backgroundColor: "#1877F2" }}
                     >
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -492,9 +601,6 @@ if (mediaRecorderRef.current?.state === "recording") {
                       </svg>
                       Conectar com Facebook
                     </a>
-
-
-                    {/* Manual credentials */}
                     {!showManualForm ? (
                       <button
                         onClick={() => setShowManualForm(true)}
@@ -543,9 +649,7 @@ if (mediaRecorderRef.current?.state === "recording") {
                       </div>
                     )}
                   </div>
-
-
-</>
+                </>
               )}
             </div>
           )}
@@ -553,22 +657,40 @@ if (mediaRecorderRef.current?.state === "recording") {
           {/* CONNECTED */}
           {waConnected && (
             <div className="space-y-2">
-              <p className="text-xs text-[#4A4A3A]">
-                <strong>Phone Number ID:</strong> {waAccount?.bsp_phone_number_id ?? bspPhoneNumberId}
-              </p>
-              {waAccount?.bsp_waba_id && (
-                <p className="text-xs text-[#4A4A3A]">
-                  <strong>WABA ID:</strong> {waAccount.bsp_waba_id}
-                </p>
+              {waAccount?.provider === "bsp" && (
+                <>
+                  <p className="text-xs text-[#4A4A3A]">
+                    <strong>Phone Number ID:</strong> {waAccount?.bsp_phone_number_id ?? bspPhoneNumberId}
+                  </p>
+                  {waAccount?.bsp_waba_id && (
+                    <p className="text-xs text-[#4A4A3A]">
+                      <strong>WABA ID:</strong> {waAccount.bsp_waba_id}
+                    </p>
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleBSPDisconnect}
+                    className="text-red-600 border-red-200 hover:bg-red-50 text-xs w-full mt-1"
+                  >
+                    Remover credenciais BSP
+                  </Button>
+                </>
               )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleBSPDisconnect}
-                className="text-red-600 border-red-200 hover:bg-red-50 text-xs w-full mt-1"
-              >
-                Remover credenciais BSP
-              </Button>
+              {waAccount?.provider === "evolution" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={async () => {
+                    await fetch("/api/whatsapp/connect", { method: "DELETE" }).catch(() => {})
+                    setConnected(false)
+                    toast.success("WhatsApp desconectado")
+                  }}
+                  className="text-red-600 border-red-200 hover:bg-red-50 text-xs w-full mt-1"
+                >
+                  Desconectar WhatsApp
+                </Button>
+              )}
             </div>
           )}
         </CardContent>

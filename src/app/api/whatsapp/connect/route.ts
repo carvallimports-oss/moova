@@ -23,7 +23,7 @@ export async function POST() {
   await adminSupabase
     .from("whatsapp_accounts")
     .upsert(
-      { user_id: user.id, instance_name: instanceName, status: "connecting", qr_code: null, provider: "evolution" },
+      { user_id: user.id, instance_name: instanceName, status: "qr_pending", qr_code: null, provider: "evolution" },
       { onConflict: "user_id" }
     )
 
@@ -38,18 +38,16 @@ export async function POST() {
   // Create fresh instance
   const webhookUrl = appUrl && !appUrl.includes("localhost")
     ? `${appUrl}/api/webhooks/whatsapp`
-    : null
+    : `https://moovaimob.com/api/webhooks/whatsapp`
   const body: Record<string, unknown> = {
     instanceName,
     integration: "WHATSAPP-BAILEYS",
     qrcode: true,
-    ...(webhookUrl ? {
-      webhook: {
-        url: webhookUrl,
-        byEvents: false,
-        events: ["MESSAGES_UPSERT", "CONNECTION_UPDATE", "QRCODE_UPDATED"],
-      }
-    } : {}),
+    webhook: {
+      url: webhookUrl,
+      byEvents: false,
+      events: ["MESSAGES_UPSERT", "CONNECTION_UPDATE", "QRCODE_UPDATED"],
+    },
   }
 
   const createRes = await fetch(`${evolutionUrl}/instance/create`, {
@@ -109,4 +107,33 @@ export async function POST() {
   }
 
   return NextResponse.json({ ok: true, instanceName, qr })
+}
+
+export async function DELETE() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+  const evolutionUrl = process.env.EVOLUTION_API_URL
+  const evolutionKey = process.env.EVOLUTION_API_KEY
+  const instanceName = `moova_${user.id.replace(/-/g, "").slice(0, 16)}`
+
+  if (evolutionUrl && evolutionKey) {
+    await fetch(`${evolutionUrl}/instance/logout/${instanceName}`, {
+      method: "DELETE",
+      headers: { apikey: evolutionKey },
+    }).catch(() => {})
+    await fetch(`${evolutionUrl}/instance/delete/${instanceName}`, {
+      method: "DELETE",
+      headers: { apikey: evolutionKey },
+    }).catch(() => {})
+  }
+
+  const adminSupabase = createAdminClient()
+  await adminSupabase
+    .from("whatsapp_accounts")
+    .update({ status: "disconnected", qr_code: null, instance_name: null })
+    .eq("user_id", user.id)
+
+  return NextResponse.json({ ok: true })
 }

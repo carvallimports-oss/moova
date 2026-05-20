@@ -76,7 +76,7 @@ async function handleQrCodeUpdated(body: Record<string, unknown>) {
     const supabase = createAdminClient()
     await supabase
       .from("whatsapp_accounts")
-      .update({ qr_code: qr, status: "connecting" })
+      .update({ qr_code: qr, status: "qr_pending" })
       .eq("instance_name", instance)
   } catch {}
 }
@@ -91,9 +91,9 @@ async function handleConnectionUpdate(body: Record<string, unknown>) {
     const statusMap: Record<string, string> = {
       open: "connected",
       close: "disconnected",
-      connecting: "connecting",
+      connecting: "qr_pending",
     }
-    const status = statusMap[state] ?? "unknown"
+    const status = statusMap[state] ?? "disconnected"
 
     await supabase
       .from("whatsapp_accounts")
