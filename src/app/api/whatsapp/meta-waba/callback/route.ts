@@ -137,12 +137,14 @@ export async function GET(req: Request) {
   if (phones.length === 0) {
     // Token is valid but WABAs couldn't be discovered — save token and let user complete manually
     const adminSupabase = createAdminClient()
-    await adminSupabase.from("whatsapp_accounts").upsert({
+    const { error: upsertErr } = await adminSupabase.from("whatsapp_accounts").upsert({
       user_id: user.id,
       provider: "bsp",
       bsp_access_token: longToken,
       status: "pending_manual",
     }, { onConflict: "user_id" })
+    if (upsertErr) console.error(`[bsp] upsert error:`, upsertErr.message)
+    else console.log(`[bsp] token saved for user ${user.id}`)
     return NextResponse.redirect(`${base}/dashboard/configuracoes?bsp_manual=1`)
   }
 
