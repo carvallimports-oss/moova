@@ -12,66 +12,98 @@ export async function POST() {
   const evolutionUrl = process.env.EVOLUTION_API_URL
   const evolutionKey = process.env.EVOLUTION_API_KEY
   if (!evolutionUrl || !evolutionKey) {
-    return NextResponse.json({ error: "Evolution API não configurada" }, { status: 503 })
+    return NextResponse.json({ error: "Evolution API não configurada no servidor" }, { status: 503 })
   }
 
   const instanceName = `moova_${user.id.replace(/-/g, "").slice(0, 16)}`
   const appUrl = process.env.NEXT_PUBLIC_APP_URL
   const adminSupabase = createAdminClient()
 
-  // Clear stale QR
-  await adminSupabase.from("whatsapp_accounts").update({ qr_code: null }).eq("user_id", user.id)
+  // Clear stale QR and set status
+  await adminSupabase
+    .from("whatsapp_accounts")
+    .upsert(
+      { user_id: user.id, instance_name: instanceName, status: "connecting", qr_code: null, provider: "evolution" },
+      { onConflict: "user_id" }
+    )
 
-  // Always ensure the account row exists with the correct instance_name
-  await adminSupabase.from("whatsapp_accounts").upsert(
-    { user_id: user.id, instance_name: instanceName, status: "connecting", qr_code: null },
-    { onConflict: "user_id" }
-  )
+  // Delete existing instance to force a clean state (ensures new QR)
+  await fetch(`${evolutionUrl}/instance/delete/${instanceName}`, {
+    method: "DELETE",
+    headers: { apikey: evolutionKey },
+  }).catch(() => {})
 
-  // Try to create instance (if exists, 422/400 is returned — that's fine)
+  await new Promise(r => setTimeout(r, 1000))
+
+  // Create fresh instance
+  const webhook = appUrl ? `${appUrl}/api/webhooks/whatsapp` : undefined
+  const body: Record<string, unknown> = {
+    instanceName,
+    integration: "WHATSAPP-BAILEYS",
+    qrcode: true,
+  }
+  // Only add webhook if appUrl is set and looks like production (not localhost)
+  if (webhook && !webhook.includes("localhost")) {
+    body.webhook = webhook
+    body.webhookByEvents = false
+    body.events = ["MESSAGES_UPSERT", "CONNECTION_UPDATE", "QRCODE_UPDATED"]
+  }
+
   const createRes = await fetch(`${evolutionUrl}/instance/create`, {
     method: "POST",
     headers: { "Content-Type": "application/json", apikey: evolutionKey },
-    body: JSON.stringify({
-      instanceName,
-      integration: "WHATSAPP-BAILEYS",
-      qrcode: true,
-      webhook: appUrl ? `${appUrl}/api/webhooks/whatsapp` : undefined,
-      webhookByEvents: false,
-      events: ["MESSAGES_UPSERT", "CONNECTION_UPDATE", "QRCODE_UPDATED"],
-    }),
+    body: JSON.stringify(body),
   })
 
-  if (createRes.ok) {
-    // New instance created — QR may be in the create response; store it immediately
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const created = await createRes.json() as Record<string, any>
-      const qr: string | null =
-        created?.qrcode?.base64 ??
-        created?.base64 ??
-        created?.qr?.base64 ??
-        (typeof created?.qrcode === "string" ? created.qrcode : null) ??
-        null
-      if (qr) {
-        await adminSupabase.from("whatsapp_accounts").update({ qr_code: qr }).eq("user_id", user.id)
-      }
-    } catch { /* ignore — client will poll */ }
-  } else {
-    // Instance exists — logout first (clears session), then explicitly reconnect for fresh QR
-    await fetch(`${evolutionUrl}/instance/logout/${instanceName}`, {
-      method: "DELETE",
-      headers: { apikey: evolutionKey },
-    }).catch(() => {})
-    // Wait for logout to propagate
-    await new Promise(r => setTimeout(r, 1500))
-    // Trigger reconnect — this causes Evolution API to generate a new QR code
-    await fetch(`${evolutionUrl}/instance/connect/${instanceName}`, {
-      method: "POST",
-      headers: { apikey: evolutionKey },
-    }).catch(() => {})
+  if (!createRes.ok) {
+    const err = await createRes.json().catch(() => ({})) as { response?: { message?: string | string[] } }
+    const msg = Array.isArray(err.response?.message) ? err.response!.message![0] : (err.response?.message ?? "Erro ao criar instância")
+    return NextResponse.json({ error: `Evolution API: ${msg}` }, { status: 502 })
   }
 
-  // Return immediately — client polls /api/whatsapp/qr
-  return NextResponse.json({ ok: true, instanceName })
+  // Poll for QR — Evolution API v2 generates it asynchronously via Baileys
+  // Returns early (after 12s max) so client can show status
+  let qr: string | null = null
+  for (let i = 0; i < 4; i++) {
+    await new Promise(r => setTimeout(r, 3000))
+    try {
+      const qrRes = await fetch(`${evolutionUrl}/instance/connect/${instanceName}`, {
+        headers: { apikey: evolutionKey },
+      })
+      if (qrRes.ok) {
+        const data = await qrRes.json() as Record<string, unknown>
+        const base64 =
+          (data as { base64?: string }).base64 ??
+          (data as { qrcode?: { base64?: string } }).qrcode?.base64 ??
+          (typeof (data as { qrcode?: unknown }).qrcode === "string" ? (data as { qrcode: string }).qrcode : null) ??
+          null
+        if (base64) {
+          qr = base64
+          await adminSupabase
+            .from("whatsapp_accounts")
+            .update({ qr_code: qr })
+            .eq("user_id", user.id)
+          break
+        }
+      }
+    } catch { /* continue polling */ }
+  }
+
+  if (!qr) {
+    // Check if server is fundamentally unable to connect
+    const stateRes = await fetch(`${evolutionUrl}/instance/connectionState/${instanceName}`, {
+      headers: { apikey: evolutionKey },
+    }).catch(() => null)
+    const stateData = stateRes?.ok ? await stateRes.json() as Record<string, unknown> : null
+    const state = (stateData?.instance as Record<string, unknown> | undefined)?.state ?? "unknown"
+
+    if (state === "connecting" || state === "close") {
+      return NextResponse.json({
+        error: "A Evolution API não conseguiu conectar ao WhatsApp. O servidor pode estar com restrição de rede. Use a opção Meta (API Oficial) acima — é mais estável.",
+        evolutionState: state,
+      }, { status: 503 })
+    }
+  }
+
+  return NextResponse.json({ ok: true, instanceName, qr })
 }

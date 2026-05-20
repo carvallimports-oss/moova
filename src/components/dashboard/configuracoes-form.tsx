@@ -398,16 +398,26 @@ export function ConfiguracoesForm({
   }
 
   async function handleConnect() {
-    if (connecting) return // prevent double-click
+    if (connecting) return
     setConnecting(true)
     setQrCode(null)
     if (pollRef.current) clearInterval(pollRef.current)
 
     try {
+      // connect route polls internally for up to 12s and returns qr if available
       const res = await fetch("/api/whatsapp/connect", { method: "POST" })
-      const data = await res.json()
+      const data = await res.json() as { ok?: boolean; qr?: string | null; error?: string; instanceName?: string }
+
       if (!res.ok) {
         toast.error(data.error ?? "Erro ao conectar WhatsApp")
+        setConnecting(false)
+        return
+      }
+
+      // QR already available in the response (fast path)
+      if (data.qr) {
+        const src = data.qr.startsWith("data:") ? data.qr : `data:image/png;base64,${data.qr}`
+        setQrCode(src)
         setConnecting(false)
         return
       }
@@ -416,18 +426,15 @@ export function ConfiguracoesForm({
       setConnecting(false)
       return
     }
-    // connecting stays true — button locked while polling
 
-    // Wait 4s for Evolution API to generate QR before first poll
-    await new Promise(r => setTimeout(r, 4000))
-
+    // Poll DB for QR stored via webhook (max 30s)
     let attempts = 0
     pollRef.current = setInterval(async () => {
       attempts++
-      if (attempts > 45) { // 45 × 2s = 90s
+      if (attempts > 15) { // 15 × 2s = 30s
         clearInterval(pollRef.current!)
         setConnecting(false)
-        toast.error("QR Code não disponível. Tente novamente.")
+        toast.error("QR Code não disponível. A Evolution API pode estar com problema de rede. Use a opção Meta (API Oficial) acima.")
         return
       }
       try {
@@ -443,9 +450,10 @@ export function ConfiguracoesForm({
         } else if (data.qr) {
           const src = data.qr.startsWith("data:") ? data.qr : `data:image/png;base64,${data.qr}`
           setQrCode(src)
-          setConnecting(false) // QR appeared — unlock button (allow rescan)
+          setConnecting(false)
+          clearInterval(pollRef.current!)
         }
-      } catch {}
+      } catch { /* ignore transient errors */ }
     }, 2000)
   }
 
@@ -706,8 +714,11 @@ export function ConfiguracoesForm({
                     </button>
                     {showEvolutionQR && (
                       <div className="px-4 pb-4 space-y-3 border-t border-[#E0D8CE] pt-3">
-                        <p className="text-xs text-[#8A8A8A]">Conecta via protocolo não-oficial. Recomendamos usar a API Meta acima.</p>
-                        {!connecting ? (
+                        <p className="text-xs text-[#8A8A8A]">
+                          Conecta via protocolo não-oficial (WhatsApp pessoal ou Business sem API Meta).{" "}
+                          <strong>Requer que o servidor Evolution API esteja online e com acesso à internet.</strong>
+                        </p>
+                        {!connecting && !qrCode && (
                           <Button
                             onClick={handleConnect}
                             className="w-full bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white text-sm gap-2"
@@ -715,14 +726,13 @@ export function ConfiguracoesForm({
                             <RefreshCw className="w-4 h-4" />
                             Gerar QR Code
                           </Button>
-                        ) : (
+                        )}
+                        {connecting && !qrCode && (
                           <div className="space-y-2">
-                            {!qrCode && (
-                              <div className="flex items-center justify-center gap-2 py-3 text-sm text-[#5A5A5A]">
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                                Aguardando QR Code...
-                              </div>
-                            )}
+                            <div className="flex items-center justify-center gap-2 py-3 text-sm text-[#5A5A5A]">
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              Aguardando QR Code... (até 30s)
+                            </div>
                             <button onClick={handleCancelConnect} className="text-xs text-[#8A8A8A] hover:underline w-full text-center">
                               Cancelar
                             </button>
@@ -734,6 +744,7 @@ export function ConfiguracoesForm({
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={qrCode} alt="QR Code WhatsApp" className="w-48 h-48 object-contain" />
                             <p className="text-[11px] text-[#8A8A8A]">WhatsApp → Dispositivos vinculados → Vincular dispositivo</p>
+                            <button onClick={handleCancelConnect} className="text-xs text-[#8A8A8A] hover:underline">Gerar novo QR</button>
                           </div>
                         )}
                       </div>
