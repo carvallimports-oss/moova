@@ -6,11 +6,17 @@ export const dynamic = "force-dynamic"
 export default async function ConfiguracoesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ calendar_connected?: string; calendar_error?: string; meta?: string; meta_error?: string; bsp?: string; bsp_error?: string; phone?: string }>
+  searchParams: Promise<{ calendar_connected?: string; calendar_error?: string; meta?: string; meta_error?: string; bsp?: string; bsp_error?: string; phone?: string; phones?: string; bsp_token?: string }>
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   const params = await searchParams
+
+  type BspPhone = { phone_number_id: string; display_phone: string; name: string; waba_id: string }
+  let bspPickerPhones: BspPhone[] | null = null
+  if (params.bsp === "picker" && params.phones) {
+    try { bspPickerPhones = JSON.parse(decodeURIComponent(params.phones)) as BspPhone[] } catch { /* ignore */ }
+  }
 
   const [profileResult, waResult] = await Promise.all([
     supabase
@@ -41,6 +47,9 @@ export default async function ConfiguracoesPage({
         bspConnectedParam={params.bsp === "connected"}
         bspErrorParam={params.bsp_error ?? null}
         bspPhoneParam={params.phone ?? null}
+        bspPickerParam={params.bsp === "picker" && !!bspPickerPhones}
+        bspPickerPhones={bspPickerPhones ?? undefined}
+        bspPickerToken={params.bsp_token ? decodeURIComponent(params.bsp_token) : null}
         initialMetaPageName={(profileResult.data as { meta_page_name?: string | null } | null)?.meta_page_name ?? null}
       />
     </div>

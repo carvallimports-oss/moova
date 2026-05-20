@@ -49,19 +49,22 @@ export async function GET(req: Request) {
     const expiresIn = longData.expires_in ?? 3600
     const expiresAt = new Date(Date.now() + expiresIn * 1000).toISOString()
 
-    // 3. Get Facebook pages (includes page-level access tokens)
-    const pagesRes = await fetch(
-      `https://graph.facebook.com/v19.0/me/accounts?access_token=${userToken}`
-    )
+    // 3. Get Facebook pages + Instagram in parallel
+    const [pagesRes, meRes] = await Promise.all([
+      fetch(`https://graph.facebook.com/v19.0/me/accounts?fields=id,name,access_token&access_token=${userToken}`),
+      fetch(`https://graph.facebook.com/v19.0/me?fields=id&access_token=${userToken}`),
+    ])
     const pagesData = await pagesRes.json()
+    const meData = await meRes.json()
     const page = pagesData.data?.[0]
 
     const pageId: string | null = page?.id ?? null
     const pageName: string | null = page?.name ?? null
     const pageToken: string | null = page?.access_token ?? null
+    const metaUserId: string | null = meData?.id ?? null
     let instagramId: string | null = null
 
-    // 4. Get Instagram Business Account linked to the first page
+    // 4. Get Instagram Business Account linked to the page
     if (pageId && pageToken) {
       const igRes = await fetch(
         `https://graph.facebook.com/v19.0/${pageId}?fields=instagram_business_account&access_token=${pageToken}`
@@ -70,7 +73,7 @@ export async function GET(req: Request) {
       instagramId = igData.instagram_business_account?.id ?? null
     }
 
-    // 5. Save to users table (store page token — used for publishing)
+    // 5. Save to users table
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) throw new Error("Not authenticated")
@@ -78,9 +81,10 @@ export async function GET(req: Request) {
     await supabase
       .from("users")
       .update({
+        // Page token for publishing; fall back to user token if no page
         meta_access_token: pageToken ?? userToken,
         meta_page_id: pageId,
-        meta_page_name: pageName,
+        meta_page_name: pageName ?? (metaUserId ? `Conta ${metaUserId}` : null),
         meta_instagram_id: instagramId,
         meta_token_expires_at: expiresAt,
       })

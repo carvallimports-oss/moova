@@ -26,23 +26,36 @@ export async function GET() {
   // Check QR from webhook (stored in DB)
   if (account.qr_code) return NextResponse.json({ qr: account.qr_code, connected: false })
 
-  // Fetch from Evolution API directly
+  // Fetch QR directly from Evolution API
   if (evolutionUrl && evolutionKey) {
     try {
-      const res = await fetch(`${evolutionUrl}/instance/connect/${account.instance_name}/`, {
+      const res = await fetch(`${evolutionUrl}/instance/connect/${account.instance_name}`, {
         headers: { apikey: evolutionKey },
       })
       if (res.ok) {
-        const data = await res.json()
-        const qr = data.base64 ?? data.qrcode?.base64 ?? null
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const data = await res.json() as Record<string, any>
+        // Handle multiple Evolution API response formats
+        const qr: string | null =
+          data?.qrcode?.base64 ??
+          data?.base64 ??
+          data?.qr?.base64 ??
+          (typeof data?.qrcode === "string" ? data.qrcode : null) ??
+          null
+
+        console.log("[qr-route] Evolution API response keys:", Object.keys(data), "hasQr:", !!qr)
+
         if (qr) {
-          // Cache in DB for next poll
           const adminSupabase = createAdminClient()
           await adminSupabase.from("whatsapp_accounts").update({ qr_code: qr }).eq("user_id", user.id)
           return NextResponse.json({ qr, connected: false })
         }
+      } else {
+        console.warn("[qr-route] Evolution API returned", res.status)
       }
-    } catch {}
+    } catch (e) {
+      console.error("[qr-route] Error fetching QR from Evolution API:", e)
+    }
   }
 
   return NextResponse.json({ qr: null, connected: false })

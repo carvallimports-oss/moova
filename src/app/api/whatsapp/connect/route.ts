@@ -22,8 +22,14 @@ export async function POST() {
   // Clear stale QR
   await adminSupabase.from("whatsapp_accounts").update({ qr_code: null }).eq("user_id", user.id)
 
+  // Always ensure the account row exists with the correct instance_name
+  await adminSupabase.from("whatsapp_accounts").upsert(
+    { user_id: user.id, instance_name: instanceName, status: "connecting", qr_code: null },
+    { onConflict: "user_id" }
+  )
+
   // Try to create instance (if exists, 422/400 is returned — that's fine)
-  const createRes = await fetch(`${evolutionUrl}/instance/create/`, {
+  const createRes = await fetch(`${evolutionUrl}/instance/create`, {
     method: "POST",
     headers: { "Content-Type": "application/json", apikey: evolutionKey },
     body: JSON.stringify({
@@ -36,17 +42,14 @@ export async function POST() {
     }),
   })
 
-  if (createRes.ok) {
-    await adminSupabase.from("whatsapp_accounts").upsert(
-      { user_id: user.id, instance_name: instanceName, status: "connecting", qr_code: null },
-      { onConflict: "user_id" }
-    )
-  } else {
-    // Instance exists — restart to get fresh QR
-    await fetch(`${evolutionUrl}/instance/restart/${instanceName}/`, {
-      method: "POST",
+  if (!createRes.ok) {
+    // Instance exists — logout first (clears session), then reconnect for fresh QR
+    await fetch(`${evolutionUrl}/instance/logout/${instanceName}`, {
+      method: "DELETE",
       headers: { apikey: evolutionKey },
-    })
+    }).catch(() => {})
+    // Small delay for logout to propagate
+    await new Promise(r => setTimeout(r, 1000))
   }
 
   // Return immediately — client polls /api/whatsapp/qr
