@@ -9,6 +9,9 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json()
 
+  // Temporary diagnostic: log every event type
+  console.log(`[evo-webhook] event="${body.event}" instance="${body.instance}"`)
+
   if (body.event === "QRCODE_UPDATED") {
     await handleQrCodeUpdated(body)
     return NextResponse.json({ ok: true })
