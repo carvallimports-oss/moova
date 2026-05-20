@@ -97,6 +97,7 @@ export function ConfiguracoesForm({
   bspPickerToken?: string | null
 }) {
   const supabase = createClient()
+  const [mounted, setMounted] = useState(false)
   const [name, setName] = useState(profile?.name ?? "")
   const [phone, setPhone] = useState(profile?.phone ?? "")
   const [creci, setCreci] = useState(profile?.creci ?? "")
@@ -163,11 +164,14 @@ export function ConfiguracoesForm({
   )
   const [metaError] = useState(metaErrorParam ?? null)
 
-  // Load Facebook JS SDK
+  // Mark as mounted to prevent hydration mismatches from client-only state
+  useEffect(() => { setMounted(true) }, [])
+
+  // Load Facebook JS SDK (client-only, after mount)
   useEffect(() => {
-    if (typeof window === "undefined" || document.getElementById("fb-sdk")) return
+    if (!mounted || document.getElementById("fb-sdk")) return
     window.fbAsyncInit = function () {
-      window.FB.init({ appId: "946137871507469", cookie: true, xfbml: true, version: "v19.0" })
+      window.FB.init({ appId: "946137871507469", cookie: true, xfbml: false, version: "v19.0" })
     }
     const script = document.createElement("script")
     script.id = "fb-sdk"
@@ -175,7 +179,7 @@ export function ConfiguracoesForm({
     script.async = true
     script.defer = true
     document.body.appendChild(script)
-  }, [])
+  }, [mounted])
 
   async function saveEmbeddedPhone(phone: { phone_number_id: string; display_phone: string; name: string; waba_id: string }, token: string) {
     const res = await fetch("/api/whatsapp/bsp-connect", {

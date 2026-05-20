@@ -26,32 +26,50 @@ export async function GET() {
   // Check QR from webhook (stored in DB)
   if (account.qr_code) return NextResponse.json({ qr: account.qr_code, connected: false })
 
-  // Fetch QR directly from Evolution API
+  // Fetch QR directly from Evolution API — try both GET and POST (varies by version)
   if (evolutionUrl && evolutionKey) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const extractQr = (data: Record<string, any>): string | null =>
+      data?.qrcode?.base64 ??
+      data?.base64 ??
+      data?.qr?.base64 ??
+      (typeof data?.qrcode === "string" ? data.qrcode : null) ??
+      null
+
     try {
-      const res = await fetch(`${evolutionUrl}/instance/connect/${account.instance_name}`, {
+      // Try GET first (Evolution API v1 style)
+      const getRes = await fetch(`${evolutionUrl}/instance/connect/${account.instance_name}`, {
         headers: { apikey: evolutionKey },
       })
-      if (res.ok) {
+      if (getRes.ok) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const data = await res.json() as Record<string, any>
-        // Handle multiple Evolution API response formats
-        const qr: string | null =
-          data?.qrcode?.base64 ??
-          data?.base64 ??
-          data?.qr?.base64 ??
-          (typeof data?.qrcode === "string" ? data.qrcode : null) ??
-          null
+        const data = await getRes.json() as Record<string, any>
+        const qr = extractQr(data)
+        console.log("[qr-route] GET keys:", Object.keys(data), "hasQr:", !!qr)
+        if (qr) {
+          const adminSupabase = createAdminClient()
+          await adminSupabase.from("whatsapp_accounts").update({ qr_code: qr }).eq("user_id", user.id)
+          return NextResponse.json({ qr, connected: false })
+        }
+      }
 
-        console.log("[qr-route] Evolution API response keys:", Object.keys(data), "hasQr:", !!qr)
-
+      // Fallback: POST (Evolution API v2 style — returns QR in response body)
+      const postRes = await fetch(`${evolutionUrl}/instance/connect/${account.instance_name}`, {
+        method: "POST",
+        headers: { apikey: evolutionKey },
+      })
+      if (postRes.ok) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const data = await postRes.json() as Record<string, any>
+        const qr = extractQr(data)
+        console.log("[qr-route] POST keys:", Object.keys(data), "hasQr:", !!qr)
         if (qr) {
           const adminSupabase = createAdminClient()
           await adminSupabase.from("whatsapp_accounts").update({ qr_code: qr }).eq("user_id", user.id)
           return NextResponse.json({ qr, connected: false })
         }
       } else {
-        console.warn("[qr-route] Evolution API returned", res.status)
+        console.warn("[qr-route] POST connect returned", postRes.status)
       }
     } catch (e) {
       console.error("[qr-route] Error fetching QR from Evolution API:", e)

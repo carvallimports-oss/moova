@@ -42,14 +42,34 @@ export async function POST() {
     }),
   })
 
-  if (!createRes.ok) {
-    // Instance exists — logout first (clears session), then reconnect for fresh QR
+  if (createRes.ok) {
+    // New instance created — QR may be in the create response; store it immediately
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const created = await createRes.json() as Record<string, any>
+      const qr: string | null =
+        created?.qrcode?.base64 ??
+        created?.base64 ??
+        created?.qr?.base64 ??
+        (typeof created?.qrcode === "string" ? created.qrcode : null) ??
+        null
+      if (qr) {
+        await adminSupabase.from("whatsapp_accounts").update({ qr_code: qr }).eq("user_id", user.id)
+      }
+    } catch { /* ignore — client will poll */ }
+  } else {
+    // Instance exists — logout first (clears session), then explicitly reconnect for fresh QR
     await fetch(`${evolutionUrl}/instance/logout/${instanceName}`, {
       method: "DELETE",
       headers: { apikey: evolutionKey },
     }).catch(() => {})
-    // Small delay for logout to propagate
-    await new Promise(r => setTimeout(r, 1000))
+    // Wait for logout to propagate
+    await new Promise(r => setTimeout(r, 1500))
+    // Trigger reconnect — this causes Evolution API to generate a new QR code
+    await fetch(`${evolutionUrl}/instance/connect/${instanceName}`, {
+      method: "POST",
+      headers: { apikey: evolutionKey },
+    }).catch(() => {})
   }
 
   // Return immediately — client polls /api/whatsapp/qr
