@@ -81,6 +81,9 @@ export function ConfiguracoesForm({
   metaConnectedParam?: boolean
   metaErrorParam?: string | null
   initialMetaPageName?: string | null
+  bspConnectedParam?: boolean
+  bspErrorParam?: string | null
+  bspPhoneParam?: string | null
 }) {
   const supabase = createClient()
   const [name, setName] = useState(profile?.name ?? "")
@@ -213,6 +216,15 @@ export function ConfiguracoesForm({
       }
     }, { scope: "whatsapp_business_management,whatsapp_business_messaging", return_scopes: true })
   }
+
+  useEffect(() => {
+    if (bspConnectedParam) {
+      setConnected(true)
+      setCurrentProvider("bsp")
+      toast.success(`WhatsApp Business conectado!${bspPhoneParam ? ` Número: ${bspPhoneParam}` : ""}`)
+    }
+    if (bspErrorParam) toast.error(`Erro BSP: ${bspErrorParam}`)
+  }, [bspConnectedParam, bspErrorParam, bspPhoneParam])
 
   useEffect(() => {
     if (calendarConnectedParam) toast.success("Google Agenda conectada!")
@@ -590,24 +602,19 @@ export function ConfiguracoesForm({
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {/* Primary: Facebook Login */}
-                  <Button
-                    onClick={handleFacebookLogin}
-                    disabled={fbConnecting}
-                    className="w-full text-white text-sm gap-2 font-medium"
+                  {/* Primary: Facebook OAuth redirect */}
+                  <a
+                    href="/api/whatsapp/meta-waba/auth"
+                    className="flex items-center justify-center gap-2 w-full rounded-md px-4 py-2 text-sm font-medium text-white"
                     style={{ backgroundColor: "#1877F2" }}
                   >
-                    {fbConnecting ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                      </svg>
-                    )}
-                    {fbConnecting ? "Aguardando Facebook..." : "Conectar com Facebook"}
-                  </Button>
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                    Conectar com Facebook
+                  </a>
                   <p className="text-[11px] text-[#8A8A8A] text-center">
-                    Abre o login do Facebook e importa seu WhatsApp Business automaticamente
+                    Redireciona para o login do Facebook e importa seu WhatsApp Business automaticamente
                   </p>
 
                   {/* Manual fallback */}

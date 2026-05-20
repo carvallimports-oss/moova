@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic"
 export default async function ConfiguracoesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ calendar_connected?: string; calendar_error?: string; meta?: string; meta_error?: string }>
+  searchParams: Promise<{ calendar_connected?: string; calendar_error?: string; meta?: string; meta_error?: string; bsp?: string; bsp_error?: string; phone?: string }>
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -38,6 +38,9 @@ export default async function ConfiguracoesPage({
         calendarErrorParam={params.calendar_error === "1"}
         metaConnectedParam={params.meta === "connected"}
         metaErrorParam={params.meta_error ?? null}
+        bspConnectedParam={params.bsp === "connected"}
+        bspErrorParam={params.bsp_error ?? null}
+        bspPhoneParam={params.phone ?? null}
         initialMetaPageName={(profileResult.data as { meta_page_name?: string | null } | null)?.meta_page_name ?? null}
       />
     </div>
