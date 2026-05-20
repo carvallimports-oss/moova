@@ -5,25 +5,7 @@ import { createWhatsAppProvider } from "@/lib/whatsapp/provider"
 
 export const dynamic = "force-dynamic"
 
-// Validate that the request comes from our Evolution API instance.
-// Evolution API sends its global API key as the "apikey" header, so we accept
-// both EVOLUTION_WEBHOOK_SECRET and EVOLUTION_API_KEY to avoid 403 floods.
-function isValidEvolutionRequest(req: NextRequest): boolean {
-  const secret = process.env.EVOLUTION_WEBHOOK_SECRET
-  const apiKey = process.env.EVOLUTION_API_KEY
-  if (!secret && !apiKey) return true // No key configured — allow in dev
-  const header = req.headers.get("apikey") ?? req.headers.get("x-api-key") ?? ""
-  if (secret && header === secret) return true
-  if (apiKey && header === apiKey) return true
-  return false
-}
-
 export async function POST(req: NextRequest) {
-  if (!isValidEvolutionRequest(req)) {
-    const header = req.headers.get("apikey") ?? req.headers.get("x-api-key") ?? "(none)"
-    console.error(`[evo-webhook] 403 — apikey header: "${header.slice(0, 20)}"`)
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-  }
 
   const body = await req.json()
 
