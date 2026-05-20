@@ -9,52 +9,51 @@ type Phone = { phone_number_id: string; display_phone: string; name: string; wab
 async function collectWabaIds(token: string, appId: string, appSecret: string): Promise<string[]> {
   const ids = new Set<string>()
 
-  // Debug token to see granted permissions
+  // Debug token permissions
   const debugRes = await fetch(
     `https://graph.facebook.com/debug_token?input_token=${token}&access_token=${appId}|${appSecret}`
   )
   const debugData = await debugRes.json() as { data?: { scopes?: string[]; user_id?: string; is_valid?: boolean } }
-  console.log(`[bsp] token debug:`, JSON.stringify(debugData?.data))
+  console.log(`[bsp] token scopes:`, JSON.stringify(debugData?.data?.scopes))
+  const userId = debugData?.data?.user_id
 
-  const [bizRes, wabaRes, meRes] = await Promise.all([
-    fetch(`https://graph.facebook.com/v19.0/me/businesses?fields=whatsapp_business_accounts{id}&access_token=${token}`),
-    fetch(`https://graph.facebook.com/v19.0/me/whatsapp_business_accounts?fields=id&access_token=${token}`),
-    fetch(`https://graph.facebook.com/v19.0/me?fields=id&access_token=${token}`),
-  ])
-
-  const bizData = await bizRes.json() as { data?: Array<{ whatsapp_business_accounts?: { data?: Array<{ id: string }> } }> }
-  console.log(`[bsp] /me/businesses:`, bizRes.status, JSON.stringify(bizData).slice(0, 300))
-
+  // Strategy 1: /me/whatsapp_business_accounts (direct WABA access)
+  const wabaRes = await fetch(`https://graph.facebook.com/v19.0/me/whatsapp_business_accounts?fields=id&access_token=${token}`)
   const wabaData = await wabaRes.json() as { data?: Array<{ id: string }> }
-  console.log(`[bsp] /me/whatsapp_business_accounts:`, wabaRes.status, JSON.stringify(wabaData).slice(0, 300))
+  console.log(`[bsp] /me/whatsapp_business_accounts:`, wabaRes.status, JSON.stringify(wabaData).slice(0, 400))
+  for (const w of wabaData.data ?? []) { if (w.id) ids.add(w.id) }
 
+  // Strategy 2: /me/businesses → WABAs under Business Manager (needs business_management scope)
+  const bizRes = await fetch(`https://graph.facebook.com/v19.0/me/businesses?fields=whatsapp_business_accounts{id}&access_token=${token}`)
+  const bizData = await bizRes.json() as { data?: Array<{ id: string; whatsapp_business_accounts?: { data?: Array<{ id: string }> } }> }
+  console.log(`[bsp] /me/businesses:`, bizRes.status, JSON.stringify(bizData).slice(0, 400))
   for (const b of bizData.data ?? []) {
     for (const w of b.whatsapp_business_accounts?.data ?? []) {
       if (w.id) ids.add(w.id)
     }
-  }
-
-  for (const w of wabaData.data ?? []) { if (w.id) ids.add(w.id) }
-
-  if (meRes.ok) {
-    const me = await meRes.json() as { id?: string }
-    console.log(`[bsp] /me:`, meRes.status, JSON.stringify(me))
-    if (me.id) {
-      const userWabaRes = await fetch(
-        `https://graph.facebook.com/v19.0/${me.id}/whatsapp_business_accounts?fields=id&access_token=${token}`
-      )
-      const userWabaData = await userWabaRes.json() as { data?: Array<{ id: string }> }
-      console.log(`[bsp] /${me.id}/whatsapp_business_accounts:`, userWabaRes.status, JSON.stringify(userWabaData).slice(0, 300))
-      for (const w of userWabaData.data ?? []) { if (w.id) ids.add(w.id) }
+    // Also try fetching WABA list per business explicitly
+    if (b.id && (b.whatsapp_business_accounts?.data ?? []).length === 0) {
+      const bmWabaRes = await fetch(`https://graph.facebook.com/v19.0/${b.id}/whatsapp_business_accounts?fields=id&access_token=${token}`)
+      const bmWabaData = await bmWabaRes.json() as { data?: Array<{ id: string }> }
+      console.log(`[bsp] /${b.id}/whatsapp_business_accounts:`, bmWabaRes.status, JSON.stringify(bmWabaData).slice(0, 400))
+      for (const w of bmWabaData.data ?? []) { if (w.id) ids.add(w.id) }
     }
   }
 
+  // Strategy 3: /{userId}/whatsapp_business_accounts
+  if (userId) {
+    const uidWabaRes = await fetch(`https://graph.facebook.com/v19.0/${userId}/whatsapp_business_accounts?fields=id&access_token=${token}`)
+    const uidWabaData = await uidWabaRes.json() as { data?: Array<{ id: string }> }
+    console.log(`[bsp] /${userId}/whatsapp_business_accounts:`, uidWabaRes.status, JSON.stringify(uidWabaData).slice(0, 400))
+    for (const w of uidWabaData.data ?? []) { if (w.id) ids.add(w.id) }
+  }
+
+  console.log(`[bsp] WABAs encontrados: ${ids.size}`, Array.from(ids))
   return Array.from(ids)
 }
 
 async function fetchPhonesFromToken(token: string, appId: string, appSecret: string): Promise<Phone[]> {
   const wabaIds = await collectWabaIds(token, appId, appSecret)
-  console.log(`[bsp] WABAs encontrados: ${wabaIds.length}`, wabaIds)
 
   const seen = new Set<string>()
   const phones: Phone[] = []
