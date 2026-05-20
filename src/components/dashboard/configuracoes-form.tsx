@@ -72,6 +72,7 @@ export function ConfiguracoesForm({
   bspPickerParam,
   bspPickerPhones,
   bspPickerToken,
+  bspManualParam,
 }: {
   profile: Profile
   waAccount: WAAccount
@@ -86,6 +87,7 @@ export function ConfiguracoesForm({
   bspPickerParam?: boolean
   bspPickerPhones?: BspPhone[]
   bspPickerToken?: string | null
+  bspManualParam?: boolean
 }) {
   const supabase = createClient()
   const [name, setName] = useState(profile?.name ?? "")
@@ -120,7 +122,7 @@ export function ConfiguracoesForm({
   const [embeddedPhones, setEmbeddedPhones] = useState<BspPhone[]>(bspPickerPhones ?? [])
   const [embeddedToken, setEmbeddedToken] = useState(bspPickerToken ?? "")
   const [showPhonePicker, setShowPhonePicker] = useState(bspPickerParam ?? false)
-  const [showManualForm, setShowManualForm] = useState(false)
+  const [showManualForm, setShowManualForm] = useState(bspManualParam ?? false)
 
   // Voice cloning state
   const [voiceCloned, setVoiceCloned] = useState(!!profile?.eleven_labs_voice_id)
@@ -170,10 +172,13 @@ export function ConfiguracoesForm({
       toast.success(`WhatsApp Business conectado!${bspPhoneParam ? ` Número: ${bspPhoneParam}` : ""}`)
     }
     if (bspErrorParam) toast.error(`Erro BSP: ${bspErrorParam}`)
+    if (bspManualParam) {
+      toast.info("Token OAuth salvo. Insira seu Phone Number ID para finalizar a conexão.")
+    }
     if (bspPickerParam && bspPickerPhones && bspPickerPhones.length > 0) {
       toast.info(`${bspPickerPhones.length} números encontrados. Selecione o número a conectar.`)
     }
-  }, [bspConnectedParam, bspErrorParam, bspPhoneParam, bspPickerParam, bspPickerPhones])
+  }, [bspConnectedParam, bspErrorParam, bspPhoneParam, bspPickerParam, bspPickerPhones, bspManualParam])
 
   useEffect(() => {
     if (calendarConnectedParam) toast.success("Google Agenda conectada!")
@@ -284,20 +289,24 @@ if (mediaRecorderRef.current?.state === "recording") {
   }
 
   async function handleBSPConnect() {
-    if (!bspPhoneNumberId.trim() || !bspAccessToken.trim()) {
-      toast.error("Phone Number ID e Access Token são obrigatórios")
+    if (!bspPhoneNumberId.trim()) {
+      toast.error("Phone Number ID é obrigatório")
+      return
+    }
+    if (!bspManualParam && !bspAccessToken.trim()) {
+      toast.error("Access Token é obrigatório")
       return
     }
     setBspConnecting(true)
     try {
+      const body: Record<string, string> = { phone_number_id: bspPhoneNumberId.trim() }
+      if (bspWabaId.trim()) body.waba_id = bspWabaId.trim()
+      if (bspAccessToken.trim()) body.access_token = bspAccessToken.trim()
+
       const res = await fetch("/api/whatsapp/bsp-connect", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          phone_number_id: bspPhoneNumberId.trim(),
-          waba_id: bspWabaId.trim() || undefined,
-          access_token: bspAccessToken.trim(),
-        }),
+        body: JSON.stringify(body),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -495,6 +504,17 @@ if (mediaRecorderRef.current?.state === "recording") {
                       </button>
                     ) : (
                       <div className="space-y-3 pt-2 border-t border-[#D4C5A0]">
+                        {bspManualParam && (
+                          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-800 space-y-1.5">
+                            <p className="font-semibold">Token salvo. Insira apenas o Phone Number ID:</p>
+                            <ol className="list-decimal list-inside space-y-1 text-amber-700">
+                              <li>Acesse <strong>business.facebook.com</strong></li>
+                              <li>Vá em <strong>WhatsApp Manager → Números de telefone</strong></li>
+                              <li>Clique no número → copie o <strong>ID do número de telefone</strong></li>
+                              <li>Cole abaixo e clique Conectar</li>
+                            </ol>
+                          </div>
+                        )}
                         <div className="space-y-1.5">
                           <Label className="text-xs">Phone Number ID <span className="text-red-500">*</span></Label>
                           <Input value={bspPhoneNumberId} onChange={(e) => setBspPhoneNumberId(e.target.value)} placeholder="ex: 123456789012345" className="border-[#D4C5A0] text-sm h-8" />
@@ -503,19 +523,23 @@ if (mediaRecorderRef.current?.state === "recording") {
                           <Label className="text-xs">WABA ID (opcional)</Label>
                           <Input value={bspWabaId} onChange={(e) => setBspWabaId(e.target.value)} placeholder="ex: 987654321098765" className="border-[#D4C5A0] text-sm h-8" />
                         </div>
-                        <div className="space-y-1.5">
-                          <Label className="text-xs">Access Token <span className="text-red-500">*</span></Label>
-                          <Input value={bspAccessToken} onChange={(e) => setBspAccessToken(e.target.value)} type="password" placeholder="EAAxxxxxxxx..." className="border-[#D4C5A0] text-sm h-8" />
-                        </div>
+                        {!bspManualParam && (
+                          <div className="space-y-1.5">
+                            <Label className="text-xs">Access Token <span className="text-red-500">*</span></Label>
+                            <Input value={bspAccessToken} onChange={(e) => setBspAccessToken(e.target.value)} type="password" placeholder="EAAxxxxxxxx..." className="border-[#D4C5A0] text-sm h-8" />
+                          </div>
+                        )}
                         <Button
                           onClick={handleBSPConnect}
-                          disabled={bspConnecting || !bspPhoneNumberId.trim() || !bspAccessToken.trim()}
+                          disabled={bspConnecting || !bspPhoneNumberId.trim() || (!bspManualParam && !bspAccessToken.trim())}
                           className="w-full bg-[#30360E] hover:bg-[#20240A] text-white text-sm gap-2"
                         >
                           {bspConnecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wifi className="w-4 h-4" />}
                           {bspConnecting ? "Salvando..." : "Conectar via Meta Cloud API"}
                         </Button>
-                        <button onClick={() => setShowManualForm(false)} className="text-xs text-[#7A7A6A] hover:underline w-full text-center">Cancelar</button>
+                        {!bspManualParam && (
+                          <button onClick={() => setShowManualForm(false)} className="text-xs text-[#7A7A6A] hover:underline w-full text-center">Cancelar</button>
+                        )}
                       </div>
                     )}
                   </div>

@@ -24,15 +24,31 @@ export async function POST(req: Request) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  const { phone_number_id, waba_id, access_token, display_phone } = await req.json() as {
+  const { phone_number_id, waba_id, access_token: bodyToken, display_phone } = await req.json() as {
     phone_number_id: string
     waba_id?: string
-    access_token: string
+    access_token?: string
     display_phone?: string
   }
 
-  if (!phone_number_id || !access_token) {
-    return NextResponse.json({ error: "phone_number_id e access_token são obrigatórios" }, { status: 400 })
+  if (!phone_number_id) {
+    return NextResponse.json({ error: "phone_number_id é obrigatório" }, { status: 400 })
+  }
+
+  // If no token in body, try to use pre-saved token from OAuth flow
+  let access_token = bodyToken
+  if (!access_token) {
+    const adminSupabase = createAdminClient()
+    const { data: existing } = await adminSupabase
+      .from("whatsapp_accounts")
+      .select("bsp_access_token")
+      .eq("user_id", user.id)
+      .single()
+    access_token = existing?.bsp_access_token ?? undefined
+  }
+
+  if (!access_token) {
+    return NextResponse.json({ error: "access_token é obrigatório" }, { status: 400 })
   }
 
   const adminSupabase = createAdminClient()

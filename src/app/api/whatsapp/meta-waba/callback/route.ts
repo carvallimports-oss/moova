@@ -135,9 +135,15 @@ export async function GET(req: Request) {
   const phones = await fetchPhonesFromToken(longToken, appId, appSecret)
 
   if (phones.length === 0) {
-    return NextResponse.redirect(
-      `${base}/dashboard/configuracoes?bsp_error=${encodeURIComponent("Nenhum número WhatsApp Business encontrado. Certifique-se de que sua conta Facebook tem um WhatsApp Business Account ativo.")}`
-    )
+    // Token is valid but WABAs couldn't be discovered — save token and let user complete manually
+    const adminSupabase = createAdminClient()
+    await adminSupabase.from("whatsapp_accounts").upsert({
+      user_id: user.id,
+      provider: "bsp",
+      bsp_access_token: longToken,
+      status: "pending_manual",
+    }, { onConflict: "user_id" })
+    return NextResponse.redirect(`${base}/dashboard/configuracoes?bsp_manual=1`)
   }
 
   // If multiple phones, encode them as query param and show picker

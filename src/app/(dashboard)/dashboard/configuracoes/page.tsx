@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic"
 export default async function ConfiguracoesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ calendar_connected?: string; calendar_error?: string; meta?: string; meta_error?: string; bsp?: string; bsp_error?: string; phone?: string; phones?: string; bsp_token?: string }>
+  searchParams: Promise<{ calendar_connected?: string; calendar_error?: string; meta?: string; meta_error?: string; bsp?: string; bsp_error?: string; phone?: string; phones?: string; bsp_token?: string; bsp_manual?: string }>
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -34,8 +34,8 @@ export default async function ConfiguracoesPage({
   return (
     <div className="p-6 lg:p-8 pt-20 lg:pt-8 max-w-2xl mx-auto space-y-6">
       <div>
-        <h1 className="font-serif text-2xl text-[#2D4A3E]">Configurações</h1>
-        <p className="text-sm text-[#8A8A8A] mt-1">Personalize a Nara e sua conta</p>
+        <h1 className="font-serif text-2xl text-[#30360E]">Configurações</h1>
+        <p className="text-sm text-[#7A7A6A] mt-1">Personalize a Nara e sua conta</p>
       </div>
       <ConfiguracoesForm
         profile={profileResult.data}
@@ -50,6 +50,7 @@ export default async function ConfiguracoesPage({
         bspPickerParam={params.bsp === "picker" && !!bspPickerPhones}
         bspPickerPhones={bspPickerPhones ?? undefined}
         bspPickerToken={params.bsp_token ? decodeURIComponent(params.bsp_token) : null}
+        bspManualParam={params.bsp_manual === "1"}
         initialMetaPageName={(profileResult.data as { meta_page_name?: string | null } | null)?.meta_page_name ?? null}
       />
     </div>
