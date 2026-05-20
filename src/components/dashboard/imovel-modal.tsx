@@ -120,7 +120,7 @@ export function ImovelModal({ property, open, onClose, onSaved }: Props) {
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle className="font-serif text-[#2D4A3E]">
+          <DialogTitle className="font-serif text-[#30360E]">
             {property ? "Editar imóvel" : "Cadastrar imóvel"}
           </DialogTitle>
         </DialogHeader>
@@ -129,14 +129,14 @@ export function ImovelModal({ property, open, onClose, onSaved }: Props) {
           <div className="space-y-1.5">
             <Label>Título do anúncio</Label>
             <Input value={form.title} onChange={(e) => set("title", e.target.value)}
-              placeholder="Apartamento 3 dorms com suíte em Pinheiros" className="border-[#E0D8CE]" />
+              placeholder="Apartamento 3 dorms com suíte em Pinheiros" className="border-[#D4C5A0]" />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label>Tipo</Label>
               <Select value={form.type} onValueChange={(v) => v && set("type", v)}>
-                <SelectTrigger className="border-[#E0D8CE]">
+                <SelectTrigger className="border-[#D4C5A0]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -147,7 +147,7 @@ export function ImovelModal({ property, open, onClose, onSaved }: Props) {
             <div className="space-y-1.5">
               <Label>Preço (R$)</Label>
               <Input value={form.price} onChange={(e) => set("price", e.target.value)}
-                type="number" placeholder="850000" className="border-[#E0D8CE]" />
+                type="number" placeholder="850000" className="border-[#D4C5A0]" />
             </div>
           </div>
 
@@ -155,31 +155,31 @@ export function ImovelModal({ property, open, onClose, onSaved }: Props) {
             <div className="space-y-1.5">
               <Label>Quartos</Label>
               <Input value={form.bedrooms} onChange={(e) => set("bedrooms", e.target.value)}
-                type="number" placeholder="3" className="border-[#E0D8CE]" />
+                type="number" placeholder="3" className="border-[#D4C5A0]" />
             </div>
             <div className="space-y-1.5">
               <Label>Área (m²)</Label>
               <Input value={form.area_sqm} onChange={(e) => set("area_sqm", e.target.value)}
-                type="number" placeholder="92" className="border-[#E0D8CE]" />
+                type="number" placeholder="92" className="border-[#D4C5A0]" />
             </div>
           </div>
 
           <div className="space-y-1.5">
             <Label>Endereço</Label>
             <Input value={form.address} onChange={(e) => set("address", e.target.value)}
-              placeholder="Rua Augusta, 1200" className="border-[#E0D8CE]" />
+              placeholder="Rua Augusta, 1200" className="border-[#D4C5A0]" />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label>Cidade</Label>
               <Input value={form.city} onChange={(e) => set("city", e.target.value)}
-                placeholder="São Paulo" className="border-[#E0D8CE]" />
+                placeholder="São Paulo" className="border-[#D4C5A0]" />
             </div>
             <div className="space-y-1.5">
               <Label>Estado</Label>
               <Select value={form.state} onValueChange={(v) => v && set("state", v)}>
-                <SelectTrigger className="border-[#E0D8CE]">
+                <SelectTrigger className="border-[#D4C5A0]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -196,7 +196,7 @@ export function ImovelModal({ property, open, onClose, onSaved }: Props) {
                 type="button"
                 onClick={handleGenerateDesc}
                 disabled={generatingDesc || !form.title}
-                className="flex items-center gap-1 text-xs text-[#B87333] hover:text-[#8a5520] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center gap-1 text-xs text-[#787F56] hover:text-[#8a5520] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 {generatingDesc
                   ? <><Loader2 className="w-3 h-3 animate-spin" /> Gerando...</>
@@ -206,14 +206,14 @@ export function ImovelModal({ property, open, onClose, onSaved }: Props) {
             </div>
             <Textarea value={form.description} onChange={(e) => set("description", e.target.value)}
               placeholder="Descreva o imóvel para a Nara usar nas conversas..." rows={3}
-              className="border-[#E0D8CE] resize-none" />
+              className="border-[#D4C5A0] resize-none" />
           </div>
         </div>
 
         <div className="flex gap-3 justify-end pt-2">
-          <Button variant="outline" onClick={onClose} className="border-[#E0D8CE]">Cancelar</Button>
+          <Button variant="outline" onClick={onClose} className="border-[#D4C5A0]">Cancelar</Button>
           <Button onClick={handleSave} disabled={saving || !form.title}
-            className="bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white">
+            className="bg-[#30360E] hover:bg-[#4A5218] text-white">
             {saving ? "Salvando..." : "Salvar"}
           </Button>
         </div>

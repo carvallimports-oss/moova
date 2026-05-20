@@ -25,7 +25,7 @@ function monthLabel(offsetFromNow: number) {
 
 // ── CSS bar component ───────────────────────────────────────────────────────
 
-function HBar({ label, value, max, color = "#2D4A3E", sub }: {
+function HBar({ label, value, max, color = "#30360E", sub }: {
   label: string
   value: number
   max: number
@@ -37,9 +37,9 @@ function HBar({ label, value, max, color = "#2D4A3E", sub }: {
     <div className="space-y-1">
       <div className="flex items-center justify-between text-sm">
         <span className="text-[#3A3A3A]">{label}</span>
-        <span className="font-medium text-[#2D4A3E] tabular-nums">{value}{sub ? ` ${sub}` : ""}</span>
+        <span className="font-medium text-[#30360E] tabular-nums">{value}{sub ? ` ${sub}` : ""}</span>
       </div>
-      <div className="h-2 bg-[#EAE3D9] rounded-full overflow-hidden">
+      <div className="h-2 bg-[#E2D4B9] rounded-full overflow-hidden">
         <div
           className="h-full rounded-full transition-all"
           style={{ width: `${pctWidth}%`, backgroundColor: color }}
@@ -53,14 +53,14 @@ function VBar({ label, value, max }: { label: string; value: number; max: number
   const pctH = max === 0 ? 0 : Math.max(4, Math.round((value / max) * 100))
   return (
     <div className="flex flex-col items-center gap-1 flex-1">
-      <span className="text-xs font-medium text-[#2D4A3E] tabular-nums">{value}</span>
+      <span className="text-xs font-medium text-[#30360E] tabular-nums">{value}</span>
       <div className="w-full flex items-end justify-center" style={{ height: "80px" }}>
         <div
-          className="w-full rounded-t-sm bg-[#2D4A3E] transition-all"
+          className="w-full rounded-t-sm bg-[#30360E] transition-all"
           style={{ height: `${pctH}%` }}
         />
       </div>
-      <span className="text-[10px] text-[#8A8A8A] text-center leading-tight">{label}</span>
+      <span className="text-[10px] text-[#7A7A6A] text-center leading-tight">{label}</span>
     </div>
   )
 }
@@ -134,10 +134,10 @@ export default async function MetricasPage() {
   // ── Funil de conversão ───────────────────────────────────────────────────
 
   const funnelStages = [
-    { label: "Novos", statuses: ["novo"], color: "#8A8A8A" },
-    { label: "Qualificados", statuses: ["qualificado", "em_consideracao"], color: "#2D4A3E" },
-    { label: "Visitas", statuses: ["visita_agendada", "visitou"], color: "#2D4A3E" },
-    { label: "Negociação", statuses: ["em_negociacao"], color: "#B87333" },
+    { label: "Novos", statuses: ["novo"], color: "#7A7A6A" },
+    { label: "Qualificados", statuses: ["qualificado", "em_consideracao"], color: "#30360E" },
+    { label: "Visitas", statuses: ["visita_agendada", "visitou"], color: "#30360E" },
+    { label: "Negociação", statuses: ["em_negociacao"], color: "#787F56" },
     { label: "Fechados", statuses: ["fechou"], color: "#4CAF50" },
   ]
   const funnelData = funnelStages.map(s => ({
@@ -210,73 +210,73 @@ export default async function MetricasPage() {
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <LineChart className="w-5 h-5 text-[#B87333]" />
-          <h1 className="font-serif text-2xl text-[#2D4A3E]">Painel de Métricas</h1>
+          <LineChart className="w-5 h-5 text-[#787F56]" />
+          <h1 className="font-serif text-2xl text-[#30360E]">Painel de Métricas</h1>
         </div>
-        <p className="text-sm text-[#8A8A8A]">Performance geral da sua operação — leads, conversões, automação e receita.</p>
+        <p className="text-sm text-[#7A7A6A]">Performance geral da sua operação — leads, conversões, automação e receita.</p>
       </div>
 
       {/* KPI row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="border-[#E0D8CE]">
+        <Card className="border-[#D4C5A0]">
           <CardContent className="p-5">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-xs text-[#8A8A8A] uppercase tracking-wide font-mono">Total de leads</p>
-                <p className="text-3xl font-serif mt-1 text-[#2D4A3E]">{totalLeads}</p>
+                <p className="text-xs text-[#7A7A6A] uppercase tracking-wide font-mono">Total de leads</p>
+                <p className="text-3xl font-serif mt-1 text-[#30360E]">{totalLeads}</p>
                 {leadGrowth !== null && (
                   <p className={`text-xs mt-1 ${leadGrowth >= 0 ? "text-green-600" : "text-red-500"}`}>
                     {leadGrowth >= 0 ? "+" : ""}{leadGrowth}% vs. mês anterior
                   </p>
                 )}
               </div>
-              <div className="p-2 rounded-lg bg-[#2D4A3E]/10">
-                <Users className="w-5 h-5 text-[#2D4A3E]" />
+              <div className="p-2 rounded-lg bg-[#30360E]/10">
+                <Users className="w-5 h-5 text-[#30360E]" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-[#E0D8CE]">
+        <Card className="border-[#D4C5A0]">
           <CardContent className="p-5">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-xs text-[#8A8A8A] uppercase tracking-wide font-mono">Taxa de conversão</p>
-                <p className="text-3xl font-serif mt-1 text-[#B87333]">{conversionRate}</p>
-                <p className="text-xs text-[#8A8A8A] mt-1">{closedLeads} fechados</p>
+                <p className="text-xs text-[#7A7A6A] uppercase tracking-wide font-mono">Taxa de conversão</p>
+                <p className="text-3xl font-serif mt-1 text-[#787F56]">{conversionRate}</p>
+                <p className="text-xs text-[#7A7A6A] mt-1">{closedLeads} fechados</p>
               </div>
-              <div className="p-2 rounded-lg bg-[#B87333]/10">
-                <TrendingUp className="w-5 h-5 text-[#B87333]" />
+              <div className="p-2 rounded-lg bg-[#787F56]/10">
+                <TrendingUp className="w-5 h-5 text-[#787F56]" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-[#E0D8CE]">
+        <Card className="border-[#D4C5A0]">
           <CardContent className="p-5">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-xs text-[#8A8A8A] uppercase tracking-wide font-mono">Visitas realizadas</p>
-                <p className="text-3xl font-serif mt-1 text-[#2D4A3E]">{visitasRealizadas}</p>
-                <p className="text-xs text-[#8A8A8A] mt-1">{pct(visitasRealizadas, visitasTotais)} do total</p>
+                <p className="text-xs text-[#7A7A6A] uppercase tracking-wide font-mono">Visitas realizadas</p>
+                <p className="text-3xl font-serif mt-1 text-[#30360E]">{visitasRealizadas}</p>
+                <p className="text-xs text-[#7A7A6A] mt-1">{pct(visitasRealizadas, visitasTotais)} do total</p>
               </div>
-              <div className="p-2 rounded-lg bg-[#2D4A3E]/10">
-                <Calendar className="w-5 h-5 text-[#2D4A3E]" />
+              <div className="p-2 rounded-lg bg-[#30360E]/10">
+                <Calendar className="w-5 h-5 text-[#30360E]" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-[#E0D8CE]">
+        <Card className="border-[#D4C5A0]">
           <CardContent className="p-5">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-xs text-[#8A8A8A] uppercase tracking-wide font-mono">Comissão total</p>
-                <p className="text-3xl font-serif mt-1 text-[#B87333]">{fmtBRL(totalCommission)}</p>
-                <p className="text-xs text-[#8A8A8A] mt-1">{transactions.length} transações</p>
+                <p className="text-xs text-[#7A7A6A] uppercase tracking-wide font-mono">Comissão total</p>
+                <p className="text-3xl font-serif mt-1 text-[#787F56]">{fmtBRL(totalCommission)}</p>
+                <p className="text-xs text-[#7A7A6A] mt-1">{transactions.length} transações</p>
               </div>
-              <div className="p-2 rounded-lg bg-[#B87333]/10">
-                <TrendingUp className="w-5 h-5 text-[#B87333]" />
+              <div className="p-2 rounded-lg bg-[#787F56]/10">
+                <TrendingUp className="w-5 h-5 text-[#787F56]" />
               </div>
             </div>
           </CardContent>
@@ -286,9 +286,9 @@ export default async function MetricasPage() {
       {/* Row 2: Funil + Temperatura */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Funil de conversão */}
-        <Card className="border-[#E0D8CE]">
+        <Card className="border-[#D4C5A0]">
           <CardHeader className="pb-3">
-            <CardTitle className="font-serif text-lg text-[#2D4A3E] flex items-center gap-2">
+            <CardTitle className="font-serif text-lg text-[#30360E] flex items-center gap-2">
               <Users className="w-4 h-4" />
               Funil de conversão
             </CardTitle>
@@ -297,7 +297,7 @@ export default async function MetricasPage() {
             {funnelData.map(f => (
               <HBar key={f.label} label={f.label} value={f.count} max={funnelMax} color={f.color} />
             ))}
-            <div className="pt-2 border-t border-[#F5F0EB] text-xs text-[#8A8A8A] flex justify-between">
+            <div className="pt-2 border-t border-[#F5F0EB] text-xs text-[#7A7A6A] flex justify-between">
               <span>{activeLeads} leads ativos</span>
               <span>{lostLeads} perdidos</span>
             </div>
@@ -305,9 +305,9 @@ export default async function MetricasPage() {
         </Card>
 
         {/* Temperatura */}
-        <Card className="border-[#E0D8CE]">
+        <Card className="border-[#D4C5A0]">
           <CardHeader className="pb-3">
-            <CardTitle className="font-serif text-lg text-[#2D4A3E] flex items-center gap-2">
+            <CardTitle className="font-serif text-lg text-[#30360E] flex items-center gap-2">
               <Zap className="w-4 h-4" />
               Temperatura dos leads
             </CardTitle>
@@ -316,7 +316,7 @@ export default async function MetricasPage() {
             {tempData.map(t => (
               <HBar key={t.key} label={t.label} value={t.count} max={tempMax} color={t.color} />
             ))}
-            <div className="pt-2 border-t border-[#F5F0EB] text-xs text-[#8A8A8A]">
+            <div className="pt-2 border-t border-[#F5F0EB] text-xs text-[#7A7A6A]">
               {leads.filter(l => !l.temperature).length} leads sem temperatura classificada
             </div>
           </CardContent>
@@ -324,9 +324,9 @@ export default async function MetricasPage() {
       </div>
 
       {/* Row 3: Leads por mês */}
-      <Card className="border-[#E0D8CE]">
+      <Card className="border-[#D4C5A0]">
         <CardHeader className="pb-3">
-          <CardTitle className="font-serif text-lg text-[#2D4A3E] flex items-center gap-2">
+          <CardTitle className="font-serif text-lg text-[#30360E] flex items-center gap-2">
             <LineChart className="w-4 h-4" />
             Novos leads — últimos 6 meses
           </CardTitle>
@@ -343,53 +343,53 @@ export default async function MetricasPage() {
       {/* Row 4: Automação Nara + Aprovações + Métricas operacionais */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Automação Nara */}
-        <Card className="border-[#E0D8CE]">
+        <Card className="border-[#D4C5A0]">
           <CardHeader className="pb-3">
-            <CardTitle className="font-serif text-base text-[#2D4A3E] flex items-center gap-2">
+            <CardTitle className="font-serif text-base text-[#30360E] flex items-center gap-2">
               <MessageSquare className="w-4 h-4" />
               Automação da Nara
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="text-center py-2">
-              <p className="text-4xl font-serif text-[#B87333]">{automationRate}</p>
-              <p className="text-xs text-[#8A8A8A] mt-1">mensagens automáticas</p>
+              <p className="text-4xl font-serif text-[#787F56]">{automationRate}</p>
+              <p className="text-xs text-[#7A7A6A] mt-1">mensagens automáticas</p>
             </div>
             <div className="space-y-2">
-              <HBar label="Nara" value={msgNara} max={msgTotal || 1} color="#B87333" />
-              <HBar label="Corretor" value={msgBroker} max={msgTotal || 1} color="#2D4A3E" />
+              <HBar label="Nara" value={msgNara} max={msgTotal || 1} color="#787F56" />
+              <HBar label="Corretor" value={msgBroker} max={msgTotal || 1} color="#30360E" />
             </div>
-            <p className="text-xs text-[#8A8A8A] text-center">{msgTotal} msgs (últimos 6 meses)</p>
+            <p className="text-xs text-[#7A7A6A] text-center">{msgTotal} msgs (últimos 6 meses)</p>
           </CardContent>
         </Card>
 
         {/* Aprovações */}
-        <Card className="border-[#E0D8CE]">
+        <Card className="border-[#D4C5A0]">
           <CardHeader className="pb-3">
-            <CardTitle className="font-serif text-base text-[#2D4A3E] flex items-center gap-2">
+            <CardTitle className="font-serif text-base text-[#30360E] flex items-center gap-2">
               <Zap className="w-4 h-4" />
               Aprovações humanas
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="text-center py-2">
-              <p className="text-4xl font-serif text-[#2D4A3E]">{totalApprovals}</p>
-              <p className="text-xs text-[#8A8A8A] mt-1">mensagens para revisão</p>
+              <p className="text-4xl font-serif text-[#30360E]">{totalApprovals}</p>
+              <p className="text-xs text-[#7A7A6A] mt-1">mensagens para revisão</p>
             </div>
             <div className="space-y-2">
               <HBar label="Resolvidas" value={resolvedApprovals} max={totalApprovals || 1} color="#4CAF50" />
               <HBar label="Pendentes" value={totalApprovals - resolvedApprovals} max={totalApprovals || 1} color="#E67E22" />
             </div>
-            <p className="text-xs text-[#8A8A8A] text-center">
+            <p className="text-xs text-[#7A7A6A] text-center">
               {pct(resolvedApprovals, totalApprovals)} taxa de resolução
             </p>
           </CardContent>
         </Card>
 
         {/* Operacional */}
-        <Card className="border-[#E0D8CE]">
+        <Card className="border-[#D4C5A0]">
           <CardHeader className="pb-3">
-            <CardTitle className="font-serif text-base text-[#2D4A3E] flex items-center gap-2">
+            <CardTitle className="font-serif text-base text-[#30360E] flex items-center gap-2">
               <Building2 className="w-4 h-4" />
               Operacional
             </CardTitle>
@@ -402,8 +402,8 @@ export default async function MetricasPage() {
               { label: "Visitas agendadas", value: visitasTotais },
             ].map(item => (
               <div key={item.label} className="flex items-center justify-between py-1.5 border-b border-[#F5F0EB] last:border-0">
-                <span className="text-sm text-[#5A5A5A]">{item.label}</span>
-                <span className="font-medium text-[#2D4A3E] tabular-nums">{item.value}</span>
+                <span className="text-sm text-[#4A4A3A]">{item.label}</span>
+                <span className="font-medium text-[#30360E] tabular-nums">{item.value}</span>
               </div>
             ))}
           </CardContent>
@@ -413,35 +413,35 @@ export default async function MetricasPage() {
       {/* Row 5: Tipos de imóvel + Comissões mensais */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Tipos de imóvel */}
-        <Card className="border-[#E0D8CE]">
+        <Card className="border-[#D4C5A0]">
           <CardHeader className="pb-3">
-            <CardTitle className="font-serif text-base text-[#2D4A3E] flex items-center gap-2">
+            <CardTitle className="font-serif text-base text-[#30360E] flex items-center gap-2">
               <Home className="w-4 h-4" />
               Imóveis por tipo
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {topTypes.length === 0 ? (
-              <p className="text-sm text-[#8A8A8A] text-center py-4">Nenhum imóvel cadastrado.</p>
+              <p className="text-sm text-[#7A7A6A] text-center py-4">Nenhum imóvel cadastrado.</p>
             ) : (
               topTypes.map(([type, count]) => (
-                <HBar key={type} label={type} value={count} max={topTypeMax} color="#2D4A3E" sub="imóveis" />
+                <HBar key={type} label={type} value={count} max={topTypeMax} color="#30360E" sub="imóveis" />
               ))
             )}
           </CardContent>
         </Card>
 
         {/* Comissões por trimestre */}
-        <Card className="border-[#E0D8CE]">
+        <Card className="border-[#D4C5A0]">
           <CardHeader className="pb-3">
-            <CardTitle className="font-serif text-base text-[#2D4A3E] flex items-center gap-2">
+            <CardTitle className="font-serif text-base text-[#30360E] flex items-center gap-2">
               <TrendingUp className="w-4 h-4" />
               Comissões recebidas
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {transactions.length === 0 ? (
-              <p className="text-sm text-[#8A8A8A] text-center py-4">
+              <p className="text-sm text-[#7A7A6A] text-center py-4">
                 Nenhuma transação registrada ainda.<br />
                 <span className="text-xs">Registre fechamentos em <strong>Cobrança</strong> para ver aqui.</span>
               </p>
@@ -460,7 +460,7 @@ export default async function MetricasPage() {
                     label={new Date(month + "-01").toLocaleDateString("pt-BR", { month: "short", year: "2-digit" })}
                     value={value}
                     max={maxComm}
-                    color="#B87333"
+                    color="#787F56"
                     sub={`(${fmtBRL(value)})`}
                   />
                 ))

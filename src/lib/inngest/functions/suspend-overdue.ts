@@ -52,7 +52,7 @@ export const suspendOverdue = inngest.createFunction(
               <p>Identificamos que o pagamento da sua assinatura Moova está pendente há mais de 5 dias.</p>
               <p>Por isso, seu acesso foi temporariamente suspenso até a regularização.</p>
               <p>Para reativar, acesse seu painel Asaas ou entre em contato com nosso suporte.</p>
-              <p style="color:#8A8A8A;font-size:12px">Esta comunicação é da Moova, não da Nara.</p>
+              <p style="color:#7A7A6A;font-size:12px">Esta comunicação é da Moova, não da Nara.</p>
             `,
           })
         }

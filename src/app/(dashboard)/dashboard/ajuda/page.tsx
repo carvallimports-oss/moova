@@ -122,16 +122,16 @@ const SECTIONS: { title: string; items: FAQItem[] }[] = [
 function FAQItem({ q, a }: FAQItem) {
   const [open, setOpen] = useState(false)
   return (
-    <div className="border-b border-[#E0D8CE] last:border-0">
+    <div className="border-b border-[#D4C5A0] last:border-0">
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-start justify-between gap-3 py-4 text-left"
       >
         <span className="text-sm font-medium text-[#2A2A2A] leading-snug">{q}</span>
-        <ChevronDown className={cn("w-4 h-4 text-[#8A8A8A] shrink-0 mt-0.5 transition-transform", open && "rotate-180")} />
+        <ChevronDown className={cn("w-4 h-4 text-[#7A7A6A] shrink-0 mt-0.5 transition-transform", open && "rotate-180")} />
       </button>
       {open && (
-        <p className="text-sm text-[#5A5A5A] pb-4 leading-relaxed">{a}</p>
+        <p className="text-sm text-[#4A4A3A] pb-4 leading-relaxed">{a}</p>
       )}
     </div>
   )
@@ -141,13 +141,13 @@ export default function AjudaPage() {
   return (
     <div className="p-6 lg:p-8 pt-20 lg:pt-8 max-w-2xl mx-auto space-y-8">
       <div>
-        <h1 className="font-serif text-2xl text-[#2D4A3E]">Central de Ajuda</h1>
-        <p className="text-sm text-[#8A8A8A] mt-1">Perguntas frequentes sobre a Moova e a Nara</p>
+        <h1 className="font-serif text-2xl text-[#30360E]">Central de Ajuda</h1>
+        <p className="text-sm text-[#7A7A6A] mt-1">Perguntas frequentes sobre a Moova e a Nara</p>
       </div>
 
       {SECTIONS.map((section) => (
-        <div key={section.title} className="bg-white border border-[#E0D8CE] rounded-xl p-6">
-          <h2 className="font-serif text-lg text-[#2D4A3E] mb-1">{section.title}</h2>
+        <div key={section.title} className="bg-white border border-[#D4C5A0] rounded-xl p-6">
+          <h2 className="font-serif text-lg text-[#30360E] mb-1">{section.title}</h2>
           <div>
             {section.items.map((item) => (
               <FAQItem key={item.q} {...item} />
@@ -156,22 +156,22 @@ export default function AjudaPage() {
         </div>
       ))}
 
-      <div className="bg-[#EAE3D9] rounded-xl p-6 space-y-3">
-        <h2 className="font-serif text-lg text-[#2D4A3E]">Ainda com dúvidas?</h2>
-        <p className="text-sm text-[#5A5A5A]">Nossa equipe responde em até 24h úteis nos dias de semana e 12h nos fins de semana.</p>
+      <div className="bg-[#E2D4B9] rounded-xl p-6 space-y-3">
+        <h2 className="font-serif text-lg text-[#30360E]">Ainda com dúvidas?</h2>
+        <p className="text-sm text-[#4A4A3A]">Nossa equipe responde em até 24h úteis nos dias de semana e 12h nos fins de semana.</p>
         <div className="flex flex-col sm:flex-row gap-3">
           <a
             href="https://wa.me/5511999999999"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm font-medium text-[#2D4A3E] bg-white border border-[#E0D8CE] rounded-lg px-4 py-2.5 hover:bg-[#F0F5F2] transition-colors"
+            className="flex items-center gap-2 text-sm font-medium text-[#30360E] bg-white border border-[#D4C5A0] rounded-lg px-4 py-2.5 hover:bg-[#EEF0E8] transition-colors"
           >
             <Phone className="w-4 h-4" />
             WhatsApp Suporte
           </a>
           <a
             href="mailto:suporte@moovaimob.com"
-            className="flex items-center gap-2 text-sm font-medium text-[#2D4A3E] bg-white border border-[#E0D8CE] rounded-lg px-4 py-2.5 hover:bg-[#F0F5F2] transition-colors"
+            className="flex items-center gap-2 text-sm font-medium text-[#30360E] bg-white border border-[#D4C5A0] rounded-lg px-4 py-2.5 hover:bg-[#EEF0E8] transition-colors"
           >
             <MessageCircle className="w-4 h-4" />
             suporte@moovaimob.com

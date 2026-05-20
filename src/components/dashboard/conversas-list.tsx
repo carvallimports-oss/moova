@@ -144,7 +144,7 @@ export function ConversasList({ conversations: initial }: { conversations: Conve
 
   if (conversations.length === 0) {
     return (
-      <div className="text-center py-16 text-[#8A8A8A]">
+      <div className="text-center py-16 text-[#7A7A6A]">
         <MessageSquare className="w-10 h-10 mx-auto mb-3 opacity-30" />
         <p className="text-sm">Nenhuma conversa ativa ainda.</p>
         <p className="text-xs mt-1">A Nara vai aparecer aqui quando o WhatsApp estiver conectado.</p>
@@ -168,9 +168,9 @@ export function ConversasList({ conversations: initial }: { conversations: Conve
               className={cn(
                 "cursor-pointer border transition-all",
                 selected === conv.id
-                  ? "border-[#2D4A3E] bg-[#2D4A3E]/5"
-                  : "border-[#E0D8CE] hover:border-[#2D4A3E]/40",
-                pendingApproval && "border-[#B87333]/50"
+                  ? "border-[#30360E] bg-[#30360E]/5"
+                  : "border-[#D4C5A0] hover:border-[#30360E]/40",
+                pendingApproval && "border-[#787F56]/50"
               )}
             >
               <CardContent className="p-4">
@@ -186,10 +186,10 @@ export function ConversasList({ conversations: initial }: { conversations: Conve
                         </Badge>
                       )}
                     </div>
-                    <p className="text-xs text-[#8A8A8A] mt-0.5">{conv.leads?.phone}</p>
+                    <p className="text-xs text-[#7A7A6A] mt-0.5">{conv.leads?.phone}</p>
                     {lastMsg && (
-                      <p className="text-xs text-[#5A5A5A] mt-1.5 truncate">
-                        <span className={cn("font-medium mr-1", lastMsg.sender === "nara" ? "text-[#2D4A3E]" : "text-[#B87333]")}>
+                      <p className="text-xs text-[#4A4A3A] mt-1.5 truncate">
+                        <span className={cn("font-medium mr-1", lastMsg.sender === "nara" ? "text-[#30360E]" : "text-[#787F56]")}>
                           {lastMsg.sender === "nara" ? "Nara:" : lastMsg.sender === "corretor" ? "Você:" : "Lead:"}
                         </span>
                         {lastMsg.content}
@@ -197,14 +197,14 @@ export function ConversasList({ conversations: initial }: { conversations: Conve
                     )}
                   </div>
                   <div className="flex flex-col items-end gap-1 shrink-0">
-                    <p className="text-[10px] text-[#8A8A8A]">
+                    <p className="text-[10px] text-[#7A7A6A]">
                       {new Date(conv.updated_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                     </p>
                     {pendingApproval && (
-                      <span className="w-2 h-2 rounded-full bg-[#B87333]" />
+                      <span className="w-2 h-2 rounded-full bg-[#787F56]" />
                     )}
                     {conv.broker_took_over && (
-                      <User className="w-3 h-3 text-[#2D4A3E]" />
+                      <User className="w-3 h-3 text-[#30360E]" />
                     )}
                   </div>
                 </div>
@@ -215,14 +215,14 @@ export function ConversasList({ conversations: initial }: { conversations: Conve
       </div>
 
       {/* Detalhe da conversa */}
-      <Card className="border-[#E0D8CE] flex flex-col overflow-hidden">
+      <Card className="border-[#D4C5A0] flex flex-col overflow-hidden">
         {selectedConv ? (
           <>
             {/* Header do chat */}
-            <div className="px-5 py-4 border-b border-[#E0D8CE] flex items-center justify-between">
+            <div className="px-5 py-4 border-b border-[#D4C5A0] flex items-center justify-between">
               <div>
                 <p className="font-medium text-[#2A2A2A]">{selectedConv.leads?.name}</p>
-                <p className="text-xs text-[#8A8A8A]">{selectedConv.leads?.phone}</p>
+                <p className="text-xs text-[#7A7A6A]">{selectedConv.leads?.phone}</p>
               </div>
               <Button
                 size="sm"
@@ -232,8 +232,8 @@ export function ConversasList({ conversations: initial }: { conversations: Conve
                 className={cn(
                   "text-xs border",
                   selectedConv.broker_took_over
-                    ? "border-[#B87333] text-[#B87333] hover:bg-orange-50"
-                    : "border-[#E0D8CE] text-[#2D4A3E]"
+                    ? "border-[#787F56] text-[#787F56] hover:bg-orange-50"
+                    : "border-[#D4C5A0] text-[#30360E]"
                 )}
               >
                 <User className="w-3.5 h-3.5 mr-1.5" />
@@ -249,10 +249,10 @@ export function ConversasList({ conversations: initial }: { conversations: Conve
                     className={cn(
                       "max-w-[80%] rounded-2xl px-4 py-2.5 text-sm",
                       msg.sender === "lead"
-                        ? "bg-[#EAE3D9] text-[#2A2A2A] self-start"
+                        ? "bg-[#E2D4B9] text-[#2A2A2A] self-start"
                         : msg.sender === "nara"
-                        ? "bg-[#2D4A3E] text-white self-end ml-auto"
-                        : "bg-[#B87333] text-white self-end ml-auto"
+                        ? "bg-[#30360E] text-white self-end ml-auto"
+                        : "bg-[#787F56] text-white self-end ml-auto"
                     )}
                   >
                     {msg.requires_approval && (
@@ -275,7 +275,7 @@ export function ConversasList({ conversations: initial }: { conversations: Conve
                       </Button>
                       <Button size="sm"
                         onClick={() => handleApprove(selectedConv.id, msg.id, true)}
-                        className="h-6 text-[10px] px-2 bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white">
+                        className="h-6 text-[10px] px-2 bg-[#30360E] hover:bg-[#4A5218] text-white">
                         Aprovar e enviar
                       </Button>
                     </div>
@@ -286,7 +286,7 @@ export function ConversasList({ conversations: initial }: { conversations: Conve
             </div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-[#8A8A8A]">
+          <div className="flex-1 flex items-center justify-center text-[#7A7A6A]">
             <div className="text-center">
               <MessageSquare className="w-10 h-10 mx-auto mb-2 opacity-20" />
               <p className="text-sm">Selecione uma conversa</p>

@@ -32,6 +32,11 @@ import {
   Wand2,
   Database,
   LineChart,
+  Key,
+  PenLine,
+  BadgeCheck,
+  Newspaper,
+  BookOpen,
 } from "lucide-react"
 
 const PLAN_LABELS: Record<string, string> = {
@@ -54,6 +59,7 @@ const navItems = [
   { href: "/dashboard/leads", label: "Leads", icon: Users },
   { href: "/dashboard/pipeline", label: "Pipeline", icon: Kanban },
   { href: "/dashboard/proprietarios", label: "Proprietários", icon: Home },
+  { href: "/dashboard/locacao", label: "Locação", icon: Key },
   { href: "/dashboard/captacao", label: "Captação", icon: Target },
   { href: "/dashboard/imoveis", label: "Imóveis", icon: Building2 },
   { href: "/dashboard/estudio", label: "Estúdio", icon: Wand2 },
@@ -61,11 +67,15 @@ const navItems = [
   { href: "/dashboard/visitas", label: "Visitas", icon: Calendar },
   { href: "/dashboard/treina", label: "Cora Treina", icon: Dumbbell },
   { href: "/dashboard/defende", label: "Cora Defende", icon: Scale },
+  { href: "/dashboard/assinatura", label: "Assinatura", icon: PenLine },
+  { href: "/dashboard/credito", label: "Crédito", icon: BadgeCheck },
   { href: "/dashboard/servicos", label: "Serviços", icon: Briefcase },
   { href: "/dashboard/apresenta", label: "Cora Apresenta", icon: UserCheck },
   { href: "/dashboard/vistoria", label: "Vistoria", icon: ClipboardList },
   { href: "/dashboard/estimativa", label: "Estimativa", icon: Calculator },
   { href: "/dashboard/cma-enterprise", label: "CMA Enterprise", icon: Database },
+  { href: "/dashboard/newsletter", label: "Cora me Conta", icon: Newspaper },
+  { href: "/dashboard/diario", label: "Diário do Imóvel", icon: BookOpen },
   { href: "/dashboard/metricas", label: "Métricas", icon: LineChart },
   { href: "/dashboard/relatorio", label: "Diagnóstico", icon: BarChart3 },
   { href: "/dashboard/pacto", label: "Pacto 90", icon: ShieldCheck },
@@ -101,12 +111,12 @@ function NavContent({
   return (
     <div className="flex flex-col h-full">
       {/* Logo */}
-      <div className="px-6 py-5 border-b border-[#E0D8CE]">
+      <div className="px-6 py-5 border-b border-[#D4C5A0]">
         <div className="flex items-center gap-2">
-          <div className="w-1.5 h-5 bg-[#B87333] rounded-full" />
-          <span className="font-serif text-xl text-[#2D4A3E]">Moova</span>
+          <div className="w-1.5 h-5 bg-[#787F56] rounded-full" />
+          <span className="font-serif text-xl text-[#30360E]">Moova</span>
         </div>
-        <p className="text-[10px] text-[#8A8A8A] mt-0.5 font-mono uppercase tracking-widest ml-4">
+        <p className="text-[10px] text-[#7A7A6A] mt-0.5 font-mono uppercase tracking-widest ml-4">
           {PLAN_LABELS[plan] ?? "Moova Atende"}
         </p>
       </div>
@@ -126,8 +136,8 @@ function NavContent({
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors",
                 active
-                  ? "bg-[#2D4A3E] text-white font-medium"
-                  : "text-[#5A5A5A] hover:bg-[#EAE3D9] hover:text-[#2D4A3E]"
+                  ? "bg-[#30360E] text-white font-medium"
+                  : "text-[#4A4A3A] hover:bg-[#E2D4B9] hover:text-[#30360E]"
               )}
             >
               <Icon className="w-4 h-4 shrink-0" />
@@ -135,7 +145,7 @@ function NavContent({
               {isConversas && pendingApprovals > 0 && (
                 <span className={cn(
                   "text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center",
-                  active ? "bg-white/20 text-white" : "bg-[#B87333] text-white"
+                  active ? "bg-white/20 text-white" : "bg-[#787F56] text-white"
                 )}>
                   {pendingApprovals > 99 ? "99+" : pendingApprovals}
                 </span>
@@ -143,7 +153,7 @@ function NavContent({
               {isDiag && diagDay !== null && (
                 <span className={cn(
                   "text-[10px] font-mono px-1.5 py-0.5 rounded-full",
-                  active ? "bg-white/20 text-white" : "bg-[#EAE3D9] text-[#5A5A5A]"
+                  active ? "bg-white/20 text-white" : "bg-[#E2D4B9] text-[#4A4A3A]"
                 )}>
                   {diagDay}/14
                 </span>
@@ -154,22 +164,22 @@ function NavContent({
       </nav>
 
       {/* User */}
-      <div className="px-3 py-4 border-t border-[#E0D8CE]">
+      <div className="px-3 py-4 border-t border-[#D4C5A0]">
         <div className="flex items-center gap-3 px-3 py-2 rounded-lg">
           <Avatar className="w-8 h-8">
-            <AvatarFallback className="bg-[#2D4A3E] text-white text-xs">
+            <AvatarFallback className="bg-[#30360E] text-white text-xs">
               {userName.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-[#2A2A2A] truncate">{userName}</p>
-            <p className="text-xs text-[#8A8A8A]">Corretor</p>
+            <p className="text-xs text-[#7A7A6A]">Corretor</p>
           </div>
           <Button
             variant="ghost"
             size="icon"
             onClick={handleLogout}
-            className="w-8 h-8 text-[#8A8A8A] hover:text-red-600"
+            className="w-8 h-8 text-[#7A7A6A] hover:text-red-600"
           >
             <LogOut className="w-4 h-4" />
           </Button>
@@ -195,14 +205,14 @@ export function DashboardSidebar({
   return (
     <>
       {/* Mobile */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-[#FAF7F2] border-b border-[#E0D8CE] px-4 h-14 flex items-center gap-3">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-[#F5F0E0] border-b border-[#D4C5A0] px-4 h-14 flex items-center gap-3">
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger>
-            <Button variant="ghost" size="icon" className="text-[#2D4A3E]">
+            <Button variant="ghost" size="icon" className="text-[#30360E]">
               {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="p-0 w-64 bg-white border-r border-[#E0D8CE]">
+          <SheetContent side="left" className="p-0 w-64 bg-white border-r border-[#D4C5A0]">
             <NavContent
               userName={userName}
               pendingApprovals={pendingApprovals}
@@ -212,11 +222,11 @@ export function DashboardSidebar({
             />
           </SheetContent>
         </Sheet>
-        <span className="font-serif text-lg text-[#2D4A3E]">Moova</span>
+        <span className="font-serif text-lg text-[#30360E]">Moova</span>
       </div>
 
       {/* Desktop */}
-      <aside className="hidden lg:flex w-60 bg-white border-r border-[#E0D8CE] flex-col shrink-0">
+      <aside className="hidden lg:flex w-60 bg-white border-r border-[#D4C5A0] flex-col shrink-0">
         <NavContent userName={userName} pendingApprovals={pendingApprovals} diagDay={diagDay} plan={plan} />
       </aside>
     </>

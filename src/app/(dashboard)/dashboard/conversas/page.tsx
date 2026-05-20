@@ -31,21 +31,21 @@ export default async function ConversasPage() {
     <div className="p-6 lg:p-8 pt-20 lg:pt-8 max-w-6xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-serif text-2xl text-[#2D4A3E]">Conversas</h1>
-          <p className="text-sm text-[#8A8A8A] mt-1">
+          <h1 className="font-serif text-2xl text-[#30360E]">Conversas</h1>
+          <p className="text-sm text-[#7A7A6A] mt-1">
             {conversations?.length ?? 0} conversas ativas
           </p>
         </div>
         {(pendingApprovals ?? 0) > 0 && (
-          <Badge className="bg-[#B87333] text-white text-xs px-3 py-1.5">
+          <Badge className="bg-[#787F56] text-white text-xs px-3 py-1.5">
             {pendingApprovals} aguardando aprovação
           </Badge>
         )}
       </div>
 
       {(pendingApprovals ?? 0) > 0 && (
-        <Card className="border-[#B87333]/40 bg-[#B87333]/5">
-          <CardContent className="p-4 text-sm text-[#B87333] font-medium">
+        <Card className="border-[#787F56]/40 bg-[#787F56]/5">
+          <CardContent className="p-4 text-sm text-[#787F56] font-medium">
             A Nara está aguardando sua aprovação em {pendingApprovals} mensagem(ns) crítica(s).
             Verifique a fila abaixo para não atrasar o atendimento.
           </CardContent>

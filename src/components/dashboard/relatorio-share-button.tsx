@@ -58,7 +58,7 @@ export function RelatorioShareButton() {
         <Button
           onClick={handleShare}
           disabled={loading}
-          className="bg-[#B87333] hover:bg-[#9A6025] text-white gap-2"
+          className="bg-[#787F56] hover:bg-[#9A6025] text-white gap-2"
         >
           {copied ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
           {loading ? "Gerando..." : copied ? "Copiado!" : "Compartilhar"}
@@ -67,7 +67,7 @@ export function RelatorioShareButton() {
           onClick={handleStory}
           disabled={loading}
           variant="outline"
-          className="border-[#2D4A3E] text-[#2D4A3E] hover:bg-[#2D4A3E] hover:text-white gap-2"
+          className="border-[#30360E] text-[#30360E] hover:bg-[#30360E] hover:text-white gap-2"
         >
           <Camera className="w-4 h-4" />
           Stories 9:16
@@ -76,7 +76,7 @@ export function RelatorioShareButton() {
       {shareUrl && (
         <button
           onClick={() => copyToClipboard(shareUrl)}
-          className="flex items-center gap-1.5 text-xs text-[#8A8A8A] hover:text-[#2D4A3E] transition-colors break-all text-center"
+          className="flex items-center gap-1.5 text-xs text-[#7A7A6A] hover:text-[#30360E] transition-colors break-all text-center"
         >
           <Copy className="w-3 h-3 shrink-0" />
           {shareUrl}

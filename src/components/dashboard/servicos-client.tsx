@@ -141,70 +141,70 @@ export function ServicosClient({ initialServices }: { initialServices: ExtraServ
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-[#5A5A5A]">{services.length} serviço{services.length !== 1 ? "s" : ""} registrado{services.length !== 1 ? "s" : ""}</p>
-        <Button onClick={openNew} className="bg-[#2D4A3E] hover:bg-[#1e3329] gap-2 text-sm">
+        <p className="text-sm text-[#4A4A3A]">{services.length} serviço{services.length !== 1 ? "s" : ""} registrado{services.length !== 1 ? "s" : ""}</p>
+        <Button onClick={openNew} className="bg-[#30360E] hover:bg-[#20240A] gap-2 text-sm">
           <Plus className="w-4 h-4" /> Novo serviço
         </Button>
       </div>
 
       {showForm && (
-        <div className="bg-white border border-[#2D4A3E]/30 rounded-xl p-6 space-y-4">
-          <h2 className="font-serif text-lg text-[#2D4A3E]">{editing ? "Editar serviço" : "Novo serviço"}</h2>
+        <div className="bg-white border border-[#30360E]/30 rounded-xl p-6 space-y-4">
+          <h2 className="font-serif text-lg text-[#30360E]">{editing ? "Editar serviço" : "Novo serviço"}</h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1 sm:col-span-2">
-              <label className="text-xs font-medium text-[#5A5A5A]">Nome do serviço *</label>
+              <label className="text-xs font-medium text-[#4A4A3A]">Nome do serviço *</label>
               <input
                 value={form.name ?? ""}
                 onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                 placeholder="Ex: Laudo de avaliação, Vistoria técnica..."
-                className="w-full border border-[#E0D8CE] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D4A3E]/20"
+                className="w-full border border-[#D4C5A0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#30360E]/20"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-medium text-[#5A5A5A]">Cliente</label>
+              <label className="text-xs font-medium text-[#4A4A3A]">Cliente</label>
               <input
                 value={form.client_name ?? ""}
                 onChange={(e) => setForm((f) => ({ ...f, client_name: e.target.value }))}
                 placeholder="Nome do cliente"
-                className="w-full border border-[#E0D8CE] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D4A3E]/20"
+                className="w-full border border-[#D4C5A0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#30360E]/20"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-medium text-[#5A5A5A]">Telefone do cliente</label>
+              <label className="text-xs font-medium text-[#4A4A3A]">Telefone do cliente</label>
               <input
                 value={form.client_phone ?? ""}
                 onChange={(e) => setForm((f) => ({ ...f, client_phone: e.target.value }))}
                 placeholder="(11) 99999-9999"
-                className="w-full border border-[#E0D8CE] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D4A3E]/20"
+                className="w-full border border-[#D4C5A0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#30360E]/20"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-medium text-[#5A5A5A]">Valor (R$)</label>
+              <label className="text-xs font-medium text-[#4A4A3A]">Valor (R$)</label>
               <input
                 type="number"
                 value={form.price ?? ""}
                 onChange={(e) => setForm((f) => ({ ...f, price: e.target.value ? Number(e.target.value) : undefined }))}
                 placeholder="0,00"
-                className="w-full border border-[#E0D8CE] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D4A3E]/20"
+                className="w-full border border-[#D4C5A0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#30360E]/20"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-medium text-[#5A5A5A]">Prazo</label>
+              <label className="text-xs font-medium text-[#4A4A3A]">Prazo</label>
               <input
                 type="date"
                 value={form.due_date ?? ""}
                 onChange={(e) => setForm((f) => ({ ...f, due_date: e.target.value }))}
-                className="w-full border border-[#E0D8CE] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D4A3E]/20"
+                className="w-full border border-[#D4C5A0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#30360E]/20"
               />
             </div>
             {editing && (
               <div className="space-y-1">
-                <label className="text-xs font-medium text-[#5A5A5A]">Status</label>
+                <label className="text-xs font-medium text-[#4A4A3A]">Status</label>
                 <select
                   value={form.status ?? "pending"}
                   onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as ServiceStatus }))}
-                  className="w-full border border-[#E0D8CE] rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#2D4A3E]/20"
+                  className="w-full border border-[#D4C5A0] rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#30360E]/20"
                 >
                   {Object.entries(STATUS_LABELS).map(([k, v]) => (
                     <option key={k} value={k}>{v}</option>
@@ -213,30 +213,30 @@ export function ServicosClient({ initialServices }: { initialServices: ExtraServ
               </div>
             )}
             <div className="space-y-1 sm:col-span-2">
-              <label className="text-xs font-medium text-[#5A5A5A]">Descrição</label>
+              <label className="text-xs font-medium text-[#4A4A3A]">Descrição</label>
               <textarea
                 value={form.description ?? ""}
                 onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
                 rows={2}
                 placeholder="Descreva o serviço..."
-                className="w-full border border-[#E0D8CE] rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#2D4A3E]/20"
+                className="w-full border border-[#D4C5A0] rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#30360E]/20"
               />
             </div>
             <div className="space-y-1 sm:col-span-2">
-              <label className="text-xs font-medium text-[#5A5A5A]">Observações internas</label>
+              <label className="text-xs font-medium text-[#4A4A3A]">Observações internas</label>
               <textarea
                 value={form.notes ?? ""}
                 onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
                 rows={2}
                 placeholder="Notas internas (não visíveis ao cliente)..."
-                className="w-full border border-[#E0D8CE] rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#2D4A3E]/20"
+                className="w-full border border-[#D4C5A0] rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#30360E]/20"
               />
             </div>
           </div>
 
           <div className="flex gap-2 justify-end">
-            <Button variant="outline" onClick={closeForm} className="border-[#E0D8CE]">Cancelar</Button>
-            <Button onClick={handleSave} disabled={saving} className="bg-[#2D4A3E] hover:bg-[#1e3329] gap-2">
+            <Button variant="outline" onClick={closeForm} className="border-[#D4C5A0]">Cancelar</Button>
+            <Button onClick={handleSave} disabled={saving} className="bg-[#30360E] hover:bg-[#20240A] gap-2">
               {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Salvando...</> : "Salvar"}
             </Button>
           </div>
@@ -244,10 +244,10 @@ export function ServicosClient({ initialServices }: { initialServices: ExtraServ
       )}
 
       {services.length === 0 && (
-        <div className="bg-white border border-[#E0D8CE] rounded-xl p-10 text-center">
-          <Briefcase className="w-10 h-10 text-[#E0D8CE] mx-auto mb-3" />
-          <p className="text-sm text-[#8A8A8A]">Nenhum serviço registrado ainda.</p>
-          <p className="text-xs text-[#8A8A8A] mt-1">Clique em "Novo serviço" para começar.</p>
+        <div className="bg-white border border-[#D4C5A0] rounded-xl p-10 text-center">
+          <Briefcase className="w-10 h-10 text-[#D4C5A0] mx-auto mb-3" />
+          <p className="text-sm text-[#7A7A6A]">Nenhum serviço registrado ainda.</p>
+          <p className="text-xs text-[#7A7A6A] mt-1">Clique em "Novo serviço" para começar.</p>
         </div>
       )}
 
@@ -270,7 +270,7 @@ export function ServicosClient({ initialServices }: { initialServices: ExtraServ
 
       {done.length > 0 && (
         <div className="space-y-3">
-          <p className="text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Concluídos / Cancelados</p>
+          <p className="text-xs font-semibold text-[#7A7A6A] uppercase tracking-wide">Concluídos / Cancelados</p>
           {done.map((s) => (
             <ServiceCard
               key={s.id}
@@ -307,46 +307,46 @@ function ServiceCard({
   deleting: boolean
 }) {
   return (
-    <div className="bg-white border border-[#E0D8CE] rounded-xl overflow-hidden">
+    <div className="bg-white border border-[#D4C5A0] rounded-xl overflow-hidden">
       <button
-        className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-[#FAF7F2] transition-colors"
+        className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-[#F5F0E0] transition-colors"
         onClick={onToggle}
       >
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          <CheckCircle2 className={cn("w-4 h-4 shrink-0", service.status === "completed" ? "text-green-600" : "text-[#E0D8CE]")} />
+          <CheckCircle2 className={cn("w-4 h-4 shrink-0", service.status === "completed" ? "text-green-600" : "text-[#D4C5A0]")} />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-[#2A2A2A] truncate">{service.name}</p>
             <div className="flex items-center gap-2 mt-0.5 flex-wrap">
               <span className={cn("text-[10px] px-2 py-0.5 rounded-full border font-medium", STATUS_COLORS[service.status])}>
                 {STATUS_LABELS[service.status]}
               </span>
-              {service.client_name && <span className="text-xs text-[#8A8A8A]">{service.client_name}</span>}
+              {service.client_name && <span className="text-xs text-[#7A7A6A]">{service.client_name}</span>}
               {service.price && (
-                <span className="text-xs text-[#2D4A3E] font-medium">
+                <span className="text-xs text-[#30360E] font-medium">
                   R$ {service.price.toLocaleString("pt-BR", { minimumFractionDigits: 0 })}
                 </span>
               )}
             </div>
           </div>
         </div>
-        {expanded ? <ChevronUp className="w-4 h-4 text-[#8A8A8A] shrink-0 ml-2" /> : <ChevronDown className="w-4 h-4 text-[#8A8A8A] shrink-0 ml-2" />}
+        {expanded ? <ChevronUp className="w-4 h-4 text-[#7A7A6A] shrink-0 ml-2" /> : <ChevronDown className="w-4 h-4 text-[#7A7A6A] shrink-0 ml-2" />}
       </button>
 
       {expanded && (
-        <div className="px-5 pb-5 border-t border-[#E0D8CE] space-y-4 pt-4">
+        <div className="px-5 pb-5 border-t border-[#D4C5A0] space-y-4 pt-4">
           {service.description && (
             <div>
-              <p className="text-xs font-medium text-[#8A8A8A] uppercase tracking-wide mb-1">Descrição</p>
-              <p className="text-sm text-[#5A5A5A]">{service.description}</p>
+              <p className="text-xs font-medium text-[#7A7A6A] uppercase tracking-wide mb-1">Descrição</p>
+              <p className="text-sm text-[#4A4A3A]">{service.description}</p>
             </div>
           )}
           {service.notes && (
             <div>
-              <p className="text-xs font-medium text-[#8A8A8A] uppercase tracking-wide mb-1">Observações</p>
-              <p className="text-sm text-[#5A5A5A]">{service.notes}</p>
+              <p className="text-xs font-medium text-[#7A7A6A] uppercase tracking-wide mb-1">Observações</p>
+              <p className="text-sm text-[#4A4A3A]">{service.notes}</p>
             </div>
           )}
-          <div className="flex flex-wrap gap-2 text-xs text-[#8A8A8A]">
+          <div className="flex flex-wrap gap-2 text-xs text-[#7A7A6A]">
             {service.due_date && <span>Prazo: {new Date(service.due_date).toLocaleDateString("pt-BR")}</span>}
             {service.client_phone && <span>Tel: {service.client_phone}</span>}
             <span>Criado em {new Date(service.created_at).toLocaleDateString("pt-BR")}</span>
@@ -362,7 +362,7 @@ function ServiceCard({
                     "text-[10px] px-2.5 py-1 rounded-full border transition-colors font-medium",
                     service.status === s
                       ? STATUS_COLORS[s]
-                      : "border-[#E0D8CE] text-[#8A8A8A] hover:border-[#2D4A3E]"
+                      : "border-[#D4C5A0] text-[#7A7A6A] hover:border-[#30360E]"
                   )}
                 >
                   {STATUS_LABELS[s]}
@@ -374,7 +374,7 @@ function ServiceCard({
                 variant="ghost"
                 size="icon"
                 onClick={onEdit}
-                className="w-8 h-8 text-[#8A8A8A] hover:text-[#2D4A3E]"
+                className="w-8 h-8 text-[#7A7A6A] hover:text-[#30360E]"
               >
                 <Pencil className="w-3.5 h-3.5" />
               </Button>
@@ -383,7 +383,7 @@ function ServiceCard({
                 size="icon"
                 onClick={onDelete}
                 disabled={deleting}
-                className="w-8 h-8 text-[#8A8A8A] hover:text-red-600"
+                className="w-8 h-8 text-[#7A7A6A] hover:text-red-600"
               >
                 {deleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
               </Button>

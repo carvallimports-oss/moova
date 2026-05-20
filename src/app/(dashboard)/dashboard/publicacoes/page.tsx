@@ -34,10 +34,10 @@ export default async function PublicacoesPage({
   return (
     <div className="p-6 lg:p-8 pt-20 lg:pt-8 space-y-6 max-w-4xl mx-auto">
       <div>
-        <h1 className="font-serif text-2xl text-[#2D4A3E]">Publicações</h1>
-        <p className="text-sm text-[#8A8A8A] mt-1">
+        <h1 className="font-serif text-2xl text-[#30360E]">Publicações</h1>
+        <p className="text-sm text-[#7A7A6A] mt-1">
           Rascunhos gerados pela Nara — revise e aprove antes de publicar.
-          {pending > 0 && <span className="ml-2 text-[#B87333] font-medium">{pending} aguardando aprovação</span>}
+          {pending > 0 && <span className="ml-2 text-[#787F56] font-medium">{pending} aguardando aprovação</span>}
         </p>
       </div>
       <PublicacoesClient

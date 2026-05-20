@@ -22,12 +22,12 @@ export default async function AdminCreciPage() {
   const resolved = (validations ?? []).filter((v) => v.status !== "pending")
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] p-6 lg:p-10">
+    <div className="min-h-screen bg-[#F5F0E0] p-6 lg:p-10">
       <div className="max-w-4xl mx-auto space-y-8">
         <div>
-          <p className="text-xs text-[#B87333] uppercase tracking-widest font-mono">Admin</p>
-          <h1 className="font-serif text-3xl text-[#2D4A3E] mt-1">Validação CRECI</h1>
-          <p className="text-sm text-[#8A8A8A] mt-1">
+          <p className="text-xs text-[#787F56] uppercase tracking-widest font-mono">Admin</p>
+          <h1 className="font-serif text-3xl text-[#30360E] mt-1">Validação CRECI</h1>
+          <p className="text-sm text-[#7A7A6A] mt-1">
             {pending.length} pendente{pending.length !== 1 ? "s" : ""} · {resolved.length} resolvido{resolved.length !== 1 ? "s" : ""}
           </p>
         </div>

@@ -96,32 +96,32 @@ export default function ImportarPage() {
   return (
     <div className="p-6 lg:p-8 pt-20 lg:pt-8 max-w-3xl mx-auto space-y-6">
       <div>
-        <h1 className="font-serif text-2xl text-[#2D4A3E]">Importar leads</h1>
-        <p className="text-sm text-[#8A8A8A] mt-1">
-          Importe sua base de leads via CSV. Colunas reconhecidas: <code className="bg-[#F5F0E8] px-1 rounded">nome</code>, <code className="bg-[#F5F0E8] px-1 rounded">telefone</code>, <code className="bg-[#F5F0E8] px-1 rounded">budget</code>, <code className="bg-[#F5F0E8] px-1 rounded">regiao</code>, <code className="bg-[#F5F0E8] px-1 rounded">observacoes</code>
+        <h1 className="font-serif text-2xl text-[#30360E]">Importar leads</h1>
+        <p className="text-sm text-[#7A7A6A] mt-1">
+          Importe sua base de leads via CSV. Colunas reconhecidas: <code className="bg-[#EDE5CD] px-1 rounded">nome</code>, <code className="bg-[#EDE5CD] px-1 rounded">telefone</code>, <code className="bg-[#EDE5CD] px-1 rounded">budget</code>, <code className="bg-[#EDE5CD] px-1 rounded">regiao</code>, <code className="bg-[#EDE5CD] px-1 rounded">observacoes</code>
         </p>
       </div>
 
-      <Card className="border-[#E0D8CE]">
+      <Card className="border-[#D4C5A0]">
         <CardContent className="p-6 space-y-4">
           {leads.length === 0 ? (
             <div
               onClick={() => fileRef.current?.click()}
-              className="border-2 border-dashed border-[#E0D8CE] rounded-lg p-12 text-center cursor-pointer hover:border-[#B87333] transition-colors"
+              className="border-2 border-dashed border-[#D4C5A0] rounded-lg p-12 text-center cursor-pointer hover:border-[#787F56] transition-colors"
             >
-              <p className="text-[#8A8A8A] text-sm">Clique para selecionar um arquivo CSV</p>
+              <p className="text-[#7A7A6A] text-sm">Clique para selecionar um arquivo CSV</p>
               <p className="text-[#B0A898] text-xs mt-1">Codificação UTF-8 recomendada</p>
             </div>
           ) : (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex gap-4 text-sm">
-                  <span className="text-[#2D4A3E] font-medium">{leads.length} leads</span>
+                  <span className="text-[#30360E] font-medium">{leads.length} leads</span>
                   {counts.done > 0 && <span className="text-green-600">{counts.done} importados</span>}
                   {counts.error > 0 && <span className="text-red-600">{counts.error} com erro</span>}
                 </div>
                 <Button variant="ghost" size="sm" onClick={() => { setLeads([]); setDone(false) }}
-                  className="text-[#8A8A8A] text-xs">
+                  className="text-[#7A7A6A] text-xs">
                   Trocar arquivo
                 </Button>
               </div>
@@ -135,15 +135,15 @@ export default function ImportarPage() {
 
               <div className="max-h-64 overflow-y-auto space-y-1">
                 {leads.map((lead, i) => (
-                  <div key={i} className="flex items-center gap-3 py-1.5 px-3 rounded-lg bg-[#FAF7F2] text-sm">
+                  <div key={i} className="flex items-center gap-3 py-1.5 px-3 rounded-lg bg-[#F5F0E0] text-sm">
                     <span className="w-4 text-center">
                       {lead._status === "done" && "✓"}
                       {lead._status === "error" && "✗"}
                       {lead._status === "importing" && "⋯"}
                       {lead._status === "pending" && "·"}
                     </span>
-                    <span className="font-medium text-[#2D4A3E] flex-1">{lead.name}</span>
-                    <span className="text-[#8A8A8A]">{lead.phone}</span>
+                    <span className="font-medium text-[#30360E] flex-1">{lead.name}</span>
+                    <span className="text-[#7A7A6A]">{lead.phone}</span>
                     {lead.region && <span className="text-[#B0A898] text-xs">{lead.region}</span>}
                     {lead._error && <span className="text-red-500 text-xs">{lead._error}</span>}
                   </div>
@@ -152,7 +152,7 @@ export default function ImportarPage() {
 
               {!done && (
                 <Button onClick={handleImport} disabled={importing}
-                  className="w-full bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white">
+                  className="w-full bg-[#30360E] hover:bg-[#4A5218] text-white">
                   {importing ? `Importando... (${counts.done}/${leads.length})` : `Importar ${leads.length} leads`}
                 </Button>
               )}

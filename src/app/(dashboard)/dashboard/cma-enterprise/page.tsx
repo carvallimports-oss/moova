@@ -48,40 +48,40 @@ export default function CmaEnterprisePage() {
     <div className="p-6 lg:p-8 pt-20 lg:pt-8 max-w-3xl mx-auto space-y-6">
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <Database className="w-5 h-5 text-[#B87333]" />
-          <h1 className="font-serif text-2xl text-[#2D4A3E]">Moova Data — CMA Enterprise</h1>
+          <Database className="w-5 h-5 text-[#787F56]" />
+          <h1 className="font-serif text-2xl text-[#30360E]">Moova Data — CMA Enterprise</h1>
         </div>
-        <p className="text-sm text-[#8A8A8A]">API B2B de análise comparativa de mercado para bancos, FIIs e seguradoras.</p>
+        <p className="text-sm text-[#7A7A6A]">API B2B de análise comparativa de mercado para bancos, FIIs e seguradoras.</p>
       </div>
 
       {/* API Key */}
-      <div className="bg-white border border-[#E0D8CE] rounded-xl p-6 space-y-4">
-        <h2 className="font-serif text-lg text-[#2D4A3E]">Sua API key</h2>
+      <div className="bg-white border border-[#D4C5A0] rounded-xl p-6 space-y-4">
+        <h2 className="font-serif text-lg text-[#30360E]">Sua API key</h2>
 
         {loading ? (
-          <div className="flex items-center gap-2 text-sm text-[#8A8A8A]">
+          <div className="flex items-center gap-2 text-sm text-[#7A7A6A]">
             <Loader2 className="w-4 h-4 animate-spin" /> Carregando...
           </div>
         ) : apiKey ? (
           <div className="space-y-3">
-            <div className="flex items-center gap-2 bg-[#FAF7F2] rounded-lg px-4 py-3 font-mono text-sm">
+            <div className="flex items-center gap-2 bg-[#F5F0E0] rounded-lg px-4 py-3 font-mono text-sm">
               <span className="flex-1 text-[#2A2A2A] break-all">{revealed ? apiKey : maskedKey}</span>
-              <button onClick={() => setRevealed(!revealed)} className="text-[#8A8A8A] hover:text-[#2D4A3E] shrink-0">
+              <button onClick={() => setRevealed(!revealed)} className="text-[#7A7A6A] hover:text-[#30360E] shrink-0">
                 {revealed ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
-              <button onClick={copyKey} className="text-[#8A8A8A] hover:text-[#2D4A3E] shrink-0">
+              <button onClick={copyKey} className="text-[#7A7A6A] hover:text-[#30360E] shrink-0">
                 {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
               </button>
             </div>
             <Button variant="outline" onClick={generateKey} disabled={generating}
-              className="border-[#E0D8CE] text-sm gap-2">
+              className="border-[#D4C5A0] text-sm gap-2">
               {generating ? <><Loader2 className="w-4 h-4 animate-spin" /> Gerando...</> : <><RefreshCw className="w-4 h-4" /> Regenerar chave</>}
             </Button>
           </div>
         ) : (
           <div className="space-y-3">
-            <p className="text-sm text-[#5A5A5A]">Você ainda não tem uma API key. Gere uma para começar a integrar.</p>
-            <Button onClick={generateKey} disabled={generating} className="bg-[#2D4A3E] hover:bg-[#1e3329] gap-2">
+            <p className="text-sm text-[#4A4A3A]">Você ainda não tem uma API key. Gere uma para começar a integrar.</p>
+            <Button onClick={generateKey} disabled={generating} className="bg-[#30360E] hover:bg-[#20240A] gap-2">
               {generating ? <><Loader2 className="w-4 h-4 animate-spin" /> Gerando...</> : "Gerar API key"}
             </Button>
           </div>
@@ -89,18 +89,18 @@ export default function CmaEnterprisePage() {
       </div>
 
       {/* Documentation */}
-      <div className="bg-white border border-[#E0D8CE] rounded-xl p-6 space-y-5">
-        <h2 className="font-serif text-lg text-[#2D4A3E]">Documentação da API</h2>
+      <div className="bg-white border border-[#D4C5A0] rounded-xl p-6 space-y-5">
+        <h2 className="font-serif text-lg text-[#30360E]">Documentação da API</h2>
 
         <div className="space-y-2">
-          <p className="text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Endpoint</p>
+          <p className="text-xs font-semibold text-[#7A7A6A] uppercase tracking-wide">Endpoint</p>
           <div className="bg-[#1A2E28] rounded-lg px-4 py-3 font-mono text-sm text-green-400">
             POST https://moovaimob.com/api/cma-enterprise
           </div>
         </div>
 
         <div className="space-y-2">
-          <p className="text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Headers</p>
+          <p className="text-xs font-semibold text-[#7A7A6A] uppercase tracking-wide">Headers</p>
           <div className="bg-[#1A2E28] rounded-lg px-4 py-3 font-mono text-xs text-green-300 space-y-1">
             <p>Content-Type: application/json</p>
             <p>X-Moova-API-Key: {"<sua-api-key>"}</p>
@@ -108,7 +108,7 @@ export default function CmaEnterprisePage() {
         </div>
 
         <div className="space-y-2">
-          <p className="text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Request body</p>
+          <p className="text-xs font-semibold text-[#7A7A6A] uppercase tracking-wide">Request body</p>
           <div className="bg-[#1A2E28] rounded-lg px-4 py-3 font-mono text-xs text-green-300 overflow-x-auto whitespace-pre">{`{
   "address": "Rua das Flores, 123, Jardins",
   "city": "São Paulo",
@@ -123,7 +123,7 @@ export default function CmaEnterprisePage() {
         </div>
 
         <div className="space-y-2">
-          <p className="text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Response</p>
+          <p className="text-xs font-semibold text-[#7A7A6A] uppercase tracking-wide">Response</p>
           <div className="bg-[#1A2E28] rounded-lg px-4 py-3 font-mono text-xs text-green-300 overflow-x-auto whitespace-pre">{`{
   "cma": {
     "price_min": 680000,
@@ -149,7 +149,7 @@ export default function CmaEnterprisePage() {
         </div>
 
         <div className="space-y-2">
-          <p className="text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Exemplo curl</p>
+          <p className="text-xs font-semibold text-[#7A7A6A] uppercase tracking-wide">Exemplo curl</p>
           <div className="bg-[#1A2E28] rounded-lg px-4 py-3 font-mono text-xs text-green-300 overflow-x-auto whitespace-pre">{`curl -X POST https://moovaimob.com/api/cma-enterprise \\
   -H "Content-Type: application/json" \\
   -H "X-Moova-API-Key: mve_sua_chave_aqui" \\
@@ -163,8 +163,8 @@ export default function CmaEnterprisePage() {
         </div>
       </div>
 
-      <div className="bg-[#EAE3D9] rounded-xl p-4 text-xs text-[#5A5A5A] space-y-1">
-        <p className="font-medium text-[#2D4A3E]">Disclaimer obrigatório</p>
+      <div className="bg-[#E2D4B9] rounded-xl p-4 text-xs text-[#4A4A3A] space-y-1">
+        <p className="font-medium text-[#30360E]">Disclaimer obrigatório</p>
         <p>Esta estimativa é informativa e não constitui avaliação imobiliária formal (NBR 14.653). Para avaliações com validade legal, consulte profissional habilitado pelo CFC ou CRECI com curso de avaliação. O resultado da API deve conter este disclaimer em toda comunicação com o usuário final.</p>
       </div>
     </div>

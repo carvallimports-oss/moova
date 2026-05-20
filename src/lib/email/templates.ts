@@ -7,25 +7,25 @@ export function welcomeEmail(params: { brokerName: string; loginUrl: string }): 
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-<body style="margin:0;padding:0;background:#FAF7F2;font-family:Georgia,serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#FAF7F2;padding:40px 20px;">
+<body style="margin:0;padding:0;background:#F5F0E0;font-family:Georgia,serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5F0E0;padding:40px 20px;">
     <tr><td align="center">
-      <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;border:1px solid #E0D8CE;overflow:hidden;">
-        <tr><td style="background:#2D4A3E;padding:32px 40px;text-align:center;">
-          <p style="margin:0;color:#B87333;font-size:13px;letter-spacing:2px;text-transform:uppercase;">Moova</p>
+      <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;border:1px solid #D4C5A0;overflow:hidden;">
+        <tr><td style="background:#30360E;padding:32px 40px;text-align:center;">
+          <p style="margin:0;color:#787F56;font-size:13px;letter-spacing:2px;text-transform:uppercase;">Moova</p>
           <h1 style="margin:8px 0 0;color:#fff;font-size:28px;font-weight:normal;">Bem-vindo, ${params.brokerName}</h1>
         </td></tr>
         <tr><td style="padding:40px;">
-          <p style="color:#2D4A3E;font-size:16px;line-height:1.6;">Sua Nara já está configurada e pronta para começar a trabalhar com você.</p>
-          <p style="color:#5A5A5A;font-size:15px;line-height:1.7;">Nos próximos 14 dias ela vai mostrar exatamente o que consegue fazer pelo seu negócio — leads qualificados, agendamentos feitos, clientes engajados enquanto você cuida do que só você pode fazer.</p>
+          <p style="color:#30360E;font-size:16px;line-height:1.6;">Sua Nara já está configurada e pronta para começar a trabalhar com você.</p>
+          <p style="color:#4A4A3A;font-size:15px;line-height:1.7;">Nos próximos 14 dias ela vai mostrar exatamente o que consegue fazer pelo seu negócio — leads qualificados, agendamentos feitos, clientes engajados enquanto você cuida do que só você pode fazer.</p>
           <table width="100%" cellpadding="0" cellspacing="0" style="margin:32px 0;">
             <tr><td align="center">
-              <a href="${params.loginUrl}" style="display:inline-block;background:#2D4A3E;color:#fff;text-decoration:none;padding:14px 36px;border-radius:8px;font-size:15px;">Acessar meu painel</a>
+              <a href="${params.loginUrl}" style="display:inline-block;background:#30360E;color:#fff;text-decoration:none;padding:14px 36px;border-radius:8px;font-size:15px;">Acessar meu painel</a>
             </td></tr>
           </table>
-          <p style="color:#8A8A8A;font-size:13px;line-height:1.6;">Se tiver qualquer dúvida, responda este email. Estamos aqui.</p>
-          <hr style="border:none;border-top:1px solid #E0D8CE;margin:32px 0;">
-          <p style="color:#B87333;font-size:12px;margin:0;">Equipe Moova</p>
+          <p style="color:#7A7A6A;font-size:13px;line-height:1.6;">Se tiver qualquer dúvida, responda este email. Estamos aqui.</p>
+          <hr style="border:none;border-top:1px solid #D4C5A0;margin:32px 0;">
+          <p style="color:#787F56;font-size:12px;margin:0;">Equipe Moova</p>
         </td></tr>
       </table>
     </td></tr>
@@ -50,47 +50,47 @@ export function diagnosticoReportEmail(params: {
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-<body style="margin:0;padding:0;background:#FAF7F2;font-family:Georgia,serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#FAF7F2;padding:40px 20px;">
+<body style="margin:0;padding:0;background:#F5F0E0;font-family:Georgia,serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5F0E0;padding:40px 20px;">
     <tr><td align="center">
-      <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;border:1px solid #E0D8CE;overflow:hidden;">
-        <tr><td style="background:#2D4A3E;padding:32px 40px;text-align:center;">
-          <p style="margin:0;color:#B87333;font-size:12px;letter-spacing:2px;text-transform:uppercase;">Diagnóstico Nara · 14 dias</p>
+      <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;border:1px solid #D4C5A0;overflow:hidden;">
+        <tr><td style="background:#30360E;padding:32px 40px;text-align:center;">
+          <p style="margin:0;color:#787F56;font-size:12px;letter-spacing:2px;text-transform:uppercase;">Diagnóstico Nara · 14 dias</p>
           <h1 style="margin:8px 0 0;color:#fff;font-size:26px;font-weight:normal;">${params.brokerName}, aqui está o balanço</h1>
         </td></tr>
         <tr><td style="padding:40px;">
           <table width="100%" cellpadding="0" cellspacing="0">
             <tr>
-              <td width="48%" style="background:#F5F0E8;border-radius:8px;padding:20px;text-align:center;">
-                <p style="margin:0;font-size:36px;font-weight:bold;color:#2D4A3E;">${params.leadsContacted}</p>
-                <p style="margin:4px 0 0;font-size:13px;color:#5A5A5A;">leads contatados</p>
+              <td width="48%" style="background:#EDE5CD;border-radius:8px;padding:20px;text-align:center;">
+                <p style="margin:0;font-size:36px;font-weight:bold;color:#30360E;">${params.leadsContacted}</p>
+                <p style="margin:4px 0 0;font-size:13px;color:#4A4A3A;">leads contatados</p>
               </td>
               <td width="4%"></td>
-              <td width="48%" style="background:#F5F0E8;border-radius:8px;padding:20px;text-align:center;">
-                <p style="margin:0;font-size:36px;font-weight:bold;color:#B87333;">${params.visitsScheduled}</p>
-                <p style="margin:4px 0 0;font-size:13px;color:#5A5A5A;">visitas agendadas</p>
+              <td width="48%" style="background:#EDE5CD;border-radius:8px;padding:20px;text-align:center;">
+                <p style="margin:0;font-size:36px;font-weight:bold;color:#787F56;">${params.visitsScheduled}</p>
+                <p style="margin:4px 0 0;font-size:13px;color:#4A4A3A;">visitas agendadas</p>
               </td>
             </tr>
             <tr><td colspan="3" style="padding:12px 0;"></td></tr>
             <tr>
-              <td width="48%" style="background:#F5F0E8;border-radius:8px;padding:20px;text-align:center;">
-                <p style="margin:0;font-size:36px;font-weight:bold;color:#2D4A3E;">${params.hotLeads}</p>
-                <p style="margin:4px 0 0;font-size:13px;color:#5A5A5A;">leads quentes</p>
+              <td width="48%" style="background:#EDE5CD;border-radius:8px;padding:20px;text-align:center;">
+                <p style="margin:0;font-size:36px;font-weight:bold;color:#30360E;">${params.hotLeads}</p>
+                <p style="margin:4px 0 0;font-size:13px;color:#4A4A3A;">leads quentes</p>
               </td>
               <td width="4%"></td>
-              <td width="48%" style="background:#2D4A3E;border-radius:8px;padding:20px;text-align:center;">
-                <p style="margin:0;font-size:28px;font-weight:bold;color:#B87333;">${fmt(params.estimatedCommission)}</p>
-                <p style="margin:4px 0 0;font-size:13px;color:#E0D8CE;">comissão estimada</p>
+              <td width="48%" style="background:#30360E;border-radius:8px;padding:20px;text-align:center;">
+                <p style="margin:0;font-size:28px;font-weight:bold;color:#787F56;">${fmt(params.estimatedCommission)}</p>
+                <p style="margin:4px 0 0;font-size:13px;color:#D4C5A0;">comissão estimada</p>
               </td>
             </tr>
           </table>
           <table width="100%" cellpadding="0" cellspacing="0" style="margin:32px 0;">
             <tr><td align="center">
-              <a href="${params.dashboardUrl}" style="display:inline-block;background:#2D4A3E;color:#fff;text-decoration:none;padding:14px 36px;border-radius:8px;font-size:15px;">Ver relatório completo</a>
+              <a href="${params.dashboardUrl}" style="display:inline-block;background:#30360E;color:#fff;text-decoration:none;padding:14px 36px;border-radius:8px;font-size:15px;">Ver relatório completo</a>
             </td></tr>
           </table>
-          <hr style="border:none;border-top:1px solid #E0D8CE;margin:32px 0;">
-          <p style="color:#B87333;font-size:12px;margin:0;">Equipe Moova</p>
+          <hr style="border:none;border-top:1px solid #D4C5A0;margin:32px 0;">
+          <p style="color:#787F56;font-size:12px;margin:0;">Equipe Moova</p>
         </td></tr>
       </table>
     </td></tr>
@@ -112,25 +112,25 @@ export function modoDesgradadoAlertEmail(params: {
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-<body style="margin:0;padding:0;background:#FAF7F2;font-family:Georgia,serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#FAF7F2;padding:40px 20px;">
+<body style="margin:0;padding:0;background:#F5F0E0;font-family:Georgia,serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5F0E0;padding:40px 20px;">
     <tr><td align="center">
-      <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;border:1px solid #E0D8CE;overflow:hidden;">
+      <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;border:1px solid #D4C5A0;overflow:hidden;">
         <tr><td style="background:#8B1A1A;padding:28px 40px;text-align:center;">
           <p style="margin:0;color:#FFD0D0;font-size:13px;letter-spacing:2px;text-transform:uppercase;">Alerta · Modo Alternativo</p>
           <h1 style="margin:8px 0 0;color:#fff;font-size:24px;font-weight:normal;">Nara está operando em modo reduzido</h1>
         </td></tr>
         <tr><td style="padding:40px;">
-          <p style="color:#2D4A3E;font-size:15px;line-height:1.6;">${params.brokerName}, detectamos uma instabilidade nos serviços de IA às <strong>${params.incidentAt}</strong>.</p>
-          <p style="color:#5A5A5A;font-size:15px;line-height:1.7;">Durante este período, a Nara enviou mensagens padrão para <strong>${params.affectedLeads} lead(s)</strong> informando que retornará em breve. As mensagens foram enfileiradas e serão reprocessadas automaticamente quando o serviço for restaurado.</p>
-          <p style="color:#5A5A5A;font-size:14px;line-height:1.6;background:#FFF8F0;border-left:3px solid #B87333;padding:12px 16px;border-radius:0 8px 8px 0;">Nenhuma ação sua é necessária. Você será notificado quando tudo voltar ao normal.</p>
+          <p style="color:#30360E;font-size:15px;line-height:1.6;">${params.brokerName}, detectamos uma instabilidade nos serviços de IA às <strong>${params.incidentAt}</strong>.</p>
+          <p style="color:#4A4A3A;font-size:15px;line-height:1.7;">Durante este período, a Nara enviou mensagens padrão para <strong>${params.affectedLeads} lead(s)</strong> informando que retornará em breve. As mensagens foram enfileiradas e serão reprocessadas automaticamente quando o serviço for restaurado.</p>
+          <p style="color:#4A4A3A;font-size:14px;line-height:1.6;background:#FFF8F0;border-left:3px solid #787F56;padding:12px 16px;border-radius:0 8px 8px 0;">Nenhuma ação sua é necessária. Você será notificado quando tudo voltar ao normal.</p>
           <table width="100%" cellpadding="0" cellspacing="0" style="margin:32px 0;">
             <tr><td align="center">
-              <a href="${params.dashboardUrl}" style="display:inline-block;background:#2D4A3E;color:#fff;text-decoration:none;padding:14px 36px;border-radius:8px;font-size:15px;">Acessar painel</a>
+              <a href="${params.dashboardUrl}" style="display:inline-block;background:#30360E;color:#fff;text-decoration:none;padding:14px 36px;border-radius:8px;font-size:15px;">Acessar painel</a>
             </td></tr>
           </table>
-          <hr style="border:none;border-top:1px solid #E0D8CE;margin:32px 0;">
-          <p style="color:#B87333;font-size:12px;margin:0;">Equipe Moova</p>
+          <hr style="border:none;border-top:1px solid #D4C5A0;margin:32px 0;">
+          <p style="color:#787F56;font-size:12px;margin:0;">Equipe Moova</p>
         </td></tr>
       </table>
     </td></tr>
@@ -162,41 +162,41 @@ export function diagnosticoMarcoEmail(params: {
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-<body style="margin:0;padding:0;background:#FAF7F2;font-family:Georgia,serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#FAF7F2;padding:40px 20px;">
+<body style="margin:0;padding:0;background:#F5F0E0;font-family:Georgia,serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5F0E0;padding:40px 20px;">
     <tr><td align="center">
-      <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;border:1px solid #E0D8CE;overflow:hidden;">
-        <tr><td style="background:#2D4A3E;padding:28px 40px;text-align:center;">
-          <p style="margin:0;color:#B87333;font-size:11px;letter-spacing:2px;text-transform:uppercase;">Diagnóstico Nara · Dia ${params.dayNumber}</p>
+      <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;border:1px solid #D4C5A0;overflow:hidden;">
+        <tr><td style="background:#30360E;padding:28px 40px;text-align:center;">
+          <p style="margin:0;color:#787F56;font-size:11px;letter-spacing:2px;text-transform:uppercase;">Diagnóstico Nara · Dia ${params.dayNumber}</p>
           <h1 style="margin:8px 0 0;color:#fff;font-size:22px;font-weight:normal;">${params.brokerName},</h1>
         </td></tr>
         <tr><td style="padding:40px;">
-          <p style="color:#2D4A3E;font-size:16px;line-height:1.6;">${params.messageContent}</p>
+          <p style="color:#30360E;font-size:16px;line-height:1.6;">${params.messageContent}</p>
           <table width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;">
             <tr>
-              <td width="30%" style="background:#F5F0E8;border-radius:8px;padding:16px;text-align:center;">
-                <p style="margin:0;font-size:28px;font-weight:bold;color:#2D4A3E;">${params.leadsAttended}</p>
-                <p style="margin:4px 0 0;font-size:12px;color:#5A5A5A;">leads atendidos</p>
+              <td width="30%" style="background:#EDE5CD;border-radius:8px;padding:16px;text-align:center;">
+                <p style="margin:0;font-size:28px;font-weight:bold;color:#30360E;">${params.leadsAttended}</p>
+                <p style="margin:4px 0 0;font-size:12px;color:#4A4A3A;">leads atendidos</p>
               </td>
               <td width="5%"></td>
-              <td width="30%" style="background:#F5F0E8;border-radius:8px;padding:16px;text-align:center;">
-                <p style="margin:0;font-size:28px;font-weight:bold;color:#B87333;">${params.visitsScheduled}</p>
-                <p style="margin:4px 0 0;font-size:12px;color:#5A5A5A;">visitas agendadas</p>
+              <td width="30%" style="background:#EDE5CD;border-radius:8px;padding:16px;text-align:center;">
+                <p style="margin:0;font-size:28px;font-weight:bold;color:#787F56;">${params.visitsScheduled}</p>
+                <p style="margin:4px 0 0;font-size:12px;color:#4A4A3A;">visitas agendadas</p>
               </td>
               <td width="5%"></td>
-              <td width="30%" style="background:#2D4A3E;border-radius:8px;padding:16px;text-align:center;">
-                <p style="margin:0;font-size:20px;font-weight:bold;color:#B87333;">${fmt(params.estimatedCommission)}</p>
-                <p style="margin:4px 0 0;font-size:12px;color:#E0D8CE;">comissão estimada</p>
+              <td width="30%" style="background:#30360E;border-radius:8px;padding:16px;text-align:center;">
+                <p style="margin:0;font-size:20px;font-weight:bold;color:#787F56;">${fmt(params.estimatedCommission)}</p>
+                <p style="margin:4px 0 0;font-size:12px;color:#D4C5A0;">comissão estimada</p>
               </td>
             </tr>
           </table>
           <table width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;">
             <tr><td align="center">
-              <a href="${params.dashboardUrl}" style="display:inline-block;background:#2D4A3E;color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-size:14px;">Ver painel completo</a>
+              <a href="${params.dashboardUrl}" style="display:inline-block;background:#30360E;color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-size:14px;">Ver painel completo</a>
             </td></tr>
           </table>
-          <hr style="border:none;border-top:1px solid #E0D8CE;margin:24px 0;">
-          <p style="color:#B87333;font-size:12px;margin:0;">Nara · Moova</p>
+          <hr style="border:none;border-top:1px solid #D4C5A0;margin:24px 0;">
+          <p style="color:#787F56;font-size:12px;margin:0;">Nara · Moova</p>
         </td></tr>
       </table>
     </td></tr>
@@ -223,30 +223,30 @@ export function pactoMarcoEmail(params: {
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-<body style="margin:0;padding:0;background:#FAF7F2;font-family:Georgia,serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#FAF7F2;padding:40px 20px;">
+<body style="margin:0;padding:0;background:#F5F0E0;font-family:Georgia,serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5F0E0;padding:40px 20px;">
     <tr><td align="center">
-      <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;border:1px solid #E0D8CE;overflow:hidden;">
-        <tr><td style="background:#2D4A3E;padding:28px 40px;text-align:center;">
-          <p style="margin:0;color:#B87333;font-size:11px;letter-spacing:2px;text-transform:uppercase;">Pacto Moova 90 · Dia ${params.dayNumber}</p>
+      <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;border:1px solid #D4C5A0;overflow:hidden;">
+        <tr><td style="background:#30360E;padding:28px 40px;text-align:center;">
+          <p style="margin:0;color:#787F56;font-size:11px;letter-spacing:2px;text-transform:uppercase;">Pacto Moova 90 · Dia ${params.dayNumber}</p>
           <h1 style="margin:8px 0 0;color:#fff;font-size:22px;font-weight:normal;">${params.brokerName},</h1>
         </td></tr>
         <tr><td style="padding:40px;">
-          <p style="color:#2D4A3E;font-size:16px;line-height:1.6;">${params.messageContent}</p>
-          <div style="background:#F5F0E8;border-radius:8px;padding:20px;margin:20px 0;">
-            <p style="margin:0 0 8px;font-size:13px;color:#5A5A5A;">Progresso para a meta de ${fmt(params.meta)}</p>
-            <div style="background:#E0D8CE;border-radius:4px;height:8px;overflow:hidden;">
-              <div style="background:#B87333;height:8px;width:${pct}%;border-radius:4px;"></div>
+          <p style="color:#30360E;font-size:16px;line-height:1.6;">${params.messageContent}</p>
+          <div style="background:#EDE5CD;border-radius:8px;padding:20px;margin:20px 0;">
+            <p style="margin:0 0 8px;font-size:13px;color:#4A4A3A;">Progresso para a meta de ${fmt(params.meta)}</p>
+            <div style="background:#D4C5A0;border-radius:4px;height:8px;overflow:hidden;">
+              <div style="background:#787F56;height:8px;width:${pct}%;border-radius:4px;"></div>
             </div>
-            <p style="margin:8px 0 0;font-size:22px;font-weight:bold;color:#2D4A3E;">${fmt(params.commissionAchieved)} <span style="font-size:13px;color:#8A8A8A;font-weight:normal;">(${pct}%)</span></p>
+            <p style="margin:8px 0 0;font-size:22px;font-weight:bold;color:#30360E;">${fmt(params.commissionAchieved)} <span style="font-size:13px;color:#7A7A6A;font-weight:normal;">(${pct}%)</span></p>
           </div>
           <table width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;">
             <tr><td align="center">
-              <a href="${params.dashboardUrl}" style="display:inline-block;background:#2D4A3E;color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-size:14px;">Acompanhar no painel</a>
+              <a href="${params.dashboardUrl}" style="display:inline-block;background:#30360E;color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-size:14px;">Acompanhar no painel</a>
             </td></tr>
           </table>
-          <hr style="border:none;border-top:1px solid #E0D8CE;margin:24px 0;">
-          <p style="color:#B87333;font-size:12px;margin:0;">Nara · Moova</p>
+          <hr style="border:none;border-top:1px solid #D4C5A0;margin:24px 0;">
+          <p style="color:#787F56;font-size:12px;margin:0;">Nara · Moova</p>
         </td></tr>
       </table>
     </td></tr>
@@ -268,17 +268,17 @@ export function pactoVeredito90Email(params: {
     A: {
       title: "Meta atingida — parabéns!",
       body: "Você chegou lá. A Nara trabalhou com você durante 90 dias e os resultados falam por si. Sem devolução, sem burocracia — você segue para o próximo ciclo com tudo que conquistou.",
-      color: "#2D4A3E",
+      color: "#30360E",
     },
     B: {
       title: "Boa-fé comprovada — devolução de 70%",
       body: `Você seguiu o processo com comprometimento, mas os resultados ficaram abaixo da meta. Reconhecemos isso. ${fmt(params.refundAmount)} serão devolvidos conforme o Pacto Moova 90.`,
-      color: "#2D4A3E",
+      color: "#30360E",
     },
     C: {
       title: "Engajamento parcial — devolução proporcional",
       body: `O engajamento com o processo foi parcial. De acordo com o Pacto Moova 90, ${fmt(params.refundAmount)} serão devolvidos, mais 1 mês adicional de acesso para você continuar.`,
-      color: "#B87333",
+      color: "#787F56",
     },
     D: {
       title: "Garantia anulada",
@@ -295,24 +295,24 @@ export function pactoVeredito90Email(params: {
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-<body style="margin:0;padding:0;background:#FAF7F2;font-family:Georgia,serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#FAF7F2;padding:40px 20px;">
+<body style="margin:0;padding:0;background:#F5F0E0;font-family:Georgia,serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5F0E0;padding:40px 20px;">
     <tr><td align="center">
-      <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;border:1px solid #E0D8CE;overflow:hidden;">
+      <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;border:1px solid #D4C5A0;overflow:hidden;">
         <tr><td style="background:${s.color};padding:32px 40px;text-align:center;">
           <p style="margin:0;color:rgba(255,255,255,0.7);font-size:12px;letter-spacing:2px;text-transform:uppercase;">Pacto Moova 90 · Cenário ${params.scenario}</p>
           <h1 style="margin:8px 0 0;color:#fff;font-size:26px;font-weight:normal;">${s.title}</h1>
         </td></tr>
         <tr><td style="padding:40px;">
-          <p style="color:#2D4A3E;font-size:16px;line-height:1.6;">${params.brokerName},</p>
-          <p style="color:#5A5A5A;font-size:15px;line-height:1.7;">${s.body}</p>
+          <p style="color:#30360E;font-size:16px;line-height:1.6;">${params.brokerName},</p>
+          <p style="color:#4A4A3A;font-size:15px;line-height:1.7;">${s.body}</p>
           <table width="100%" cellpadding="0" cellspacing="0" style="margin:32px 0;">
             <tr><td align="center">
-              <a href="${params.dashboardUrl}" style="display:inline-block;background:#2D4A3E;color:#fff;text-decoration:none;padding:14px 36px;border-radius:8px;font-size:15px;">Ver meu veredito completo</a>
+              <a href="${params.dashboardUrl}" style="display:inline-block;background:#30360E;color:#fff;text-decoration:none;padding:14px 36px;border-radius:8px;font-size:15px;">Ver meu veredito completo</a>
             </td></tr>
           </table>
-          <hr style="border:none;border-top:1px solid #E0D8CE;margin:32px 0;">
-          <p style="color:#B87333;font-size:12px;margin:0;">Equipe Moova</p>
+          <hr style="border:none;border-top:1px solid #D4C5A0;margin:32px 0;">
+          <p style="color:#787F56;font-size:12px;margin:0;">Equipe Moova</p>
         </td></tr>
       </table>
     </td></tr>
@@ -332,25 +332,25 @@ export function circuloMoovaWelcomeEmail(params: {
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-<body style="margin:0;padding:0;background:#FAF7F2;font-family:Georgia,serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#FAF7F2;padding:40px 20px;">
+<body style="margin:0;padding:0;background:#F5F0E0;font-family:Georgia,serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5F0E0;padding:40px 20px;">
     <tr><td align="center">
-      <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;border:1px solid #E0D8CE;overflow:hidden;">
-        <tr><td style="background:#2D4A3E;padding:32px 40px;text-align:center;">
+      <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;border:1px solid #D4C5A0;overflow:hidden;">
+        <tr><td style="background:#30360E;padding:32px 40px;text-align:center;">
           <p style="margin:0;color:rgba(255,255,255,0.7);font-size:12px;letter-spacing:2px;text-transform:uppercase;">Círculo Moova</p>
           <h1 style="margin:8px 0 0;color:#fff;font-size:26px;font-weight:normal;">Você faz parte da comunidade</h1>
         </td></tr>
         <tr><td style="padding:40px;">
-          <p style="color:#2D4A3E;font-size:16px;line-height:1.6;">${params.brokerName},</p>
-          <p style="color:#5A5A5A;font-size:15px;line-height:1.7;">Seu acesso ao <strong>Círculo Moova</strong> está liberado. É a comunidade exclusiva de corretores que usam IA para crescer — troca de experiências, estratégias e suporte direto da equipe Moova.</p>
+          <p style="color:#30360E;font-size:16px;line-height:1.6;">${params.brokerName},</p>
+          <p style="color:#4A4A3A;font-size:15px;line-height:1.7;">Seu acesso ao <strong>Círculo Moova</strong> está liberado. É a comunidade exclusiva de corretores que usam IA para crescer — troca de experiências, estratégias e suporte direto da equipe Moova.</p>
           <table width="100%" cellpadding="0" cellspacing="0" style="margin:32px 0;">
             <tr><td align="center">
               <a href="${params.discordUrl}" style="display:inline-block;background:#5865F2;color:#fff;text-decoration:none;padding:14px 36px;border-radius:8px;font-size:15px;">Entrar no Discord</a>
             </td></tr>
           </table>
-          <p style="color:#8A8A8A;font-size:13px;line-height:1.6;">Se o botão não funcionar, copie e cole este link:<br><span style="color:#2D4A3E;">${params.discordUrl}</span></p>
-          <hr style="border:none;border-top:1px solid #E0D8CE;margin:32px 0;">
-          <p style="color:#B87333;font-size:12px;margin:0;">Equipe Moova</p>
+          <p style="color:#7A7A6A;font-size:13px;line-height:1.6;">Se o botão não funcionar, copie e cole este link:<br><span style="color:#30360E;">${params.discordUrl}</span></p>
+          <hr style="border:none;border-top:1px solid #D4C5A0;margin:32px 0;">
+          <p style="color:#787F56;font-size:12px;margin:0;">Equipe Moova</p>
         </td></tr>
       </table>
     </td></tr>

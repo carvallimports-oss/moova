@@ -34,21 +34,21 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FAF7F2] px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#F5F0E0] px-4">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center space-y-2">
-          <div className="w-8 h-1 bg-[#B87333] rounded-full mx-auto" />
-          <h1 className="font-serif text-3xl text-[#2D4A3E]">Moova</h1>
-          <p className="text-[#8A8A8A] text-sm">Solicitar acesso ao beta</p>
+          <div className="w-8 h-1 bg-[#787F56] rounded-full mx-auto" />
+          <h1 className="font-serif text-3xl text-[#30360E]">Moova</h1>
+          <p className="text-[#7A7A6A] text-sm">Solicitar acesso ao beta</p>
         </div>
 
-        <Card className="border-[#E0D8CE] shadow-sm">
+        <Card className="border-[#D4C5A0] shadow-sm">
           <CardContent className="p-6 space-y-4">
             {sent ? (
               <div className="text-center space-y-3 py-4">
                 <div className="text-4xl">✅</div>
-                <p className="text-[#2D4A3E] font-medium font-serif">Conta criada!</p>
-                <p className="text-sm text-[#8A8A8A]">
+                <p className="text-[#30360E] font-medium font-serif">Conta criada!</p>
+                <p className="text-sm text-[#7A7A6A]">
                   Enviamos um link de confirmação para <strong>{email}</strong>.
                   Clique nele para acessar o onboarding.
                 </p>
@@ -59,23 +59,23 @@ export default function SignupPage() {
                   <Label htmlFor="email">Email profissional</Label>
                   <Input id="email" type="email" placeholder="corretor@email.com"
                     value={email} onChange={(e) => setEmail(e.target.value)} required
-                    className="border-[#E0D8CE]" />
+                    className="border-[#D4C5A0]" />
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="password">Senha (mínimo 8 caracteres)</Label>
                   <Input id="password" type="password" placeholder="••••••••"
                     value={password} onChange={(e) => setPassword(e.target.value)} required
-                    className="border-[#E0D8CE]" />
+                    className="border-[#D4C5A0]" />
                 </div>
                 {error && <p className="text-red-600 text-sm">{error}</p>}
-                <p className="text-xs text-[#8A8A8A]">
+                <p className="text-xs text-[#7A7A6A]">
                   Ao criar conta você concorda com os{" "}
-                  <a href="/termos" className="text-[#B87333] underline">Termos de Uso</a>{" "}
+                  <a href="/termos" className="text-[#787F56] underline">Termos de Uso</a>{" "}
                   e{" "}
-                  <a href="/privacidade" className="text-[#B87333] underline">Política de Privacidade</a>.
+                  <a href="/privacidade" className="text-[#787F56] underline">Política de Privacidade</a>.
                 </p>
                 <Button type="submit" disabled={loading}
-                  className="w-full bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white">
+                  className="w-full bg-[#30360E] hover:bg-[#4A5218] text-white">
                   {loading ? "Criando conta..." : "Criar conta"}
                 </Button>
               </form>
@@ -83,9 +83,9 @@ export default function SignupPage() {
           </CardContent>
         </Card>
 
-        <p className="text-center text-sm text-[#8A8A8A]">
+        <p className="text-center text-sm text-[#7A7A6A]">
           Já tem conta?{" "}
-          <Link href="/login" className="text-[#B87333] hover:underline font-medium">Entrar</Link>
+          <Link href="/login" className="text-[#787F56] hover:underline font-medium">Entrar</Link>
         </p>
       </div>
     </div>

@@ -5,12 +5,17 @@ import { createWhatsAppProvider } from "@/lib/whatsapp/provider"
 
 export const dynamic = "force-dynamic"
 
-// Validate that the request comes from our Evolution API instance
+// Validate that the request comes from our Evolution API instance.
+// Evolution API sends its global API key as the "apikey" header, so we accept
+// both EVOLUTION_WEBHOOK_SECRET and EVOLUTION_API_KEY to avoid 403 floods.
 function isValidEvolutionRequest(req: NextRequest): boolean {
   const secret = process.env.EVOLUTION_WEBHOOK_SECRET
-  if (!secret) return true // No secret configured — skip validation in dev
+  const apiKey = process.env.EVOLUTION_API_KEY
+  if (!secret && !apiKey) return true // No key configured — allow in dev
   const header = req.headers.get("apikey") ?? req.headers.get("x-api-key") ?? ""
-  return header === secret
+  if (secret && header === secret) return true
+  if (apiKey && header === apiKey) return true
+  return false
 }
 
 export async function POST(req: NextRequest) {
@@ -40,19 +45,23 @@ export async function POST(req: NextRequest) {
 
   const instanceName = (body as Record<string, unknown>).instance as string | undefined
 
-  await inngest.send({
-    name: "whatsapp/message.received",
-    data: {
-      from: incoming.from,
-      type: incoming.type,
-      text: incoming.text,
-      audioBase64: incoming.audioBase64,
-      imageUrl: incoming.imageUrl,
-      timestamp: incoming.timestamp,
-      messageId: incoming.messageId,
-      instanceName,
-    },
-  })
+  try {
+    await inngest.send({
+      name: "whatsapp/message.received",
+      data: {
+        from: incoming.from,
+        type: incoming.type,
+        text: incoming.text,
+        audioBase64: incoming.audioBase64,
+        imageUrl: incoming.imageUrl,
+        timestamp: incoming.timestamp,
+        messageId: incoming.messageId,
+        instanceName,
+      },
+    })
+  } catch (err) {
+    console.error("[evo-webhook] inngest.send failed:", err)
+  }
 
   return NextResponse.json({ ok: true })
 }

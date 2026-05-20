@@ -26,8 +26,8 @@ export default async function ProprietariosPage() {
   return (
     <div className="p-6 lg:p-8 pt-20 lg:pt-8 h-full flex flex-col">
       <div className="mb-6">
-        <h1 className="font-serif text-2xl text-[#2D4A3E]">Proprietários</h1>
-        <p className="text-sm text-[#8A8A8A] mt-1">Pipeline de captação de imóveis — {landlords?.length ?? 0} proprietários</p>
+        <h1 className="font-serif text-2xl text-[#30360E]">Proprietários</h1>
+        <p className="text-sm text-[#7A7A6A] mt-1">Pipeline de captação de imóveis — {landlords?.length ?? 0} proprietários</p>
       </div>
       <ProprietariosClient initialLandlords={landlords ?? []} columns={COLUMNS} />
     </div>

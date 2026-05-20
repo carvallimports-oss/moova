@@ -64,53 +64,53 @@ function PlanCard({ plan, isAvailable, isCurrent }: { plan: typeof PLANS[0]; isA
   return (
     <div className={cn(
       "relative bg-white border rounded-2xl p-6 flex flex-col",
-      plan.highlight ? "border-[#2D4A3E] shadow-lg" : "border-[#E0D8CE]",
+      plan.highlight ? "border-[#30360E] shadow-lg" : "border-[#D4C5A0]",
       !isAvailable && !isCurrent && "opacity-60"
     )}>
       {plan.highlight && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-          <span className="bg-[#2D4A3E] text-white text-xs font-medium px-3 py-1 rounded-full">Mais popular</span>
+          <span className="bg-[#30360E] text-white text-xs font-medium px-3 py-1 rounded-full">Mais popular</span>
         </div>
       )}
 
       <div className="flex items-center gap-3 mb-4">
         <div className={cn(
           "w-10 h-10 rounded-xl flex items-center justify-center",
-          plan.highlight ? "bg-[#2D4A3E]" : "bg-[#EAE3D9]"
+          plan.highlight ? "bg-[#30360E]" : "bg-[#E2D4B9]"
         )}>
-          <Icon className={cn("w-5 h-5", plan.highlight ? "text-white" : "text-[#2D4A3E]")} />
+          <Icon className={cn("w-5 h-5", plan.highlight ? "text-white" : "text-[#30360E]")} />
         </div>
         <div>
-          <h3 className="font-serif text-lg text-[#2D4A3E]">{plan.name}</h3>
-          <p className="text-xs text-[#8A8A8A]">{plan.tagline}</p>
+          <h3 className="font-serif text-lg text-[#30360E]">{plan.name}</h3>
+          <p className="text-xs text-[#7A7A6A]">{plan.tagline}</p>
         </div>
       </div>
 
       <div className="mb-5">
-        <span className="font-serif text-3xl text-[#2D4A3E]">R$ {plan.price.toLocaleString("pt-BR")}</span>
-        <span className="text-sm text-[#8A8A8A]">/mês</span>
+        <span className="font-serif text-3xl text-[#30360E]">R$ {plan.price.toLocaleString("pt-BR")}</span>
+        <span className="text-sm text-[#7A7A6A]">/mês</span>
       </div>
 
       <ul className="space-y-2.5 flex-1 mb-6">
         {plan.features.map((f) => (
-          <li key={f} className="flex items-start gap-2 text-sm text-[#5A5A5A]">
-            <Check className="w-4 h-4 text-[#2D4A3E] shrink-0 mt-0.5" />
+          <li key={f} className="flex items-start gap-2 text-sm text-[#4A4A3A]">
+            <Check className="w-4 h-4 text-[#30360E] shrink-0 mt-0.5" />
             <span>{f}</span>
           </li>
         ))}
       </ul>
 
       {("pacto" in plan) && (
-        <div className="bg-[#EAE3D9] rounded-xl p-4 mb-5">
-          <p className="text-xs font-medium text-[#2D4A3E] mb-1">Pacto Maestria</p>
-          <p className="text-xs text-[#5A5A5A] leading-relaxed">
+        <div className="bg-[#E2D4B9] rounded-xl p-4 mb-5">
+          <p className="text-xs font-medium text-[#30360E] mb-1">Pacto Maestria</p>
+          <p className="text-xs text-[#4A4A3A] leading-relaxed">
             Se em 6 meses você não rodar R$ 90k em comissão adicional, descemos pro Inteligência automaticamente. Sem ligação difícil.
           </p>
         </div>
       )}
 
       {isCurrent ? (
-        <div className="text-center py-2.5 bg-[#EAE3D9] rounded-xl text-sm font-medium text-[#2D4A3E]">
+        <div className="text-center py-2.5 bg-[#E2D4B9] rounded-xl text-sm font-medium text-[#30360E]">
           Plano atual
         </div>
       ) : isAvailable ? (
@@ -118,8 +118,8 @@ function PlanCard({ plan, isAvailable, isCurrent }: { plan: typeof PLANS[0]; isA
           className={cn(
             "w-full",
             plan.highlight
-              ? "bg-[#2D4A3E] hover:bg-[#1e3329] text-white"
-              : "border border-[#2D4A3E] text-[#2D4A3E] bg-white hover:bg-[#EAE3D9]"
+              ? "bg-[#30360E] hover:bg-[#20240A] text-white"
+              : "border border-[#30360E] text-[#30360E] bg-white hover:bg-[#E2D4B9]"
           )}
           variant={plan.highlight ? "default" : "outline"}
           onClick={() => window.open("https://wa.me/5511999999999?text=Quero%20fazer%20upgrade%20para%20o%20" + encodeURIComponent(plan.name), "_blank")}
@@ -127,7 +127,7 @@ function PlanCard({ plan, isAvailable, isCurrent }: { plan: typeof PLANS[0]; isA
           Quero o {plan.name}
         </Button>
       ) : (
-        <div className="text-center py-2.5 text-xs text-[#8A8A8A]">
+        <div className="text-center py-2.5 text-xs text-[#7A7A6A]">
           Disponível após planos anteriores
         </div>
       )}
@@ -140,8 +140,8 @@ export function PlansClient({ currentPlan }: { currentPlan: string }) {
 
   return (
     <div className="space-y-6">
-      <div className="bg-[#EAE3D9] rounded-xl p-4 text-sm text-[#5A5A5A]">
-        <span className="font-medium text-[#2D4A3E]">Como funciona o upgrade?</span>{" "}
+      <div className="bg-[#E2D4B9] rounded-xl p-4 text-sm text-[#4A4A3A]">
+        <span className="font-medium text-[#30360E]">Como funciona o upgrade?</span>{" "}
         A Cora vai te avisar quando identificar que você está pronto para o próximo nível —
         por volume de operações, ROI e engajamento. Para upgrades manuais, entre em contato com o suporte.
       </div>
@@ -163,7 +163,7 @@ export function PlansClient({ currentPlan }: { currentPlan: string }) {
         })}
       </div>
 
-      <p className="text-xs text-center text-[#8A8A8A]">
+      <p className="text-xs text-center text-[#7A7A6A]">
         Todos os planos incluem o Moova Atende (Cora 24/7, Diagnóstico 14 dias, Pacto Moova 90).
         Cobrança via Asaas — Pix, boleto ou cartão.
       </p>

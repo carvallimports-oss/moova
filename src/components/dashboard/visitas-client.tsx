@@ -63,18 +63,18 @@ function VisitCard({ visit, onUpdate }: { visit: Visit; onUpdate: (id: string, s
   }
 
   return (
-    <Card className={cn("border-[#E0D8CE]", isPast && "opacity-60")}>
+    <Card className={cn("border-[#D4C5A0]", isPast && "opacity-60")}>
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 space-y-2">
             <div className="flex items-center gap-2">
-              <User className="w-4 h-4 text-[#2D4A3E]" />
+              <User className="w-4 h-4 text-[#30360E]" />
               <span className="font-medium text-[#2A2A2A]">{lead?.name ?? "Lead"}</span>
               {lead?.temperature && (
-                <span className="text-[10px] text-[#8A8A8A]">· {lead.temperature}</span>
+                <span className="text-[10px] text-[#7A7A6A]">· {lead.temperature}</span>
               )}
             </div>
-            <div className="flex flex-wrap gap-4 text-sm text-[#5A5A5A]">
+            <div className="flex flex-wrap gap-4 text-sm text-[#4A4A3A]">
               <span className="flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5" />
                 {dt.toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "short" })}
@@ -91,7 +91,7 @@ function VisitCard({ visit, onUpdate }: { visit: Visit; onUpdate: (id: string, s
               )}
             </div>
             {visit.notes && (
-              <p className="text-xs text-[#8A8A8A] bg-[#F5F0E8] px-3 py-1.5 rounded-lg">
+              <p className="text-xs text-[#7A7A6A] bg-[#EDE5CD] px-3 py-1.5 rounded-lg">
                 {visit.notes}
               </p>
             )}
@@ -166,7 +166,7 @@ export function VisitasClient({
       <div className="flex justify-end">
         <Button
           onClick={() => setModalOpen(true)}
-          className="bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white gap-2"
+          className="bg-[#30360E] hover:bg-[#4A5218] text-white gap-2"
         >
           <Plus className="w-4 h-4" />
           Nova visita
@@ -174,7 +174,7 @@ export function VisitasClient({
       </div>
 
       {visits.length === 0 ? (
-        <div className="text-center py-16 text-[#8A8A8A]">
+        <div className="text-center py-16 text-[#7A7A6A]">
           <Calendar className="w-10 h-10 mx-auto mb-3 opacity-20" />
           <p className="text-sm">Nenhuma visita agendada ainda.</p>
           <p className="text-xs mt-1">A Nara agenda visitas automaticamente ao qualificar leads quentes.</p>
@@ -183,7 +183,7 @@ export function VisitasClient({
         <div className="space-y-8">
           {upcoming.length > 0 && (
             <section className="space-y-3">
-              <h2 className="text-xs font-medium text-[#8A8A8A] uppercase tracking-widest">Próximas</h2>
+              <h2 className="text-xs font-medium text-[#7A7A6A] uppercase tracking-widest">Próximas</h2>
               {upcoming.map((v) => (
                 <VisitCard key={v.id} visit={v} onUpdate={handleUpdate} />
               ))}
@@ -191,7 +191,7 @@ export function VisitasClient({
           )}
           {past.length > 0 && (
             <section className="space-y-3">
-              <h2 className="text-xs font-medium text-[#8A8A8A] uppercase tracking-widest">Histórico</h2>
+              <h2 className="text-xs font-medium text-[#7A7A6A] uppercase tracking-widest">Histórico</h2>
               {past.map((v) => (
                 <VisitCard key={v.id} visit={v} onUpdate={handleUpdate} />
               ))}

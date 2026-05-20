@@ -78,25 +78,25 @@ export default async function PactoPage() {
   return (
     <div className="p-6 lg:p-8 pt-20 lg:pt-8 max-w-2xl mx-auto space-y-6 pb-12">
       <div className="flex items-center gap-3">
-        <Link href="/dashboard/relatorio" className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "text-[#5A5A5A] gap-1.5")}>
+        <Link href="/dashboard/relatorio" className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "text-[#4A4A3A] gap-1.5")}>
           <ArrowLeft className="w-3.5 h-3.5" />
           Diagnóstico
         </Link>
       </div>
 
       <div className="text-center space-y-2">
-        <p className="text-xs text-[#B87333] uppercase tracking-widest font-mono">Pacto Moova 90</p>
-        <h1 className="font-serif text-3xl text-[#2D4A3E]">Garantia reversa real</h1>
-        <p className="text-sm text-[#8A8A8A]">
+        <p className="text-xs text-[#787F56] uppercase tracking-widest font-mono">Pacto Moova 90</p>
+        <h1 className="font-serif text-3xl text-[#30360E]">Garantia reversa real</h1>
+        <p className="text-sm text-[#7A7A6A]">
           Se a Nara não entregar e você fez sua parte, devolvemos até 70% do valor investido.
         </p>
       </div>
 
       {!pacto ? (
-        <div className="border border-[#E0D8CE] rounded-2xl p-8 text-center space-y-4 bg-white">
-          <Clock className="w-10 h-10 text-[#B87333] mx-auto opacity-60" />
-          <p className="font-medium text-[#2D4A3E]">Pacto ainda não ativado</p>
-          <p className="text-sm text-[#5A5A5A] leading-relaxed max-w-sm mx-auto">
+        <div className="border border-[#D4C5A0] rounded-2xl p-8 text-center space-y-4 bg-white">
+          <Clock className="w-10 h-10 text-[#787F56] mx-auto opacity-60" />
+          <p className="font-medium text-[#30360E]">Pacto ainda não ativado</p>
+          <p className="text-sm text-[#4A4A3A] leading-relaxed max-w-sm mx-auto">
             O Pacto Moova 90 é ativado automaticamente ao final do Diagnóstico 14 dias,
             quando você confirma a assinatura dos 3 meses.
           </p>
@@ -104,7 +104,7 @@ export default async function PactoPage() {
       ) : (
         <>
           {/* Status */}
-          <div className="bg-[#2D4A3E] rounded-2xl p-6 text-white space-y-4">
+          <div className="bg-[#30360E] rounded-2xl p-6 text-white space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-[#B0D0C0] uppercase tracking-widest">Status</p>
@@ -114,7 +114,7 @@ export default async function PactoPage() {
               </div>
               {isResolved
                 ? <CheckCircle2 className="w-8 h-8 text-[#B0D0C0]" />
-                : <AlertCircle className="w-8 h-8 text-[#B87333]" />
+                : <AlertCircle className="w-8 h-8 text-[#787F56]" />
               }
             </div>
             {!isResolved && (
@@ -125,7 +125,7 @@ export default async function PactoPage() {
                 </div>
                 <div className="h-2 bg-white/20 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-[#B87333] rounded-full transition-all"
+                    className="h-full bg-[#787F56] rounded-full transition-all"
                     style={{ width: `${(daysElapsed / 90) * 100}%` }}
                   />
                 </div>
@@ -135,17 +135,17 @@ export default async function PactoPage() {
 
           {/* Métricas */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="border border-[#E0D8CE] rounded-xl p-5 bg-white text-center space-y-1">
-              <p className="text-2xl font-bold text-[#2D4A3E]">
+            <div className="border border-[#D4C5A0] rounded-xl p-5 bg-white text-center space-y-1">
+              <p className="text-2xl font-bold text-[#30360E]">
                 {fmt(pacto.commission_achieved ?? 0)}
               </p>
-              <p className="text-xs text-[#8A8A8A]">comissão realizada</p>
+              <p className="text-xs text-[#7A7A6A]">comissão realizada</p>
             </div>
-            <div className="border border-[#E0D8CE] rounded-xl p-5 bg-white text-center space-y-1">
-              <p className="text-2xl font-bold text-[#B87333]">
+            <div className="border border-[#D4C5A0] rounded-xl p-5 bg-white text-center space-y-1">
+              <p className="text-2xl font-bold text-[#787F56]">
                 {((pacto.good_faith_score ?? 0) * 100).toFixed(0)}%
               </p>
-              <p className="text-xs text-[#8A8A8A]">score de boa-fé</p>
+              <p className="text-xs text-[#7A7A6A]">score de boa-fé</p>
             </div>
           </div>
 
@@ -169,9 +169,9 @@ export default async function PactoPage() {
       )}
 
       {/* Fechamentos / comissões reais */}
-      <div className="border border-[#E0D8CE] rounded-2xl p-6 space-y-4 bg-white">
-        <h2 className="font-serif text-lg text-[#2D4A3E]">Registrar fechamento</h2>
-        <p className="text-sm text-[#5A5A5A]">
+      <div className="border border-[#D4C5A0] rounded-2xl p-6 space-y-4 bg-white">
+        <h2 className="font-serif text-lg text-[#30360E]">Registrar fechamento</h2>
+        <p className="text-sm text-[#4A4A3A]">
           Registre cada venda concluída para que o sistema atualize automaticamente sua comissão acumulada no Pacto.
         </p>
         <FechamentosForm
@@ -182,9 +182,9 @@ export default async function PactoPage() {
       </div>
 
       {/* Regras */}
-      <div className="border border-[#E0D8CE] rounded-2xl p-6 space-y-4 bg-white">
-        <h2 className="font-serif text-lg text-[#2D4A3E]">Como funciona o Pacto</h2>
-        <div className="space-y-3 text-sm text-[#5A5A5A]">
+      <div className="border border-[#D4C5A0] rounded-2xl p-6 space-y-4 bg-white">
+        <h2 className="font-serif text-lg text-[#30360E]">Como funciona o Pacto</h2>
+        <div className="space-y-3 text-sm text-[#4A4A3A]">
           {[
             "Meta: R$ 50.000 em comissão real nos primeiros 90 dias",
             "Score de boa-fé: % visitas realizadas, escalações atendidas em 4h, leads quentes aceitos",
@@ -194,12 +194,12 @@ export default async function PactoPage() {
             "Prazo de contestação: 7 dias após veredito, com evidências",
           ].map((rule) => (
             <div key={rule} className="flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-[#B87333] shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-4 h-4 text-[#787F56] shrink-0 mt-0.5" />
               <p>{rule}</p>
             </div>
           ))}
         </div>
-        <p className="text-xs text-[#8A8A8A]">
+        <p className="text-xs text-[#7A7A6A]">
           Para acionar o Pacto, entre em contato: <strong>pacto@moova.com.br</strong>
         </p>
       </div>

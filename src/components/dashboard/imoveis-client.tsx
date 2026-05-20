@@ -160,21 +160,21 @@ export function ImoveisClient({ initialProperties }: { initialProperties: DbProp
     <>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-serif text-2xl text-[#2D4A3E]">Imóveis</h1>
-          <p className="text-sm text-[#8A8A8A] mt-1">{properties.length} imóveis cadastrados</p>
+          <h1 className="font-serif text-2xl text-[#30360E]">Imóveis</h1>
+          <p className="text-sm text-[#7A7A6A] mt-1">{properties.length} imóveis cadastrados</p>
         </div>
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
             onClick={() => csvRef.current?.click()}
             disabled={importing}
-            className="border-[#E0D8CE] text-[#5A5A5A] hover:text-[#2D4A3E] text-sm gap-2"
+            className="border-[#D4C5A0] text-[#4A4A3A] hover:text-[#30360E] text-sm gap-2"
           >
             {importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
             Importar CSV
           </Button>
           <input ref={csvRef} type="file" accept=".csv,.txt" className="hidden" onChange={handleCSVImport} />
-          <Button onClick={openCreate} className="bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white text-sm gap-2">
+          <Button onClick={openCreate} className="bg-[#30360E] hover:bg-[#4A5218] text-white text-sm gap-2">
             <Plus className="w-4 h-4" />
             Novo imóvel
           </Button>
@@ -182,11 +182,11 @@ export function ImoveisClient({ initialProperties }: { initialProperties: DbProp
       </div>
 
       {!properties.length ? (
-        <div className="text-center py-20 text-[#8A8A8A]">
+        <div className="text-center py-20 text-[#7A7A6A]">
           <Building2 className="w-12 h-12 mx-auto mb-3 opacity-20" />
           <p className="text-sm font-medium">Nenhum imóvel cadastrado</p>
           <p className="text-xs mt-1">A Nara usa a carteira de imóveis para qualificar e sugerir ao lead.</p>
-          <Button onClick={openCreate} className="mt-4 bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white text-sm gap-2">
+          <Button onClick={openCreate} className="mt-4 bg-[#30360E] hover:bg-[#4A5218] text-white text-sm gap-2">
             <Plus className="w-4 h-4" />
             Adicionar primeiro imóvel
           </Button>
@@ -197,22 +197,22 @@ export function ImoveisClient({ initialProperties }: { initialProperties: DbProp
             <Card
               key={property.id}
               onClick={() => openEdit(property)}
-              className="border-[#E0D8CE] hover:shadow-sm transition-shadow cursor-pointer"
+              className="border-[#D4C5A0] hover:shadow-sm transition-shadow cursor-pointer"
             >
-              <div className="h-32 bg-[#EAE3D9] rounded-t-lg flex items-center justify-center">
-                <Building2 className="w-10 h-10 text-[#8A8A8A]/40" />
+              <div className="h-32 bg-[#E2D4B9] rounded-t-lg flex items-center justify-center">
+                <Building2 className="w-10 h-10 text-[#7A7A6A]/40" />
               </div>
               <CardContent className="p-4 space-y-2">
                 <div className="flex items-start justify-between gap-2">
                   <p className="font-medium text-sm text-[#2A2A2A] leading-tight">{property.title}</p>
-                  <Badge className="bg-[#2D4A3E]/10 text-[#2D4A3E] border-0 text-[10px] shrink-0">
+                  <Badge className="bg-[#30360E]/10 text-[#30360E] border-0 text-[10px] shrink-0">
                     {property.type ?? "Imóvel"}
                   </Badge>
                 </div>
-                <p className="text-xs text-[#8A8A8A]">
+                <p className="text-xs text-[#7A7A6A]">
                   {property.city}{property.state ? `, ${property.state}` : ""}
                 </p>
-                <div className="flex items-center gap-4 text-xs text-[#5A5A5A]">
+                <div className="flex items-center gap-4 text-xs text-[#4A4A3A]">
                   {property.bedrooms && (
                     <span className="flex items-center gap-1">
                       <BedDouble className="w-3 h-3" /> {property.bedrooms} quartos
@@ -225,7 +225,7 @@ export function ImoveisClient({ initialProperties }: { initialProperties: DbProp
                   )}
                 </div>
                 {property.price && (
-                  <p className="text-[#B87333] font-medium text-sm">
+                  <p className="text-[#787F56] font-medium text-sm">
                     R$ {Number(property.price).toLocaleString("pt-BR")}
                   </p>
                 )}

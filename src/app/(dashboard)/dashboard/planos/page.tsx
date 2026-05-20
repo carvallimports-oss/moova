@@ -19,8 +19,8 @@ export default async function PlanosPage() {
   return (
     <div className="p-6 lg:p-8 pt-20 lg:pt-8 max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="font-serif text-2xl text-[#2D4A3E]">Planos Moova</h1>
-        <p className="text-sm text-[#8A8A8A] mt-1">
+        <h1 className="font-serif text-2xl text-[#30360E]">Planos Moova</h1>
+        <p className="text-sm text-[#7A7A6A] mt-1">
           Evolua conforme seu volume cresce — de assistente a operadora.
         </p>
       </div>

@@ -85,8 +85,8 @@ export function PipelineClient({ initialLeads }: { initialLeads: PipelineLead[] 
             className={cn(
               "px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
               tempFilter === key
-                ? "bg-[#2D4A3E] text-white"
-                : "bg-[#EAE3D9] text-[#5A5A5A] hover:bg-[#E0D8CE]"
+                ? "bg-[#30360E] text-white"
+                : "bg-[#E2D4B9] text-[#4A4A3A] hover:bg-[#D4C5A0]"
             )}
           >
             {label}

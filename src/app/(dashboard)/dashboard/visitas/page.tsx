@@ -33,8 +33,8 @@ export default async function VisitasPage() {
   return (
     <div className="p-6 lg:p-8 pt-20 lg:pt-8 max-w-3xl mx-auto space-y-8">
       <div>
-        <h1 className="font-serif text-2xl text-[#2D4A3E]">Visitas</h1>
-        <p className="text-sm text-[#8A8A8A] mt-1">
+        <h1 className="font-serif text-2xl text-[#30360E]">Visitas</h1>
+        <p className="text-sm text-[#7A7A6A] mt-1">
           {upcoming.length} visita{upcoming.length !== 1 ? "s" : ""} agendada{upcoming.length !== 1 ? "s" : ""}
         </p>
       </div>

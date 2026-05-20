@@ -22,10 +22,10 @@ export default async function PipelinePage() {
     <div className="p-6 lg:p-8 pt-20 lg:pt-8 space-y-4 h-full flex flex-col">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-serif text-2xl text-[#2D4A3E]">Pipeline</h1>
-          <p className="text-sm text-[#8A8A8A] mt-1">{leads?.length ?? 0} leads ativos</p>
+          <h1 className="font-serif text-2xl text-[#30360E]">Pipeline</h1>
+          <p className="text-sm text-[#7A7A6A] mt-1">{leads?.length ?? 0} leads ativos</p>
         </div>
-        <Link href="/api/leads/export" className={cn(buttonVariants({ variant: "outline", size: "sm" }), "border-[#E0D8CE] text-[#5A5A5A] gap-2")}>
+        <Link href="/api/leads/export" className={cn(buttonVariants({ variant: "outline", size: "sm" }), "border-[#D4C5A0] text-[#4A4A3A] gap-2")}>
           <Download className="w-3.5 h-3.5" />
           Exportar CSV
         </Link>

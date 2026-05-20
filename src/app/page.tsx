@@ -79,17 +79,17 @@ const FAQ = [
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#FAF7F2]">
+    <main className="min-h-screen bg-[#F5F0E0]">
       {/* Nav */}
-      <nav className="border-b border-[#E0D8CE] bg-white/80 backdrop-blur sticky top-0 z-40">
+      <nav className="border-b border-[#D4C5A0] bg-white/80 backdrop-blur sticky top-0 z-40">
         <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-1.5 h-5 bg-[#B87333] rounded-full" />
-            <span className="font-serif text-xl text-[#2D4A3E]">Moova</span>
+            <div className="w-1.5 h-5 bg-[#787F56] rounded-full" />
+            <span className="font-serif text-xl text-[#30360E]">Moova</span>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/login" className="text-sm text-[#5A5A5A] hover:text-[#2D4A3E]">Entrar</Link>
-            <Link href="/signup" className={cn(buttonVariants({ size: "sm" }), "bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white")}>
+            <Link href="/login" className="text-sm text-[#4A4A3A] hover:text-[#30360E]">Entrar</Link>
+            <Link href="/signup" className={cn(buttonVariants({ size: "sm" }), "bg-[#30360E] hover:bg-[#4A5218] text-white")}>
               Solicitar acesso
             </Link>
           </div>
@@ -98,38 +98,38 @@ export default function Home() {
 
       {/* Hero */}
       <section className="max-w-5xl mx-auto px-6 pt-20 pb-16 text-center space-y-6">
-        <div className="inline-flex items-center gap-2 bg-[#2D4A3E]/10 text-[#2D4A3E] text-xs px-4 py-1.5 rounded-full font-medium">
+        <div className="inline-flex items-center gap-2 bg-[#30360E]/10 text-[#30360E] text-xs px-4 py-1.5 rounded-full font-medium">
           <Star className="w-3.5 h-3.5" />
           Beta exclusivo para corretores brasileiros
         </div>
-        <h1 className="font-serif text-5xl lg:text-6xl text-[#2D4A3E] leading-tight max-w-3xl mx-auto">
+        <h1 className="font-serif text-5xl lg:text-6xl text-[#30360E] leading-tight max-w-3xl mx-auto">
           A nova infraestrutura do corretor brasileiro
         </h1>
-        <p className="text-[#5A5A5A] text-lg max-w-xl mx-auto leading-relaxed">
+        <p className="text-[#4A4A3A] text-lg max-w-xl mx-auto leading-relaxed">
           A Nara atende seus leads no WhatsApp 24 horas por dia, qualifica, agenda visitas e te avisa só quando é a hora de fechar.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-          <Link href="/signup" className={cn(buttonVariants({ size: "lg" }), "bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white text-base")}>
+          <Link href="/signup" className={cn(buttonVariants({ size: "lg" }), "bg-[#30360E] hover:bg-[#4A5218] text-white text-base")}>
             Começar diagnóstico gratuito
           </Link>
-          <Link href="#como-funciona" className={cn(buttonVariants({ size: "lg", variant: "outline" }), "border-[#E0D8CE] text-[#2D4A3E] text-base")}>
+          <Link href="#como-funciona" className={cn(buttonVariants({ size: "lg", variant: "outline" }), "border-[#D4C5A0] text-[#30360E] text-base")}>
             Ver como funciona
           </Link>
         </div>
-        <p className="text-xs text-[#8A8A8A]">14 dias de diagnóstico · Sem cartão de crédito</p>
+        <p className="text-xs text-[#7A7A6A]">14 dias de diagnóstico · Sem cartão de crédito</p>
       </section>
 
       {/* Features */}
-      <section className="bg-white border-y border-[#E0D8CE] py-16">
+      <section className="bg-white border-y border-[#D4C5A0] py-16">
         <div className="max-w-5xl mx-auto px-6">
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {FEATURES.map(({ icon: Icon, title, desc }) => (
               <div key={title} className="space-y-3">
-                <div className="w-10 h-10 bg-[#2D4A3E]/10 rounded-xl flex items-center justify-center">
-                  <Icon className="w-5 h-5 text-[#2D4A3E]" />
+                <div className="w-10 h-10 bg-[#30360E]/10 rounded-xl flex items-center justify-center">
+                  <Icon className="w-5 h-5 text-[#30360E]" />
                 </div>
                 <h3 className="font-medium text-[#2A2A2A]">{title}</h3>
-                <p className="text-sm text-[#5A5A5A] leading-relaxed">{desc}</p>
+                <p className="text-sm text-[#4A4A3A] leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
@@ -139,24 +139,24 @@ export default function Home() {
       {/* Como funciona */}
       <section id="como-funciona" className="max-w-5xl mx-auto px-6 py-20 space-y-12">
         <div className="text-center space-y-2">
-          <p className="text-xs text-[#B87333] uppercase tracking-widest font-mono">Como funciona</p>
-          <h2 className="font-serif text-3xl text-[#2D4A3E]">Do cadastro ao primeiro lead atendido em 10 minutos</h2>
+          <p className="text-xs text-[#787F56] uppercase tracking-widest font-mono">Como funciona</p>
+          <h2 className="font-serif text-3xl text-[#30360E]">Do cadastro ao primeiro lead atendido em 10 minutos</h2>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {STEPS.map(({ step, title, desc }) => (
             <div key={step} className="space-y-3">
-              <span className="font-mono text-[#B87333] text-2xl font-bold">{step}</span>
+              <span className="font-mono text-[#787F56] text-2xl font-bold">{step}</span>
               <h3 className="font-medium text-[#2A2A2A]">{title}</h3>
-              <p className="text-sm text-[#5A5A5A] leading-relaxed">{desc}</p>
+              <p className="text-sm text-[#4A4A3A] leading-relaxed">{desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Nara Constitution destaque */}
-      <section className="bg-[#2D4A3E] py-16">
+      <section className="bg-[#30360E] py-16">
         <div className="max-w-3xl mx-auto px-6 text-center space-y-6">
-          <p className="text-[#B87333] text-xs uppercase tracking-widest font-mono">Nara Constitution</p>
+          <p className="text-[#787F56] text-xs uppercase tracking-widest font-mono">Nara Constitution</p>
           <h2 className="font-serif text-3xl text-white">A Nara nunca inventa, nunca pressiona, nunca mente</h2>
           <p className="text-[#B0D0C0] leading-relaxed">
             Três atributos não-negociáveis: <strong className="text-white">Precisa</strong> (informação certa, fonte clara),
@@ -166,7 +166,7 @@ export default function Home() {
           <div className="flex flex-wrap justify-center gap-3 text-sm">
             {["Nunca finge ser humana", "Nunca inventa dados", "Nunca pressiona sem instrução", "Max 1 emoji/mensagem"].map((r) => (
               <span key={r} className="flex items-center gap-1.5 text-[#8AC0A8]">
-                <CheckCircle2 className="w-4 h-4 text-[#B87333]" />
+                <CheckCircle2 className="w-4 h-4 text-[#787F56]" />
                 {r}
               </span>
             ))}
@@ -177,53 +177,53 @@ export default function Home() {
       {/* Planos */}
       <section id="precos" className="max-w-5xl mx-auto px-6 py-20 space-y-12">
         <div className="text-center space-y-2">
-          <p className="text-xs text-[#B87333] uppercase tracking-widest font-mono">Planos</p>
-          <h2 className="font-serif text-3xl text-[#2D4A3E]">Simples e direto</h2>
+          <p className="text-xs text-[#787F56] uppercase tracking-widest font-mono">Planos</p>
+          <h2 className="font-serif text-3xl text-[#30360E]">Simples e direto</h2>
         </div>
         <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
           {PLANS.map((plan) => (
-            <div key={plan.name} className={`rounded-2xl border p-8 space-y-6 ${plan.highlight ? "border-[#B87333] bg-white shadow-lg" : "border-[#E0D8CE] bg-white"}`}>
+            <div key={plan.name} className={`rounded-2xl border p-8 space-y-6 ${plan.highlight ? "border-[#787F56] bg-white shadow-lg" : "border-[#D4C5A0] bg-white"}`}>
               {plan.highlight && (
-                <div className="text-[10px] font-bold text-[#B87333] uppercase tracking-widest">Mais popular</div>
+                <div className="text-[10px] font-bold text-[#787F56] uppercase tracking-widest">Mais popular</div>
               )}
               <div>
-                <h3 className="font-serif text-xl text-[#2D4A3E]">{plan.name}</h3>
+                <h3 className="font-serif text-xl text-[#30360E]">{plan.name}</h3>
                 <div className="mt-2 flex items-baseline gap-1">
                   <span className="font-bold text-3xl text-[#2A2A2A]">{plan.price}</span>
-                  <span className="text-[#8A8A8A] text-sm">{plan.period}</span>
+                  <span className="text-[#7A7A6A] text-sm">{plan.period}</span>
                 </div>
-                <p className="text-xs text-[#8A8A8A] mt-1">{plan.provider}</p>
+                <p className="text-xs text-[#7A7A6A] mt-1">{plan.provider}</p>
               </div>
               <ul className="space-y-2">
                 {plan.items.map((item) => (
                   <li key={item} className="flex items-center gap-2 text-sm text-[#3A3A3A]">
-                    <CheckCircle2 className="w-4 h-4 text-[#2D4A3E] shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-[#30360E] shrink-0" />
                     {item}
                   </li>
                 ))}
               </ul>
-              <Link href="/signup" className={cn(buttonVariants(), "w-full justify-center", plan.highlight ? "bg-[#B87333] hover:bg-[#9A6025] text-white" : "bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white")}>
+              <Link href="/signup" className={cn(buttonVariants(), "w-full justify-center", plan.highlight ? "bg-[#787F56] hover:bg-[#9A6025] text-white" : "bg-[#30360E] hover:bg-[#4A5218] text-white")}>
                 {plan.cta}
               </Link>
             </div>
           ))}
         </div>
-        <p className="text-center text-xs text-[#8A8A8A]">
+        <p className="text-center text-xs text-[#7A7A6A]">
           Pagamento via Pix, boleto ou cartão. Asaas · Seguro e transparente.
         </p>
       </section>
 
       {/* FAQ */}
-      <section className="bg-white border-t border-[#E0D8CE] py-16">
+      <section className="bg-white border-t border-[#D4C5A0] py-16">
         <div className="max-w-2xl mx-auto px-6 space-y-10">
           <div className="text-center space-y-2">
-            <h2 className="font-serif text-2xl text-[#2D4A3E]">Perguntas frequentes</h2>
+            <h2 className="font-serif text-2xl text-[#30360E]">Perguntas frequentes</h2>
           </div>
-          <div className="divide-y divide-[#E0D8CE]">
+          <div className="divide-y divide-[#D4C5A0]">
             {FAQ.map(({ q, a }) => (
               <div key={q} className="py-5 space-y-2">
                 <p className="font-medium text-[#2A2A2A]">{q}</p>
-                <p className="text-sm text-[#5A5A5A] leading-relaxed">{a}</p>
+                <p className="text-sm text-[#4A4A3A] leading-relaxed">{a}</p>
               </div>
             ))}
           </div>
@@ -232,26 +232,26 @@ export default function Home() {
 
       {/* CTA Final */}
       <section className="max-w-5xl mx-auto px-6 py-20 text-center space-y-6">
-        <h2 className="font-serif text-4xl text-[#2D4A3E] max-w-xl mx-auto">
+        <h2 className="font-serif text-4xl text-[#30360E] max-w-xl mx-auto">
           Sua Nara está pronta. Seus leads estão esperando.
         </h2>
-        <Link href="/signup" className={cn(buttonVariants({ size: "lg" }), "bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white text-base px-10")}>
+        <Link href="/signup" className={cn(buttonVariants({ size: "lg" }), "bg-[#30360E] hover:bg-[#4A5218] text-white text-base px-10")}>
           Solicitar acesso ao beta
         </Link>
-        <p className="text-xs text-[#8A8A8A]">14 dias · Sem cartão · Pacto Moova 90 incluso</p>
+        <p className="text-xs text-[#7A7A6A]">14 dias · Sem cartão · Pacto Moova 90 incluso</p>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-[#E0D8CE] py-8">
-        <div className="max-w-5xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#8A8A8A]">
+      <footer className="border-t border-[#D4C5A0] py-8">
+        <div className="max-w-5xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#7A7A6A]">
           <div className="flex items-center gap-2">
-            <div className="w-1 h-3.5 bg-[#B87333] rounded-full" />
-            <span className="font-serif text-[#2D4A3E]">Moova</span>
+            <div className="w-1 h-3.5 bg-[#787F56] rounded-full" />
+            <span className="font-serif text-[#30360E]">Moova</span>
           </div>
           <div className="flex gap-4">
-            <Link href="/termos" className="hover:text-[#2D4A3E]">Termos de Uso</Link>
-            <Link href="/privacidade" className="hover:text-[#2D4A3E]">Privacidade</Link>
-            <a href="mailto:contato@moova.com.br" className="hover:text-[#2D4A3E]">Contato</a>
+            <Link href="/termos" className="hover:text-[#30360E]">Termos de Uso</Link>
+            <Link href="/privacidade" className="hover:text-[#30360E]">Privacidade</Link>
+            <a href="mailto:contato@moova.com.br" className="hover:text-[#30360E]">Contato</a>
           </div>
           <p>© 2026 Moova. Todos os direitos reservados.</p>
         </div>

@@ -31,18 +31,18 @@ function StatCard({
   accent?: boolean
 }) {
   return (
-    <Card className="border-[#E0D8CE]">
+    <Card className="border-[#D4C5A0]">
       <CardContent className="p-5">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-xs text-[#8A8A8A] uppercase tracking-wide font-mono">{title}</p>
-            <p className={`text-3xl font-serif mt-1 ${accent ? "text-[#B87333]" : "text-[#2D4A3E]"}`}>
+            <p className="text-xs text-[#7A7A6A] uppercase tracking-wide font-mono">{title}</p>
+            <p className={`text-3xl font-serif mt-1 ${accent ? "text-[#787F56]" : "text-[#30360E]"}`}>
               {value}
             </p>
-            {sub && <p className="text-xs text-[#8A8A8A] mt-1">{sub}</p>}
+            {sub && <p className="text-xs text-[#7A7A6A] mt-1">{sub}</p>}
           </div>
-          <div className={`p-2 rounded-lg ${accent ? "bg-[#B87333]/10" : "bg-[#2D4A3E]/10"}`}>
-            <Icon className={`w-5 h-5 ${accent ? "text-[#B87333]" : "text-[#2D4A3E]"}`} />
+          <div className={`p-2 rounded-lg ${accent ? "bg-[#787F56]/10" : "bg-[#30360E]/10"}`}>
+            <Icon className={`w-5 h-5 ${accent ? "text-[#787F56]" : "text-[#30360E]"}`} />
           </div>
         </div>
       </CardContent>
@@ -117,35 +117,35 @@ export default async function DashboardPage() {
     <div className="p-6 lg:p-8 pt-20 lg:pt-8 max-w-6xl mx-auto space-y-8">
       {/* Header */}
       <div>
-        <h1 className="font-serif text-2xl text-[#2D4A3E]">Início</h1>
-        <p className="text-sm text-[#8A8A8A] mt-1">
+        <h1 className="font-serif text-2xl text-[#30360E]">Início</h1>
+        <p className="text-sm text-[#7A7A6A] mt-1">
           {new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}
         </p>
       </div>
 
       {/* Diagnóstico banner */}
       {diagnosticoAtivo && (
-        <Card className="border-[#B87333]/30 bg-gradient-to-r from-[#B87333]/5 to-[#2D4A3E]/5">
+        <Card className="border-[#787F56]/30 bg-gradient-to-r from-[#787F56]/5 to-[#30360E]/5">
           <CardContent className="p-5">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <Zap className="w-4 h-4 text-[#B87333]" />
-                  <span className="text-sm font-medium text-[#2D4A3E]">Diagnóstico Nara 14 Dias</span>
-                  <Badge className="bg-[#B87333]/10 text-[#B87333] text-[10px] border-0">
+                  <Zap className="w-4 h-4 text-[#787F56]" />
+                  <span className="text-sm font-medium text-[#30360E]">Diagnóstico Nara 14 Dias</span>
+                  <Badge className="bg-[#787F56]/10 text-[#787F56] text-[10px] border-0">
                     {diasRestantes} dias restantes
                   </Badge>
                 </div>
-                <Progress value={progressoPct} className="h-1.5 bg-[#E0D8CE]" />
+                <Progress value={progressoPct} className="h-1.5 bg-[#D4C5A0]" />
                 <div className="flex gap-6 mt-3 text-sm">
-                  <span className="text-[#5A5A5A]">
-                    <strong className="text-[#2D4A3E]">{diagnosticoAtivo.leads_attended}</strong> leads atendidos
+                  <span className="text-[#4A4A3A]">
+                    <strong className="text-[#30360E]">{diagnosticoAtivo.leads_attended}</strong> leads atendidos
                   </span>
-                  <span className="text-[#5A5A5A]">
-                    <strong className="text-[#2D4A3E]">{diagnosticoAtivo.visits_scheduled}</strong> visitas agendadas
+                  <span className="text-[#4A4A3A]">
+                    <strong className="text-[#30360E]">{diagnosticoAtivo.visits_scheduled}</strong> visitas agendadas
                   </span>
-                  <span className="text-[#5A5A5A]">
-                    <strong className="text-[#B87333]">
+                  <span className="text-[#4A4A3A]">
+                    <strong className="text-[#787F56]">
                       R$ {diagnosticoAtivo.estimated_commission.toLocaleString("pt-BR")}
                     </strong>{" "}
                     em potencial
@@ -178,16 +178,16 @@ export default async function DashboardPage() {
       {/* Próximos compromissos + Status Nara */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Próximas visitas */}
-        <Card className="border-[#E0D8CE]">
+        <Card className="border-[#D4C5A0]">
           <CardHeader className="pb-3">
-            <CardTitle className="font-serif text-lg text-[#2D4A3E] flex items-center justify-between">
+            <CardTitle className="font-serif text-lg text-[#30360E] flex items-center justify-between">
               <span className="flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
                 Próximas visitas
               </span>
               <Link
                 href="/dashboard/visitas"
-                className="text-xs text-[#B87333] font-sans font-normal hover:underline"
+                className="text-xs text-[#787F56] font-sans font-normal hover:underline"
               >
                 Ver todas
               </Link>
@@ -195,7 +195,7 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             {visitas.length === 0 ? (
-              <p className="text-sm text-[#8A8A8A] text-center py-6">
+              <p className="text-sm text-[#7A7A6A] text-center py-6">
                 Nenhuma visita nos próximos 7 dias.
               </p>
             ) : (
@@ -205,7 +205,7 @@ export default async function DashboardPage() {
                   <div key={v.id} className="flex items-start justify-between gap-2 py-2 border-b border-[#F5F0EB] last:border-0">
                     <div className="space-y-0.5">
                       <p className="text-sm font-medium text-[#2A2A2A]">{Array.isArray(v.leads) ? v.leads[0]?.name : (v.leads as { name: string } | null)?.name ?? "Lead"}</p>
-                      <div className="flex items-center gap-3 text-xs text-[#8A8A8A]">
+                      <div className="flex items-center gap-3 text-xs text-[#7A7A6A]">
                         <span className="flex items-center gap-1">
                           <Clock className="w-3 h-3" />
                           {dt.toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "short" })}{" "}
@@ -235,9 +235,9 @@ export default async function DashboardPage() {
 
       {/* Timeline de incidentes */}
       {incidentes.length > 0 && (
-        <Card className="border-[#E0D8CE]">
+        <Card className="border-[#D4C5A0]">
           <CardHeader className="pb-3">
-            <CardTitle className="font-serif text-lg text-[#2D4A3E] flex items-center gap-2">
+            <CardTitle className="font-serif text-lg text-[#30360E] flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-[#E67E22]" />
               Incidentes recentes — Modo degradado
             </CardTitle>
@@ -257,7 +257,7 @@ export default async function DashboardPage() {
                         day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
                       })}
                     </p>
-                    <p className="text-xs text-[#8A8A8A]">
+                    <p className="text-xs text-[#7A7A6A]">
                       OpenAI: {inc.openai_status} · Anthropic: {inc.anthropic_status}
                       {durationMin !== null && ` · Duração: ${durationMin}min`}
                     </p>

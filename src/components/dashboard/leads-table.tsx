@@ -114,8 +114,8 @@ export function LeadsTable({ initialLeads }: { initialLeads: TableLead[] }) {
     <>
       {/* Header row */}
       <div className="flex items-center justify-between gap-3">
-        <p className="text-sm text-[#8A8A8A]">{leads.length} leads no total</p>
-        <Button onClick={openCreate} className="bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white text-sm gap-2 shrink-0">
+        <p className="text-sm text-[#7A7A6A]">{leads.length} leads no total</p>
+        <Button onClick={openCreate} className="bg-[#30360E] hover:bg-[#4A5218] text-white text-sm gap-2 shrink-0">
           <Plus className="w-4 h-4" />
           Novo lead
         </Button>
@@ -127,12 +127,12 @@ export function LeadsTable({ initialLeads }: { initialLeads: TableLead[] }) {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Buscar por nome ou telefone..."
-          className="flex-1 text-sm border border-[#E0D8CE] rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-[#2D4A3E] text-[#2A2A2A] placeholder:text-[#8A8A8A]"
+          className="flex-1 text-sm border border-[#D4C5A0] rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-[#30360E] text-[#2A2A2A] placeholder:text-[#7A7A6A]"
         />
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="text-sm border border-[#E0D8CE] rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-[#2D4A3E] text-[#5A5A5A]"
+          className="text-sm border border-[#D4C5A0] rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-[#30360E] text-[#4A4A3A]"
         >
           <option value="all">Todos os status</option>
           {Object.entries(STATUS_LABELS).map(([v, l]) => (
@@ -142,7 +142,7 @@ export function LeadsTable({ initialLeads }: { initialLeads: TableLead[] }) {
         <select
           value={tempFilter}
           onChange={(e) => setTempFilter(e.target.value)}
-          className="text-sm border border-[#E0D8CE] rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-[#2D4A3E] text-[#5A5A5A]"
+          className="text-sm border border-[#D4C5A0] rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-[#30360E] text-[#4A4A3A]"
         >
           <option value="all">Todas as temperaturas</option>
           {ALL_TEMPS.slice(1).map((t) => (
@@ -153,8 +153,8 @@ export function LeadsTable({ initialLeads }: { initialLeads: TableLead[] }) {
           onClick={() => setVipOnly((v) => !v)}
           className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm transition-colors ${
             vipOnly
-              ? "border-[#B87333] bg-[#B87333]/10 text-[#B87333]"
-              : "border-[#E0D8CE] bg-white text-[#5A5A5A] hover:border-[#B87333]/40"
+              ? "border-[#787F56] bg-[#787F56]/10 text-[#787F56]"
+              : "border-[#D4C5A0] bg-white text-[#4A4A3A] hover:border-[#787F56]/40"
           }`}
         >
           <Star className="w-3.5 h-3.5" />
@@ -163,11 +163,11 @@ export function LeadsTable({ initialLeads }: { initialLeads: TableLead[] }) {
       </div>
 
       {/* Table */}
-      <div className="border border-[#E0D8CE] rounded-xl overflow-hidden bg-white">
+      <div className="border border-[#D4C5A0] rounded-xl overflow-hidden bg-white">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[#E0D8CE] bg-[#FAF7F2]">
+              <tr className="border-b border-[#D4C5A0] bg-[#F5F0E0]">
                 {([
                   ["name", "Nome"],
                   ["status", "Status"],
@@ -178,7 +178,7 @@ export function LeadsTable({ initialLeads }: { initialLeads: TableLead[] }) {
                   <th
                     key={key}
                     onClick={() => toggleSort(key)}
-                    className="text-left px-4 py-3 text-xs font-medium text-[#5A5A5A] uppercase tracking-wide cursor-pointer hover:text-[#2D4A3E] select-none"
+                    className="text-left px-4 py-3 text-xs font-medium text-[#4A4A3A] uppercase tracking-wide cursor-pointer hover:text-[#30360E] select-none"
                   >
                     <span className="flex items-center gap-1">
                       {label}
@@ -189,10 +189,10 @@ export function LeadsTable({ initialLeads }: { initialLeads: TableLead[] }) {
                 <th className="px-4 py-3" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#EAE3D9]">
+            <tbody className="divide-y divide-[#E2D4B9]">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-sm text-[#8A8A8A]">
+                  <td colSpan={6} className="px-4 py-12 text-center text-sm text-[#7A7A6A]">
                     Nenhum lead encontrado
                   </td>
                 </tr>
@@ -204,23 +204,23 @@ export function LeadsTable({ initialLeads }: { initialLeads: TableLead[] }) {
                       setSelectedLead(lead as unknown as Lead)
                       setModalOpen(true)
                     }}
-                    className="hover:bg-[#FAF7F2] cursor-pointer transition-colors"
+                    className="hover:bg-[#F5F0E0] cursor-pointer transition-colors"
                   >
                     <td className="px-4 py-3">
                       <div>
                         <div className="flex items-center gap-2">
                           <p className="font-medium text-[#2A2A2A]">{lead.name}</p>
                           {lead.is_vip && (
-                            <Star className="w-3 h-3 text-[#B87333] fill-[#B87333] shrink-0" />
+                            <Star className="w-3 h-3 text-[#787F56] fill-[#787F56] shrink-0" />
                           )}
                         </div>
                         <div className="flex items-center gap-3 mt-0.5">
-                          <span className="flex items-center gap-1 text-xs text-[#8A8A8A]">
+                          <span className="flex items-center gap-1 text-xs text-[#7A7A6A]">
                             <Phone className="w-3 h-3" />
                             {lead.phone}
                           </span>
                           {lead.region && (
-                            <span className="flex items-center gap-1 text-xs text-[#8A8A8A]">
+                            <span className="flex items-center gap-1 text-xs text-[#7A7A6A]">
                               <MapPin className="w-3 h-3" />
                               {lead.region}
                             </span>
@@ -229,7 +229,7 @@ export function LeadsTable({ initialLeads }: { initialLeads: TableLead[] }) {
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <span className="text-xs text-[#5A5A5A]">
+                      <span className="text-xs text-[#4A4A3A]">
                         {STATUS_LABELS[lead.status] ?? lead.status}
                       </span>
                     </td>
@@ -239,24 +239,24 @@ export function LeadsTable({ initialLeads }: { initialLeads: TableLead[] }) {
                           {lead.temperature}
                         </Badge>
                       ) : (
-                        <span className="text-xs text-[#8A8A8A]">—</span>
+                        <span className="text-xs text-[#7A7A6A]">—</span>
                       )}
                     </td>
                     <td className="px-4 py-3">
                       {lead.estimated_budget ? (
-                        <span className="text-xs text-[#B87333] font-medium">
+                        <span className="text-xs text-[#787F56] font-medium">
                           R$ {lead.estimated_budget.toLocaleString("pt-BR")}
                         </span>
                       ) : (
-                        <span className="text-xs text-[#8A8A8A]">—</span>
+                        <span className="text-xs text-[#7A7A6A]">—</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-xs text-[#8A8A8A]">
+                    <td className="px-4 py-3 text-xs text-[#7A7A6A]">
                       {new Date(lead.created_at).toLocaleDateString("pt-BR")}
                     </td>
                     <td className="px-4 py-3">
                       {lead.next_action && (
-                        <span className="text-[11px] text-[#5A5A5A] bg-[#EAE3D9] px-2 py-1 rounded whitespace-nowrap">
+                        <span className="text-[11px] text-[#4A4A3A] bg-[#E2D4B9] px-2 py-1 rounded whitespace-nowrap">
                           {lead.next_action}
                         </span>
                       )}
@@ -268,7 +268,7 @@ export function LeadsTable({ initialLeads }: { initialLeads: TableLead[] }) {
           </table>
         </div>
         {filtered.length > 0 && (
-          <div className="px-4 py-2.5 border-t border-[#EAE3D9] bg-[#FAF7F2] text-xs text-[#8A8A8A]">
+          <div className="px-4 py-2.5 border-t border-[#E2D4B9] bg-[#F5F0E0] text-xs text-[#7A7A6A]">
             {filtered.length} lead{filtered.length !== 1 ? "s" : ""} exibido{filtered.length !== 1 ? "s" : ""}
             {filtered.length !== leads.length && ` de ${leads.length}`}
           </div>

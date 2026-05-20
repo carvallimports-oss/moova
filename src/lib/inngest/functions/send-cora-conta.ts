@@ -94,23 +94,23 @@ Escreva em português brasileiro.`
           subject: `Cora me Conta — semana de ${weekStr}`,
           html: `
             <div style="font-family:Georgia,serif;max-width:580px;margin:0 auto;color:#2A2A2A">
-              <div style="padding:24px 0;border-bottom:2px solid #E0D8CE">
-                <span style="font-size:12px;color:#8A8A8A;text-transform:uppercase;letter-spacing:2px">Moova</span>
-                <h1 style="font-size:22px;color:#2D4A3E;margin:8px 0 0">Cora me Conta</h1>
-                <p style="font-size:13px;color:#8A8A8A;margin:4px 0 0">Semana de ${weekStr}</p>
+              <div style="padding:24px 0;border-bottom:2px solid #D4C5A0">
+                <span style="font-size:12px;color:#7A7A6A;text-transform:uppercase;letter-spacing:2px">Moova</span>
+                <h1 style="font-size:22px;color:#30360E;margin:8px 0 0">Cora me Conta</h1>
+                <p style="font-size:13px;color:#7A7A6A;margin:4px 0 0">Semana de ${weekStr}</p>
               </div>
 
               <div style="padding:24px 0">
-                <p style="color:#5A5A5A;font-size:14px">Oi, ${brokerName}! Aqui é a Cora com sua curadoria da semana.</p>
+                <p style="color:#4A4A3A;font-size:14px">Oi, ${brokerName}! Aqui é a Cora com sua curadoria da semana.</p>
                 <div style="font-size:14px;color:#2A2A2A;line-height:1.7">
                   <p>${contentHtml}</p>
                 </div>
               </div>
 
-              <div style="border-top:1px solid #E0D8CE;padding:20px 0;font-size:11px;color:#8A8A8A">
+              <div style="border-top:1px solid #D4C5A0;padding:20px 0;font-size:11px;color:#7A7A6A">
                 <p>Esta newsletter é gerada pela Cora, assistente IA da Moova.<br>
                 Você recebe porque é assinante Moova Opera ou superior.</p>
-                <p>Moova · <a href="https://moovaimob.com" style="color:#B87333">moovaimob.com</a></p>
+                <p>Moova · <a href="https://moovaimob.com" style="color:#787F56">moovaimob.com</a></p>
               </div>
             </div>
           `,

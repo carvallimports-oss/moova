@@ -38,12 +38,12 @@ export default async function StoryPage({ params }: { params: Promise<{ token: s
       {/* Story card — 9:16 ratio */}
       <div
         className="w-full max-w-[390px] rounded-3xl overflow-hidden shadow-2xl"
-        style={{ background: "linear-gradient(160deg, #1A2D25 0%, #2D4A3E 40%, #1A3028 100%)" }}
+        style={{ background: "linear-gradient(160deg, #1A2D25 0%, #30360E 40%, #1A3028 100%)" }}
       >
         {/* Top bar */}
         <div className="px-8 pt-10 pb-6 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-1 h-6 bg-[#B87333] rounded-full" />
+            <div className="w-1 h-6 bg-[#787F56] rounded-full" />
             <span className="font-serif text-white text-xl tracking-tight">Moova</span>
           </div>
           <span className="text-xs text-[#8AC0A8] font-mono uppercase tracking-widest">IA Imobiliária</span>
@@ -51,7 +51,7 @@ export default async function StoryPage({ params }: { params: Promise<{ token: s
 
         {/* Broker + period */}
         <div className="px-8 pb-8">
-          <p className="text-[#B87333] text-xs uppercase tracking-widest font-mono">Diagnóstico Nara · 14 dias</p>
+          <p className="text-[#787F56] text-xs uppercase tracking-widest font-mono">Diagnóstico Nara · 14 dias</p>
           <h1 className="font-serif text-white text-2xl mt-1 leading-tight">{brokerName}</h1>
           <p className="text-[#6AA88A] text-xs mt-1">
             {started.toLocaleDateString("pt-BR")} – {ends.toLocaleDateString("pt-BR")}
@@ -73,7 +73,7 @@ export default async function StoryPage({ params }: { params: Promise<{ token: s
             <p className="text-4xl font-bold text-white">{leadsContacted}</p>
             <p className="text-xs text-[#8AC0A8] mt-1">leads contatados</p>
           </div>
-          <div className="rounded-xl bg-[#B87333]/20 border border-[#B87333]/30 p-5 text-center">
+          <div className="rounded-xl bg-[#787F56]/20 border border-[#787F56]/30 p-5 text-center">
             <p className="text-4xl font-bold text-[#D4924A]">{visitsScheduled}</p>
             <p className="text-xs text-[#C0885A] mt-1">visitas agendadas</p>
           </div>
@@ -83,7 +83,7 @@ export default async function StoryPage({ params }: { params: Promise<{ token: s
         <div className="px-8 py-10 text-center space-y-1">
           <p className="text-white/40 text-[11px] uppercase tracking-widest">Powered by</p>
           <div className="flex items-center justify-center gap-2">
-            <div className="w-0.5 h-4 bg-[#B87333] rounded-full" />
+            <div className="w-0.5 h-4 bg-[#787F56] rounded-full" />
             <span className="font-serif text-white text-lg">Moova</span>
           </div>
           <p className="text-white/30 text-[10px]">moova.com.br</p>

@@ -74,17 +74,17 @@ export default function DefendePage() {
     <div className="p-6 lg:p-8 pt-20 lg:pt-8 max-w-3xl mx-auto space-y-6">
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <Scale className="w-5 h-5 text-[#B87333]" />
-          <h1 className="font-serif text-2xl text-[#2D4A3E]">Cora me Defende</h1>
+          <Scale className="w-5 h-5 text-[#787F56]" />
+          <h1 className="font-serif text-2xl text-[#30360E]">Cora me Defende</h1>
         </div>
-        <p className="text-sm text-[#8A8A8A]">Dúvidas jurídicas imobiliárias respondidas pela IA — com base na legislação brasileira.</p>
+        <p className="text-sm text-[#7A7A6A]">Dúvidas jurídicas imobiliárias respondidas pela IA — com base na legislação brasileira.</p>
       </div>
 
-      <div className="bg-[#EAE3D9] rounded-xl p-4 text-xs text-[#5A5A5A]">
-        <span className="font-medium text-[#2D4A3E]">Aviso importante:</span> As orientações são informativas e NÃO substituem consulta com advogado habilitado. Para casos com valor legal, procure um profissional.
+      <div className="bg-[#E2D4B9] rounded-xl p-4 text-xs text-[#4A4A3A]">
+        <span className="font-medium text-[#30360E]">Aviso importante:</span> As orientações são informativas e NÃO substituem consulta com advogado habilitado. Para casos com valor legal, procure um profissional.
       </div>
 
-      <div className="bg-white border border-[#E0D8CE] rounded-xl p-5 space-y-4">
+      <div className="bg-white border border-[#D4C5A0] rounded-xl p-5 space-y-4">
         <div className="flex flex-wrap gap-2">
           {CATEGORIES.map((c) => (
             <button
@@ -93,8 +93,8 @@ export default function DefendePage() {
               className={cn(
                 "text-xs px-3 py-1.5 rounded-full border transition-colors",
                 category === c.key
-                  ? "bg-[#2D4A3E] text-white border-[#2D4A3E]"
-                  : "border-[#E0D8CE] text-[#5A5A5A] hover:border-[#2D4A3E] hover:text-[#2D4A3E]"
+                  ? "bg-[#30360E] text-white border-[#30360E]"
+                  : "border-[#D4C5A0] text-[#4A4A3A] hover:border-[#30360E] hover:text-[#30360E]"
               )}
             >
               {c.label}
@@ -109,26 +109,26 @@ export default function DefendePage() {
             onKeyDown={(e) => { if (e.key === "Enter" && e.metaKey) handleAsk() }}
             rows={3}
             placeholder="Ex: O comprador pode desistir após 7 dias da assinatura do contrato?"
-            className="w-full border border-[#E0D8CE] rounded-lg px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#2D4A3E]/20 pr-12"
+            className="w-full border border-[#D4C5A0] rounded-lg px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#30360E]/20 pr-12"
           />
           <Button
             size="icon"
             onClick={handleAsk}
             disabled={loading || !question.trim()}
-            className="absolute bottom-3 right-3 w-8 h-8 bg-[#2D4A3E] hover:bg-[#1e3329]"
+            className="absolute bottom-3 right-3 w-8 h-8 bg-[#30360E] hover:bg-[#20240A]"
           >
             {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
           </Button>
         </div>
 
         <div className="space-y-2">
-          <p className="text-xs text-[#8A8A8A]">Perguntas frequentes:</p>
+          <p className="text-xs text-[#7A7A6A]">Perguntas frequentes:</p>
           <div className="flex flex-wrap gap-2">
             {QUICK_QUESTIONS.map((q) => (
               <button
                 key={q}
                 onClick={() => setQuestion(q)}
-                className="text-xs text-[#2D4A3E] bg-[#EAE3D9] hover:bg-[#E0D8CE] px-2.5 py-1 rounded-lg transition-colors text-left"
+                className="text-xs text-[#30360E] bg-[#E2D4B9] hover:bg-[#D4C5A0] px-2.5 py-1 rounded-lg transition-colors text-left"
               >
                 {q}
               </button>
@@ -139,28 +139,28 @@ export default function DefendePage() {
 
       {history.length > 0 && (
         <div className="space-y-3">
-          <h2 className="font-serif text-lg text-[#2D4A3E]">Consultas anteriores</h2>
+          <h2 className="font-serif text-lg text-[#30360E]">Consultas anteriores</h2>
           {history.map((c) => (
-            <div key={c.id} className="bg-white border border-[#E0D8CE] rounded-xl overflow-hidden">
+            <div key={c.id} className="bg-white border border-[#D4C5A0] rounded-xl overflow-hidden">
               <button
-                className="w-full flex items-start justify-between gap-3 px-5 py-4 text-left hover:bg-[#FAF7F2] transition-colors"
+                className="w-full flex items-start justify-between gap-3 px-5 py-4 text-left hover:bg-[#F5F0E0] transition-colors"
                 onClick={() => setExpandedId(expandedId === c.id ? null : c.id)}
               >
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-[#2A2A2A] leading-snug">{c.question}</p>
-                  <p className="text-xs text-[#8A8A8A] mt-0.5">
+                  <p className="text-xs text-[#7A7A6A] mt-0.5">
                     {CATEGORIES.find((x) => x.key === c.category)?.label ?? c.category} ·{" "}
                     {new Date(c.created_at).toLocaleDateString("pt-BR")}
                   </p>
                 </div>
-                <ChevronDown className={cn("w-4 h-4 text-[#8A8A8A] shrink-0 mt-0.5 transition-transform", expandedId === c.id && "rotate-180")} />
+                <ChevronDown className={cn("w-4 h-4 text-[#7A7A6A] shrink-0 mt-0.5 transition-transform", expandedId === c.id && "rotate-180")} />
               </button>
               {expandedId === c.id && (
-                <div className="px-5 pb-5 border-t border-[#E0D8CE] space-y-3">
+                <div className="px-5 pb-5 border-t border-[#D4C5A0] space-y-3">
                   <div className="prose prose-sm max-w-none text-[#2A2A2A] whitespace-pre-wrap text-sm leading-relaxed mt-4">
                     {c.answer}
                   </div>
-                  <div className="bg-[#EAE3D9] rounded-lg p-3 text-xs text-[#5A5A5A]">
+                  <div className="bg-[#E2D4B9] rounded-lg p-3 text-xs text-[#4A4A3A]">
                     ⚠️ {c.disclaimer}
                   </div>
                 </div>

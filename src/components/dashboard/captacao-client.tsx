@@ -178,67 +178,67 @@ export function CaptacaoClient({ initialLeads }: { initialLeads: CaptacaoLead[] 
             </span>
           ))}
         </div>
-        <Button onClick={openNew} className="bg-[#2D4A3E] hover:bg-[#1e3329] gap-2 text-sm">
+        <Button onClick={openNew} className="bg-[#30360E] hover:bg-[#20240A] gap-2 text-sm">
           <Plus className="w-4 h-4" /> Novo proprietário
         </Button>
       </div>
 
       {showForm && (
-        <div className="bg-white border border-[#2D4A3E]/30 rounded-xl p-6 space-y-4">
-          <h2 className="font-serif text-lg text-[#2D4A3E]">{editing ? "Editar lead" : "Novo lead opt-in"}</h2>
+        <div className="bg-white border border-[#30360E]/30 rounded-xl p-6 space-y-4">
+          <h2 className="font-serif text-lg text-[#30360E]">{editing ? "Editar lead" : "Novo lead opt-in"}</h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-xs font-medium text-[#5A5A5A]">Nome do proprietário *</label>
+              <label className="text-xs font-medium text-[#4A4A3A]">Nome do proprietário *</label>
               <input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                placeholder="Nome completo" className="w-full border border-[#E0D8CE] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D4A3E]/20" />
+                placeholder="Nome completo" className="w-full border border-[#D4C5A0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#30360E]/20" />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-medium text-[#5A5A5A]">Telefone</label>
+              <label className="text-xs font-medium text-[#4A4A3A]">Telefone</label>
               <input value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-                placeholder="(11) 99999-9999" className="w-full border border-[#E0D8CE] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D4A3E]/20" />
+                placeholder="(11) 99999-9999" className="w-full border border-[#D4C5A0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#30360E]/20" />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-medium text-[#5A5A5A]">E-mail</label>
+              <label className="text-xs font-medium text-[#4A4A3A]">E-mail</label>
               <input value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                placeholder="email@exemplo.com" className="w-full border border-[#E0D8CE] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D4A3E]/20" />
+                placeholder="email@exemplo.com" className="w-full border border-[#D4C5A0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#30360E]/20" />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-medium text-[#5A5A5A]">Origem do contato</label>
+              <label className="text-xs font-medium text-[#4A4A3A]">Origem do contato</label>
               <select value={form.optin_source} onChange={(e) => setForm((f) => ({ ...f, optin_source: e.target.value as OptinSource }))}
-                className="w-full border border-[#E0D8CE] rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#2D4A3E]/20">
+                className="w-full border border-[#D4C5A0] rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#30360E]/20">
                 {Object.entries(SOURCE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
               </select>
             </div>
             <div className="space-y-1 sm:col-span-2">
-              <label className="text-xs font-medium text-[#5A5A5A]">Endereço do imóvel</label>
+              <label className="text-xs font-medium text-[#4A4A3A]">Endereço do imóvel</label>
               <input value={form.property_address} onChange={(e) => setForm((f) => ({ ...f, property_address: e.target.value }))}
-                placeholder="Rua, número, bairro" className="w-full border border-[#E0D8CE] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D4A3E]/20" />
+                placeholder="Rua, número, bairro" className="w-full border border-[#D4C5A0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#30360E]/20" />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-medium text-[#5A5A5A]">Tipo</label>
+              <label className="text-xs font-medium text-[#4A4A3A]">Tipo</label>
               <select value={form.property_type} onChange={(e) => setForm((f) => ({ ...f, property_type: e.target.value }))}
-                className="w-full border border-[#E0D8CE] rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#2D4A3E]/20">
+                className="w-full border border-[#D4C5A0] rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#30360E]/20">
                 <option value="">Selecionar</option>
                 {["apartamento","casa","comercial","terreno","sala"].map((t) => <option key={t} value={t} className="capitalize">{t}</option>)}
               </select>
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-medium text-[#5A5A5A]">Valor estimado (R$)</label>
+              <label className="text-xs font-medium text-[#4A4A3A]">Valor estimado (R$)</label>
               <input type="number" value={form.estimated_value} onChange={(e) => setForm((f) => ({ ...f, estimated_value: e.target.value }))}
-                placeholder="Ex: 500000" className="w-full border border-[#E0D8CE] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D4A3E]/20" />
+                placeholder="Ex: 500000" className="w-full border border-[#D4C5A0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#30360E]/20" />
             </div>
             <div className="space-y-1 sm:col-span-2">
-              <label className="text-xs font-medium text-[#5A5A5A]">Observações</label>
+              <label className="text-xs font-medium text-[#4A4A3A]">Observações</label>
               <textarea value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
                 rows={2} placeholder="Contexto do lead, histórico, particularidades..."
-                className="w-full border border-[#E0D8CE] rounded-lg px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#2D4A3E]/20" />
+                className="w-full border border-[#D4C5A0] rounded-lg px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#30360E]/20" />
             </div>
           </div>
 
           <div className="flex gap-2 justify-end">
-            <Button variant="outline" onClick={() => { setShowForm(false); setEditing(null) }} className="border-[#E0D8CE]">Cancelar</Button>
-            <Button onClick={handleSave} disabled={saving} className="bg-[#2D4A3E] hover:bg-[#1e3329] gap-2">
+            <Button variant="outline" onClick={() => { setShowForm(false); setEditing(null) }} className="border-[#D4C5A0]">Cancelar</Button>
+            <Button onClick={handleSave} disabled={saving} className="bg-[#30360E] hover:bg-[#20240A] gap-2">
               {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Salvando...</> : "Salvar"}
             </Button>
           </div>
@@ -246,10 +246,10 @@ export function CaptacaoClient({ initialLeads }: { initialLeads: CaptacaoLead[] 
       )}
 
       {leads.length === 0 && (
-        <div className="bg-white border border-[#E0D8CE] rounded-xl p-10 text-center">
-          <CheckCircle2 className="w-10 h-10 text-[#E0D8CE] mx-auto mb-3" />
-          <p className="text-sm text-[#8A8A8A]">Nenhum lead de captação ainda.</p>
-          <p className="text-xs text-[#8A8A8A] mt-1">Adicione proprietários que entraram em contato voluntariamente.</p>
+        <div className="bg-white border border-[#D4C5A0] rounded-xl p-10 text-center">
+          <CheckCircle2 className="w-10 h-10 text-[#D4C5A0] mx-auto mb-3" />
+          <p className="text-sm text-[#7A7A6A]">Nenhum lead de captação ainda.</p>
+          <p className="text-xs text-[#7A7A6A] mt-1">Adicione proprietários que entraram em contato voluntariamente.</p>
         </div>
       )}
 
@@ -276,7 +276,7 @@ export function CaptacaoClient({ initialLeads }: { initialLeads: CaptacaoLead[] 
 
       {done.length > 0 && (
         <div className="space-y-3">
-          <p className="text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Captados / Perdidos</p>
+          <p className="text-xs font-semibold text-[#7A7A6A] uppercase tracking-wide">Captados / Perdidos</p>
           {done.map((lead) => (
             <LeadCard
               key={lead.id}
@@ -310,33 +310,33 @@ function LeadCard({
 }) {
   const cfg = STATUS_CONFIG[lead.status]
   return (
-    <div className="bg-white border border-[#E0D8CE] rounded-xl overflow-hidden">
-      <button className="w-full flex items-start justify-between gap-3 px-5 py-4 text-left hover:bg-[#FAF7F2] transition-colors" onClick={onToggle}>
+    <div className="bg-white border border-[#D4C5A0] rounded-xl overflow-hidden">
+      <button className="w-full flex items-start justify-between gap-3 px-5 py-4 text-left hover:bg-[#F5F0E0] transition-colors" onClick={onToggle}>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <p className="text-sm font-medium text-[#2A2A2A]">{lead.name}</p>
             <span className={cn("text-[10px] font-medium px-2 py-0.5 rounded-full border", cfg.bg, cfg.color)}>{cfg.label}</span>
-            <span className="text-[10px] text-[#8A8A8A] bg-[#F5F5F5] px-2 py-0.5 rounded-full">{SOURCE_LABELS[lead.optin_source]}</span>
+            <span className="text-[10px] text-[#7A7A6A] bg-[#F5F5F5] px-2 py-0.5 rounded-full">{SOURCE_LABELS[lead.optin_source]}</span>
           </div>
           <div className="flex items-center gap-3 mt-1 flex-wrap">
             {lead.property_address && (
-              <span className="flex items-center gap-1 text-xs text-[#8A8A8A]">
+              <span className="flex items-center gap-1 text-xs text-[#7A7A6A]">
                 <MapPin className="w-3 h-3" />{lead.property_address}
               </span>
             )}
             {lead.estimated_value && (
-              <span className="text-xs text-[#2D4A3E] font-medium">
+              <span className="text-xs text-[#30360E] font-medium">
                 R$ {Number(lead.estimated_value).toLocaleString("pt-BR")}
               </span>
             )}
           </div>
         </div>
-        {expanded ? <ChevronUp className="w-4 h-4 text-[#8A8A8A] shrink-0 mt-0.5" /> : <ChevronDown className="w-4 h-4 text-[#8A8A8A] shrink-0 mt-0.5" />}
+        {expanded ? <ChevronUp className="w-4 h-4 text-[#7A7A6A] shrink-0 mt-0.5" /> : <ChevronDown className="w-4 h-4 text-[#7A7A6A] shrink-0 mt-0.5" />}
       </button>
 
       {expanded && (
-        <div className="px-5 pb-5 border-t border-[#E0D8CE] space-y-4 pt-4">
-          <div className="flex flex-wrap gap-3 text-xs text-[#8A8A8A]">
+        <div className="px-5 pb-5 border-t border-[#D4C5A0] space-y-4 pt-4">
+          <div className="flex flex-wrap gap-3 text-xs text-[#7A7A6A]">
             {lead.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{lead.phone}</span>}
             {lead.email && <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{lead.email}</span>}
             <span>Adicionado em {new Date(lead.created_at).toLocaleDateString("pt-BR")}</span>
@@ -344,31 +344,31 @@ function LeadCard({
 
           {lead.notes && (
             <div>
-              <p className="text-xs font-medium text-[#8A8A8A] uppercase tracking-wide mb-1">Observações</p>
-              <p className="text-sm text-[#5A5A5A]">{lead.notes}</p>
+              <p className="text-xs font-medium text-[#7A7A6A] uppercase tracking-wide mb-1">Observações</p>
+              <p className="text-sm text-[#4A4A3A]">{lead.notes}</p>
             </div>
           )}
 
           {lead.pitch_content && (
-            <div className="bg-[#FAF7F2] rounded-lg p-4 space-y-2">
+            <div className="bg-[#F5F0E0] rounded-lg p-4 space-y-2">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-medium text-[#2D4A3E] uppercase tracking-wide">Pitch de exclusividade</p>
-                <button onClick={onCopyPitch} className="flex items-center gap-1 text-xs text-[#B87333] hover:underline">
+                <p className="text-xs font-medium text-[#30360E] uppercase tracking-wide">Pitch de exclusividade</p>
+                <button onClick={onCopyPitch} className="flex items-center gap-1 text-xs text-[#787F56] hover:underline">
                   {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                   {copied ? "Copiado" : "Copiar"}
                 </button>
               </div>
-              <p className="text-sm text-[#5A5A5A] whitespace-pre-wrap leading-relaxed">{lead.pitch_content}</p>
+              <p className="text-sm text-[#4A4A3A] whitespace-pre-wrap leading-relaxed">{lead.pitch_content}</p>
             </div>
           )}
 
           <div className="space-y-2">
-            <p className="text-xs font-medium text-[#8A8A8A] uppercase tracking-wide">Mover para</p>
+            <p className="text-xs font-medium text-[#7A7A6A] uppercase tracking-wide">Mover para</p>
             <div className="flex flex-wrap gap-1.5">
               {(["novo","qualificando","pitch_enviado","reuniao_agendada","captado","perdido"] as CaptacaoStatus[]).map((s) => (
                 <button key={s} onClick={() => onStatusChange(s)}
                   className={cn("text-[10px] px-2.5 py-1 rounded-full border transition-colors font-medium",
-                    lead.status === s ? STATUS_CONFIG[s].bg + " " + STATUS_CONFIG[s].color : "border-[#E0D8CE] text-[#8A8A8A] hover:border-[#2D4A3E]"
+                    lead.status === s ? STATUS_CONFIG[s].bg + " " + STATUS_CONFIG[s].color : "border-[#D4C5A0] text-[#7A7A6A] hover:border-[#30360E]"
                   )}>
                   {STATUS_CONFIG[s].label}
                 </button>
@@ -378,14 +378,14 @@ function LeadCard({
 
           <div className="flex items-center gap-2 flex-wrap">
             <Button onClick={onGeneratePitch} disabled={generatingPitch}
-              variant="outline" className="border-[#B87333] text-[#B87333] hover:bg-[#B87333] hover:text-white gap-1.5 text-xs h-8">
+              variant="outline" className="border-[#787F56] text-[#787F56] hover:bg-[#787F56] hover:text-white gap-1.5 text-xs h-8">
               {generatingPitch ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Gerando...</> : <><Sparkles className="w-3.5 h-3.5" /> {lead.pitch_content ? "Regerar pitch" : "Gerar pitch"}</>}
             </Button>
             <div className="ml-auto flex gap-1.5">
-              <Button variant="ghost" size="icon" onClick={onEdit} className="w-8 h-8 text-[#8A8A8A] hover:text-[#2D4A3E]">
+              <Button variant="ghost" size="icon" onClick={onEdit} className="w-8 h-8 text-[#7A7A6A] hover:text-[#30360E]">
                 <Pencil className="w-3.5 h-3.5" />
               </Button>
-              <Button variant="ghost" size="icon" onClick={onDelete} disabled={deleting} className="w-8 h-8 text-[#8A8A8A] hover:text-red-600">
+              <Button variant="ghost" size="icon" onClick={onDelete} disabled={deleting} className="w-8 h-8 text-[#7A7A6A] hover:text-red-600">
                 {deleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
               </Button>
             </div>

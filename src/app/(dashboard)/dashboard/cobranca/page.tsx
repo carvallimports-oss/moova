@@ -43,8 +43,8 @@ export default async function CobrancaPage() {
   return (
     <div className="p-6 lg:p-8 pt-20 lg:pt-8 max-w-2xl mx-auto space-y-8">
       <div>
-        <h1 className="font-serif text-2xl text-[#2D4A3E]">Cobrança</h1>
-        <p className="text-sm text-[#8A8A8A] mt-1">Gerencie sua assinatura</p>
+        <h1 className="font-serif text-2xl text-[#30360E]">Cobrança</h1>
+        <p className="text-sm text-[#7A7A6A] mt-1">Gerencie sua assinatura</p>
       </div>
 
       {/* Status atual */}
@@ -54,53 +54,53 @@ export default async function CobrancaPage() {
           <div className="flex-1">
             <p className={`font-medium ${statusInfo.color}`}>{statusInfo.label}</p>
             {status === "active" && currentPeriodEnd && (
-              <p className="text-sm text-[#5A5A5A] mt-0.5">Próxima cobrança: {currentPeriodEnd}</p>
+              <p className="text-sm text-[#4A4A3A] mt-0.5">Próxima cobrança: {currentPeriodEnd}</p>
             )}
             {status === "trial" && trialEnd && (
-              <p className="text-sm text-[#5A5A5A] mt-0.5">Trial encerra em: {trialEnd}</p>
+              <p className="text-sm text-[#4A4A3A] mt-0.5">Trial encerra em: {trialEnd}</p>
             )}
             {status === "past_due" && (
               <p className="text-sm text-orange-600 mt-0.5">Regularize o pagamento para evitar suspensão.</p>
             )}
           </div>
           {sub?.plan && (
-            <Badge className="bg-[#2D4A3E]/10 text-[#2D4A3E] border-0 capitalize">{sub.plan}</Badge>
+            <Badge className="bg-[#30360E]/10 text-[#30360E] border-0 capitalize">{sub.plan}</Badge>
           )}
         </CardContent>
       </Card>
 
       {/* Planos */}
       <div className="space-y-3">
-        <h2 className="font-serif text-lg text-[#2D4A3E]">Planos</h2>
+        <h2 className="font-serif text-lg text-[#30360E]">Planos</h2>
         <div className="grid sm:grid-cols-2 gap-4">
           {PLANS.map((plan) => {
             const isCurrent = sub?.plan === plan.id
             return (
-              <Card key={plan.id} className={`border relative ${plan.highlight ? "border-[#B87333]" : "border-[#E0D8CE]"}`}>
+              <Card key={plan.id} className={`border relative ${plan.highlight ? "border-[#787F56]" : "border-[#D4C5A0]"}`}>
                 {plan.highlight && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="bg-[#B87333] text-white text-[10px] px-3 py-0.5 rounded-full">Mais popular</span>
+                    <span className="bg-[#787F56] text-white text-[10px] px-3 py-0.5 rounded-full">Mais popular</span>
                   </div>
                 )}
                 <CardContent className="p-5 space-y-3">
                   <div>
                     <p className="font-medium text-[#2A2A2A]">{plan.label}</p>
-                    <p className="text-[#B87333] font-bold text-xl mt-1">{plan.price}</p>
+                    <p className="text-[#787F56] font-bold text-xl mt-1">{plan.price}</p>
                   </div>
-                  <div className="space-y-1.5 text-sm text-[#5A5A5A]">
+                  <div className="space-y-1.5 text-sm text-[#4A4A3A]">
                     <p>✓ Nara ativa 24/7</p>
                     <p>✓ Diagnóstico 14 dias</p>
                     <p>✓ Pacto Moova 90</p>
                     <p>✓ {plan.provider}</p>
                   </div>
                   {isCurrent ? (
-                    <div className="w-full text-center text-sm text-[#2D4A3E] font-medium py-2 bg-[#F0F5F2] rounded-lg">
+                    <div className="w-full text-center text-sm text-[#30360E] font-medium py-2 bg-[#EEF0E8] rounded-lg">
                       Plano atual
                     </div>
                   ) : (
                     <a
                       href="mailto:contato@moova.com.br?subject=Quero mudar de plano"
-                      className="block w-full text-center text-sm text-white bg-[#2D4A3E] hover:bg-[#3A6B5A] py-2 rounded-lg transition-colors"
+                      className="block w-full text-center text-sm text-white bg-[#30360E] hover:bg-[#4A5218] py-2 rounded-lg transition-colors"
                     >
                       Solicitar mudança
                     </a>
@@ -114,32 +114,32 @@ export default async function CobrancaPage() {
 
       {/* Histórico placeholder */}
       <div className="space-y-3">
-        <h2 className="font-serif text-lg text-[#2D4A3E]">Histórico de pagamentos</h2>
+        <h2 className="font-serif text-lg text-[#30360E]">Histórico de pagamentos</h2>
         {sub?.asaas_customer_id ? (
-          <Card className="border-[#E0D8CE]">
-            <CardContent className="p-5 flex items-center gap-3 text-[#5A5A5A]">
+          <Card className="border-[#D4C5A0]">
+            <CardContent className="p-5 flex items-center gap-3 text-[#4A4A3A]">
               <CreditCard className="w-4 h-4 shrink-0" />
               <div>
                 <p className="text-sm">Pagamentos processados via Asaas.</p>
-                <p className="text-xs text-[#8A8A8A] mt-0.5">
-                  ID do cliente: <code className="bg-[#EAE3D9] px-1 rounded">{sub.asaas_customer_id}</code>
+                <p className="text-xs text-[#7A7A6A] mt-0.5">
+                  ID do cliente: <code className="bg-[#E2D4B9] px-1 rounded">{sub.asaas_customer_id}</code>
                 </p>
               </div>
             </CardContent>
           </Card>
         ) : (
-          <p className="text-sm text-[#8A8A8A]">Nenhum pagamento registrado ainda.</p>
+          <p className="text-sm text-[#7A7A6A]">Nenhum pagamento registrado ainda.</p>
         )}
       </div>
 
       {/* Círculo Moova */}
       {(status === "active" || status === "trial") && (
         <div className="space-y-3">
-          <h2 className="font-serif text-lg text-[#2D4A3E]">Círculo Moova</h2>
-          <Card className="border-[#2D4A3E]/20 bg-[#2D4A3E]">
+          <h2 className="font-serif text-lg text-[#30360E]">Círculo Moova</h2>
+          <Card className="border-[#30360E]/20 bg-[#30360E]">
             <CardContent className="p-5 flex items-start gap-4">
               <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
-                <Users className="w-5 h-5 text-[#B87333]" />
+                <Users className="w-5 h-5 text-[#787F56]" />
               </div>
               <div className="space-y-2">
                 <p className="font-medium text-white">Comunidade exclusiva de corretores Moova</p>
@@ -160,9 +160,9 @@ export default async function CobrancaPage() {
 
       {/* Cancelamento */}
       {status === "active" && (
-        <div className="border border-[#E0D8CE] rounded-xl p-5 space-y-2">
+        <div className="border border-[#D4C5A0] rounded-xl p-5 space-y-2">
           <p className="text-sm font-medium text-[#2A2A2A]">Cancelar assinatura</p>
-          <p className="text-xs text-[#8A8A8A]">
+          <p className="text-xs text-[#7A7A6A]">
             Para cancelar, entre em contato: <strong>suporte@moova.com.br</strong>.
             Lembre-se de verificar as condições do Pacto Moova 90 antes de cancelar.
           </p>

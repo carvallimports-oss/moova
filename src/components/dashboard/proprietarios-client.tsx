@@ -24,12 +24,12 @@ type LandlordCard = {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  prospeccao: "bg-[#EAE3D9] text-[#8A8A8A]",
+  prospeccao: "bg-[#E2D4B9] text-[#7A7A6A]",
   em_contato: "bg-blue-50 text-blue-600",
   negociando_exclusividade: "bg-yellow-50 text-yellow-700",
   captado: "bg-green-50 text-green-700",
   em_publicacao: "bg-purple-50 text-purple-700",
-  vendido: "bg-[#2D4A3E]/10 text-[#2D4A3E]",
+  vendido: "bg-[#30360E]/10 text-[#30360E]",
   retomado: "bg-red-50 text-red-600",
 }
 
@@ -79,17 +79,17 @@ function LandlordModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="bg-white rounded-xl w-full max-w-md shadow-xl">
-        <div className="flex items-center justify-between p-5 border-b border-[#E0D8CE]">
-          <h2 className="font-serif text-lg text-[#2D4A3E]">
+        <div className="flex items-center justify-between p-5 border-b border-[#D4C5A0]">
+          <h2 className="font-serif text-lg text-[#30360E]">
             {isNew ? "Novo proprietário" : "Editar proprietário"}
           </h2>
-          <button onClick={onClose} className="text-[#8A8A8A] hover:text-[#2A2A2A]"><X className="w-5 h-5" /></button>
+          <button onClick={onClose} className="text-[#7A7A6A] hover:text-[#2A2A2A]"><X className="w-5 h-5" /></button>
         </div>
         <div className="p-5 space-y-4">
           <div>
-            <label className="text-xs font-medium text-[#5A5A5A] mb-1 block">Nome *</label>
+            <label className="text-xs font-medium text-[#4A4A3A] mb-1 block">Nome *</label>
             <input
-              className="w-full border border-[#E0D8CE] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D4A3E]/20"
+              className="w-full border border-[#D4C5A0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#30360E]/20"
               value={form.name ?? ""}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
               placeholder="Nome do proprietário"
@@ -97,18 +97,18 @@ function LandlordModal({
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-medium text-[#5A5A5A] mb-1 block">Telefone</label>
+              <label className="text-xs font-medium text-[#4A4A3A] mb-1 block">Telefone</label>
               <input
-                className="w-full border border-[#E0D8CE] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D4A3E]/20"
+                className="w-full border border-[#D4C5A0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#30360E]/20"
                 value={form.phone ?? ""}
                 onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
                 placeholder="(11) 99999-0000"
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-[#5A5A5A] mb-1 block">Email</label>
+              <label className="text-xs font-medium text-[#4A4A3A] mb-1 block">Email</label>
               <input
-                className="w-full border border-[#E0D8CE] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D4A3E]/20"
+                className="w-full border border-[#D4C5A0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#30360E]/20"
                 value={form.email ?? ""}
                 onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
                 placeholder="email@exemplo.com"
@@ -116,9 +116,9 @@ function LandlordModal({
             </div>
           </div>
           <div>
-            <label className="text-xs font-medium text-[#5A5A5A] mb-1 block">Status</label>
+            <label className="text-xs font-medium text-[#4A4A3A] mb-1 block">Status</label>
             <select
-              className="w-full border border-[#E0D8CE] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D4A3E]/20"
+              className="w-full border border-[#D4C5A0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#30360E]/20"
               value={form.status ?? "prospeccao"}
               onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}
             >
@@ -132,28 +132,28 @@ function LandlordModal({
             </select>
           </div>
           <div>
-            <label className="text-xs font-medium text-[#5A5A5A] mb-1 block">Próxima ação</label>
+            <label className="text-xs font-medium text-[#4A4A3A] mb-1 block">Próxima ação</label>
             <input
-              className="w-full border border-[#E0D8CE] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D4A3E]/20"
+              className="w-full border border-[#D4C5A0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#30360E]/20"
               value={form.next_action ?? ""}
               onChange={(e) => setForm((f) => ({ ...f, next_action: e.target.value }))}
               placeholder="Ligar segunda-feira..."
             />
           </div>
           <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2 text-sm text-[#5A5A5A] cursor-pointer">
+            <label className="flex items-center gap-2 text-sm text-[#4A4A3A] cursor-pointer">
               <input
                 type="checkbox"
-                className="accent-[#2D4A3E]"
+                className="accent-[#30360E]"
                 checked={form.exclusivity ?? false}
                 onChange={(e) => setForm((f) => ({ ...f, exclusivity: e.target.checked }))}
               />
               Exclusividade
             </label>
-            <label className="flex items-center gap-2 text-sm text-[#5A5A5A] cursor-pointer">
+            <label className="flex items-center gap-2 text-sm text-[#4A4A3A] cursor-pointer">
               <input
                 type="checkbox"
-                className="accent-[#2D4A3E]"
+                className="accent-[#30360E]"
                 checked={form.diario_optin ?? false}
                 onChange={(e) => setForm((f) => ({ ...f, diario_optin: e.target.checked }))}
               />
@@ -161,9 +161,9 @@ function LandlordModal({
             </label>
           </div>
         </div>
-        <div className="flex items-center justify-end gap-3 p-5 border-t border-[#E0D8CE]">
-          <Button variant="outline" size="sm" onClick={onClose} className="border-[#E0D8CE]">Cancelar</Button>
-          <Button size="sm" onClick={handleSave} disabled={saving || !form.name} className="bg-[#2D4A3E] hover:bg-[#1e3329]">
+        <div className="flex items-center justify-end gap-3 p-5 border-t border-[#D4C5A0]">
+          <Button variant="outline" size="sm" onClick={onClose} className="border-[#D4C5A0]">Cancelar</Button>
+          <Button size="sm" onClick={handleSave} disabled={saving || !form.name} className="bg-[#30360E] hover:bg-[#20240A]">
             {saving ? "Salvando..." : "Salvar"}
           </Button>
         </div>
@@ -182,26 +182,26 @@ function LandlordCardItem({
   return (
     <div
       onClick={onClick}
-      className="bg-white border border-[#E0D8CE] rounded-lg p-3 cursor-pointer hover:border-[#B87333] hover:shadow-sm transition-all"
+      className="bg-white border border-[#D4C5A0] rounded-lg p-3 cursor-pointer hover:border-[#787F56] hover:shadow-sm transition-all"
     >
       <div className="flex items-start justify-between gap-2 mb-2">
         <p className="text-sm font-medium text-[#2A2A2A] leading-snug">{landlord.name}</p>
-        {landlord.exclusivity && <Star className="w-3.5 h-3.5 text-[#B87333] shrink-0 mt-0.5" fill="currentColor" />}
+        {landlord.exclusivity && <Star className="w-3.5 h-3.5 text-[#787F56] shrink-0 mt-0.5" fill="currentColor" />}
       </div>
       {landlord.phone && (
-        <p className="flex items-center gap-1 text-xs text-[#8A8A8A]">
+        <p className="flex items-center gap-1 text-xs text-[#7A7A6A]">
           <Phone className="w-3 h-3" />
           {landlord.phone}
         </p>
       )}
       {landlord.diario_optin && (
-        <p className="flex items-center gap-1 text-xs text-[#2D4A3E] mt-1">
+        <p className="flex items-center gap-1 text-xs text-[#30360E] mt-1">
           <Rss className="w-3 h-3" />
           Diário do Imóvel ativo
         </p>
       )}
       {landlord.next_action && (
-        <p className="text-xs text-[#B87333] mt-2 truncate">{landlord.next_action}</p>
+        <p className="text-xs text-[#787F56] mt-2 truncate">{landlord.next_action}</p>
       )}
     </div>
   )
@@ -244,7 +244,7 @@ export function ProprietariosClient({
         <Button
           size="sm"
           onClick={() => setEditing("new")}
-          className="bg-[#2D4A3E] hover:bg-[#1e3329] gap-1.5"
+          className="bg-[#30360E] hover:bg-[#20240A] gap-1.5"
         >
           <Plus className="w-4 h-4" />
           Novo proprietário
@@ -257,8 +257,8 @@ export function ProprietariosClient({
           return (
             <div key={col.status} className="shrink-0 w-56 flex flex-col">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-[#5A5A5A] uppercase tracking-wide">{col.label}</span>
-                <span className="text-xs text-[#8A8A8A] bg-[#EAE3D9] px-1.5 py-0.5 rounded-full">{cards.length}</span>
+                <span className="text-xs font-semibold text-[#4A4A3A] uppercase tracking-wide">{col.label}</span>
+                <span className="text-xs text-[#7A7A6A] bg-[#E2D4B9] px-1.5 py-0.5 rounded-full">{cards.length}</span>
               </div>
               <div className="flex flex-col gap-2 flex-1">
                 {cards.map((landlord) => (
@@ -269,8 +269,8 @@ export function ProprietariosClient({
                   />
                 ))}
                 {cards.length === 0 && (
-                  <div className="border-2 border-dashed border-[#E0D8CE] rounded-lg h-16 flex items-center justify-center">
-                    <span className="text-xs text-[#8A8A8A]">Vazio</span>
+                  <div className="border-2 border-dashed border-[#D4C5A0] rounded-lg h-16 flex items-center justify-center">
+                    <span className="text-xs text-[#7A7A6A]">Vazio</span>
                   </div>
                 )}
               </div>

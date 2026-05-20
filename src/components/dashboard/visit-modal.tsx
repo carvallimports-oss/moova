@@ -67,7 +67,7 @@ export function VisitModal({ leads, open, onClose, onCreated }: Props) {
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-serif text-[#2D4A3E]">Nova visita</DialogTitle>
+          <DialogTitle className="font-serif text-[#30360E]">Nova visita</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
@@ -76,7 +76,7 @@ export function VisitModal({ leads, open, onClose, onCreated }: Props) {
             <select
               value={leadId}
               onChange={(e) => setLeadId(e.target.value)}
-              className="w-full text-sm border border-[#E0D8CE] rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-[#2D4A3E] text-[#2A2A2A]"
+              className="w-full text-sm border border-[#D4C5A0] rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-[#30360E] text-[#2A2A2A]"
             >
               <option value="">Selecione um lead...</option>
               {leads.map((l) => (
@@ -91,7 +91,7 @@ export function VisitModal({ leads, open, onClose, onCreated }: Props) {
               type="datetime-local"
               value={scheduledAt}
               onChange={(e) => setScheduledAt(e.target.value)}
-              className="border-[#E0D8CE]"
+              className="border-[#D4C5A0]"
             />
           </div>
 
@@ -101,7 +101,7 @@ export function VisitModal({ leads, open, onClose, onCreated }: Props) {
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               placeholder="Ex: Rua das Flores, 123 — Pinheiros"
-              className="border-[#E0D8CE]"
+              className="border-[#D4C5A0]"
             />
           </div>
 
@@ -112,17 +112,17 @@ export function VisitModal({ leads, open, onClose, onCreated }: Props) {
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Notas sobre a visita..."
               rows={2}
-              className="border-[#E0D8CE] resize-none"
+              className="border-[#D4C5A0] resize-none"
             />
           </div>
         </div>
 
         <div className="flex gap-3 justify-end pt-2">
-          <Button variant="outline" onClick={onClose} className="border-[#E0D8CE]">Cancelar</Button>
+          <Button variant="outline" onClick={onClose} className="border-[#D4C5A0]">Cancelar</Button>
           <Button
             onClick={handleSave}
             disabled={saving || !leadId || !scheduledAt}
-            className="bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white"
+            className="bg-[#30360E] hover:bg-[#4A5218] text-white"
           >
             {saving ? "Agendando..." : "Agendar visita"}
           </Button>

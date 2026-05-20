@@ -43,7 +43,7 @@ function LeadCard({
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
       onClick={onClick}
-      className="border-[#E0D8CE] hover:shadow-sm transition-shadow cursor-pointer active:opacity-70 select-none"
+      className="border-[#D4C5A0] hover:shadow-sm transition-shadow cursor-pointer active:opacity-70 select-none"
     >
       <CardContent className="p-3 space-y-2">
         <div className="flex items-start justify-between gap-1">
@@ -54,18 +54,18 @@ function LeadCard({
             </Badge>
           )}
         </div>
-        <div className="flex items-center gap-1.5 text-xs text-[#8A8A8A]">
+        <div className="flex items-center gap-1.5 text-xs text-[#7A7A6A]">
           <Phone className="w-3 h-3" />
           {lead.phone}
         </div>
         {lead.estimated_budget && (
-          <div className="flex items-center gap-1.5 text-xs text-[#B87333] font-medium">
+          <div className="flex items-center gap-1.5 text-xs text-[#787F56] font-medium">
             <DollarSign className="w-3 h-3" />
             R$ {lead.estimated_budget.toLocaleString("pt-BR")}
           </div>
         )}
         {lead.next_action && (
-          <p className="text-[11px] text-[#5A5A5A] bg-[#EAE3D9] px-2 py-1 rounded">
+          <p className="text-[11px] text-[#4A4A3A] bg-[#E2D4B9] px-2 py-1 rounded">
             {lead.next_action}
           </p>
         )}
@@ -134,17 +134,17 @@ export function KanbanBoard({
             onDrop={(e) => handleDrop(e, stage.key)}
           >
             <div className="flex items-center justify-between mb-2 px-1">
-              <span className="text-xs font-medium text-[#5A5A5A] uppercase tracking-wide">
+              <span className="text-xs font-medium text-[#4A4A3A] uppercase tracking-wide">
                 {stage.label}
               </span>
-              <span className="text-xs text-[#8A8A8A] bg-[#EAE3D9] px-1.5 py-0.5 rounded-full">
+              <span className="text-xs text-[#7A7A6A] bg-[#E2D4B9] px-1.5 py-0.5 rounded-full">
                 {leads.length}
               </span>
             </div>
             <div
               className={cn(
                 "flex flex-col gap-2 flex-1 min-h-[200px] rounded-xl p-2 transition-colors",
-                isOver ? "bg-[#2D4A3E]/10 ring-2 ring-dashed ring-[#2D4A3E]/30" : "bg-[#EAE3D9]/40"
+                isOver ? "bg-[#30360E]/10 ring-2 ring-dashed ring-[#30360E]/30" : "bg-[#E2D4B9]/40"
               )}
             >
               {leads.map((lead) => (
@@ -158,7 +158,7 @@ export function KanbanBoard({
               ))}
               {leads.length === 0 && (
                 <div className="flex-1 flex items-center justify-center">
-                  <p className="text-xs text-[#8A8A8A]/50">{isOver ? "Soltar aqui" : "Vazio"}</p>
+                  <p className="text-xs text-[#7A7A6A]/50">{isOver ? "Soltar aqui" : "Vazio"}</p>
                 </div>
               )}
             </div>

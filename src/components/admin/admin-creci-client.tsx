@@ -68,23 +68,23 @@ function CreciCard({
   }
 
   return (
-    <div className="border border-[#E0D8CE] rounded-xl p-5 bg-white space-y-4">
+    <div className="border border-[#D4C5A0] rounded-xl p-5 bg-white space-y-4">
       <div className="flex items-start gap-3">
-        <div className="w-9 h-9 rounded-full bg-[#2D4A3E]/10 flex items-center justify-center shrink-0">
-          <User className="w-4 h-4 text-[#2D4A3E]" />
+        <div className="w-9 h-9 rounded-full bg-[#30360E]/10 flex items-center justify-center shrink-0">
+          <User className="w-4 h-4 text-[#30360E]" />
         </div>
         <div className="flex-1 min-w-0">
           <p className="font-medium text-[#2A2A2A]">{v.users?.name ?? "—"}</p>
-          <p className="text-xs text-[#8A8A8A]">{v.users?.email} · {v.users?.phone}</p>
+          <p className="text-xs text-[#7A7A6A]">{v.users?.email} · {v.users?.phone}</p>
           <div className="flex items-center gap-2 mt-1.5">
-            <span className="font-mono text-xs bg-[#EAE3D9] px-2 py-0.5 rounded text-[#2D4A3E]">
+            <span className="font-mono text-xs bg-[#E2D4B9] px-2 py-0.5 rounded text-[#30360E]">
               CRECI-{v.state}: {v.creci}
             </span>
             <span className={`text-xs px-2 py-0.5 rounded border ${STATUS_COLOR[v.status]}`}>
               {STATUS_LABEL[v.status]}
             </span>
           </div>
-          <p className="text-xs text-[#8A8A8A] mt-1">
+          <p className="text-xs text-[#7A7A6A] mt-1">
             Cadastro: {new Date(v.created_at).toLocaleDateString("pt-BR")}
             {v.validated_at ? ` · Validado: ${new Date(v.validated_at).toLocaleDateString("pt-BR")}` : ""}
           </p>
@@ -94,7 +94,7 @@ function CreciCard({
       {v.status === "pending" && (
         <div className="space-y-3">
           <textarea
-            className="w-full border border-[#E0D8CE] rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-[#2D4A3E]"
+            className="w-full border border-[#D4C5A0] rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-[#30360E]"
             rows={2}
             placeholder="Observações (opcional)"
             value={notes}
@@ -122,7 +122,7 @@ function CreciCard({
             <Button
               size="sm"
               variant="outline"
-              className="border-[#E0D8CE] gap-1.5"
+              className="border-[#D4C5A0] gap-1.5"
               onClick={() => update("manual")}
               disabled={loading}
             >
@@ -133,7 +133,7 @@ function CreciCard({
         </div>
       )}
       {v.notes && v.status !== "pending" && (
-        <p className="text-xs text-[#5A5A5A] italic border-l-2 border-[#E0D8CE] pl-3">{v.notes}</p>
+        <p className="text-xs text-[#4A4A3A] italic border-l-2 border-[#D4C5A0] pl-3">{v.notes}</p>
       )}
     </div>
   )
@@ -153,14 +153,14 @@ export function AdminCreciClient({ pending: initialPending, resolved: initialRes
   return (
     <div className="space-y-8">
       <div className="space-y-4">
-        <h2 className="font-serif text-xl text-[#2D4A3E]">
+        <h2 className="font-serif text-xl text-[#30360E]">
           Pendentes
           {pending.length > 0 && (
-            <span className="ml-2 text-sm text-[#B87333] font-sans">({pending.length})</span>
+            <span className="ml-2 text-sm text-[#787F56] font-sans">({pending.length})</span>
           )}
         </h2>
         {pending.length === 0 ? (
-          <div className="border border-[#E0D8CE] rounded-xl p-8 text-center text-sm text-[#8A8A8A] bg-white">
+          <div className="border border-[#D4C5A0] rounded-xl p-8 text-center text-sm text-[#7A7A6A] bg-white">
             Nenhuma validação pendente.
           </div>
         ) : (
@@ -170,7 +170,7 @@ export function AdminCreciClient({ pending: initialPending, resolved: initialRes
 
       {resolved.length > 0 && (
         <div className="space-y-4">
-          <h2 className="font-serif text-xl text-[#2D4A3E]">Resolvidos</h2>
+          <h2 className="font-serif text-xl text-[#30360E]">Resolvidos</h2>
           {resolved.map((v) => <CreciCard key={v.id} v={v} onUpdate={handleUpdate} />)}
         </div>
       )}

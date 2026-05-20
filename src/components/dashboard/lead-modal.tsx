@@ -91,7 +91,7 @@ export function LeadModal({ lead, open, onClose, onSaved }: Props) {
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle className="font-serif text-[#2D4A3E]">
+          <DialogTitle className="font-serif text-[#30360E]">
             {lead ? "Editar lead" : "Novo lead"}
           </DialogTitle>
         </DialogHeader>
@@ -101,12 +101,12 @@ export function LeadModal({ lead, open, onClose, onSaved }: Props) {
             <div className="space-y-1.5">
               <Label>Nome</Label>
               <Input value={form.name} onChange={(e) => set("name", e.target.value)}
-                placeholder="Nome do lead" className="border-[#E0D8CE]" />
+                placeholder="Nome do lead" className="border-[#D4C5A0]" />
             </div>
             <div className="space-y-1.5">
               <Label>Telefone (WhatsApp)</Label>
               <Input value={form.phone} onChange={(e) => set("phone", e.target.value)}
-                placeholder="5511999999999" className="border-[#E0D8CE]" />
+                placeholder="5511999999999" className="border-[#D4C5A0]" />
             </div>
           </div>
 
@@ -114,7 +114,7 @@ export function LeadModal({ lead, open, onClose, onSaved }: Props) {
             <div className="space-y-1.5">
               <Label>Status</Label>
               <Select value={form.status} onValueChange={(v) => v && set("status", v)}>
-                <SelectTrigger className="border-[#E0D8CE]">
+                <SelectTrigger className="border-[#D4C5A0]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -127,7 +127,7 @@ export function LeadModal({ lead, open, onClose, onSaved }: Props) {
             <div className="space-y-1.5">
               <Label>Temperatura</Label>
               <Select value={form.temperature} onValueChange={(v) => v && set("temperature", v)}>
-                <SelectTrigger className="border-[#E0D8CE]">
+                <SelectTrigger className="border-[#D4C5A0]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -143,38 +143,38 @@ export function LeadModal({ lead, open, onClose, onSaved }: Props) {
             <div className="space-y-1.5">
               <Label>Budget estimado (R$)</Label>
               <Input value={form.estimated_budget} onChange={(e) => set("estimated_budget", e.target.value)}
-                type="number" placeholder="500000" className="border-[#E0D8CE]" />
+                type="number" placeholder="500000" className="border-[#D4C5A0]" />
             </div>
             <div className="space-y-1.5">
               <Label>Região de interesse</Label>
               <Input value={form.region} onChange={(e) => set("region", e.target.value)}
-                placeholder="Pinheiros, SP" className="border-[#E0D8CE]" />
+                placeholder="Pinheiros, SP" className="border-[#D4C5A0]" />
             </div>
           </div>
 
           <div className="space-y-1.5">
             <Label>Próxima ação</Label>
             <Input value={form.next_action} onChange={(e) => set("next_action", e.target.value)}
-              placeholder="Ex: Ligar para confirmar visita" className="border-[#E0D8CE]" />
+              placeholder="Ex: Ligar para confirmar visita" className="border-[#D4C5A0]" />
           </div>
 
           <div className="space-y-1.5">
             <Label>Observações</Label>
             <Textarea value={form.notes} onChange={(e) => set("notes", e.target.value)}
               placeholder="Notas internas sobre o lead..." rows={3}
-              className="border-[#E0D8CE] resize-none" />
+              className="border-[#D4C5A0] resize-none" />
           </div>
 
           {/* VIP toggle */}
-          <div className="flex items-center justify-between py-2 px-3 rounded-lg border border-[#E0D8CE] bg-[#FAF7F2]">
+          <div className="flex items-center justify-between py-2 px-3 rounded-lg border border-[#D4C5A0] bg-[#F5F0E0]">
             <div>
               <p className="text-sm font-medium text-[#2A2A2A]">Lead VIP</p>
-              <p className="text-xs text-[#8A8A8A]">A Nara prioriza respostas e aprovações humanas para VIPs</p>
+              <p className="text-xs text-[#7A7A6A]">A Nara prioriza respostas e aprovações humanas para VIPs</p>
             </div>
             <button
               type="button"
               onClick={() => setIsVip((v) => !v)}
-              className={`w-11 h-6 rounded-full transition-colors relative ${isVip ? "bg-[#B87333]" : "bg-[#E0D8CE]"}`}
+              className={`w-11 h-6 rounded-full transition-colors relative ${isVip ? "bg-[#787F56]" : "bg-[#D4C5A0]"}`}
             >
               <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-all ${isVip ? "left-[22px]" : "left-0.5"}`} />
             </button>
@@ -182,9 +182,9 @@ export function LeadModal({ lead, open, onClose, onSaved }: Props) {
         </div>
 
         <div className="flex gap-3 justify-end pt-2">
-          <Button variant="outline" onClick={onClose} className="border-[#E0D8CE]">Cancelar</Button>
+          <Button variant="outline" onClick={onClose} className="border-[#D4C5A0]">Cancelar</Button>
           <Button onClick={handleSave} disabled={saving || !form.name || !form.phone}
-            className="bg-[#2D4A3E] hover:bg-[#3A6B5A] text-white">
+            className="bg-[#30360E] hover:bg-[#4A5218] text-white">
             {saving ? "Salvando..." : "Salvar"}
           </Button>
         </div>

@@ -66,9 +66,9 @@ export default async function RelatorioPage() {
     <div className="p-6 lg:p-8 pt-20 lg:pt-8 max-w-2xl mx-auto space-y-8 pb-12">
       {/* Header */}
       <div className="text-center space-y-2 pt-4">
-        <p className="text-xs text-[#B87333] uppercase tracking-widest font-mono">Diagnóstico Nara · 14 dias</p>
-        <h1 className="font-serif text-3xl text-[#2D4A3E]">{brokerName}, aqui está o resultado</h1>
-        <p className="text-[#8A8A8A] text-sm">
+        <p className="text-xs text-[#787F56] uppercase tracking-widest font-mono">Diagnóstico Nara · 14 dias</p>
+        <h1 className="font-serif text-3xl text-[#30360E]">{brokerName}, aqui está o resultado</h1>
+        <p className="text-[#7A7A6A] text-sm">
           {isCompleted
             ? `Período encerrado em ${ends.toLocaleDateString("pt-BR")}`
             : `Dia ${daysElapsed} de 14 — em andamento`}
@@ -77,26 +77,26 @@ export default async function RelatorioPage() {
 
       {/* Big stats */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-[#2D4A3E] rounded-2xl p-6 text-white text-center">
+        <div className="bg-[#30360E] rounded-2xl p-6 text-white text-center">
           <p className="text-5xl font-bold">{leadsContacted}</p>
           <p className="text-sm text-[#B0D0C0] mt-2">leads contatados</p>
         </div>
-        <div className="bg-[#F5F0E8] rounded-2xl p-6 text-center">
-          <p className="text-5xl font-bold text-[#B87333]">{visitsScheduled}</p>
-          <p className="text-sm text-[#8A8A8A] mt-2">visitas agendadas</p>
+        <div className="bg-[#EDE5CD] rounded-2xl p-6 text-center">
+          <p className="text-5xl font-bold text-[#787F56]">{visitsScheduled}</p>
+          <p className="text-sm text-[#7A7A6A] mt-2">visitas agendadas</p>
         </div>
       </div>
 
       {/* Commission highlight */}
-      <div className="bg-gradient-to-br from-[#2D4A3E] to-[#3A6B5A] rounded-2xl p-8 text-center text-white">
+      <div className="bg-gradient-to-br from-[#30360E] to-[#4A5218] rounded-2xl p-8 text-center text-white">
         <p className="text-sm text-[#B0D0C0] uppercase tracking-widest mb-2">Comissão estimada</p>
         <p className="text-6xl font-serif font-bold">{fmt(estimatedCommission)}</p>
         <p className="text-xs text-[#8AC0A8] mt-3">Baseado em leads QUENTE × 6% de comissão média</p>
       </div>
 
       {/* Funil de conversão (M09) */}
-      <div className="border border-[#E0D8CE] rounded-2xl p-6 space-y-4 bg-white">
-        <h2 className="font-serif text-lg text-[#2D4A3E]">Funil de conversão</h2>
+      <div className="border border-[#D4C5A0] rounded-2xl p-6 space-y-4 bg-white">
+        <h2 className="font-serif text-lg text-[#30360E]">Funil de conversão</h2>
         <div className="space-y-3">
           {[
             {
@@ -104,21 +104,21 @@ export default async function RelatorioPage() {
               label: "Total de leads",
               value: totalLeads,
               rate: null,
-              color: "text-[#2D4A3E]",
+              color: "text-[#30360E]",
             },
             {
               icon: TrendingUp,
               label: "Leads qualificados",
               value: qualificados,
               rate: pct(qualificados, totalLeads),
-              color: "text-[#3A6B5A]",
+              color: "text-[#4A5218]",
             },
             {
               icon: Calendar,
               label: "Com visita realizada",
               value: visitasOcorridas,
               rate: pct(visitasOcorridas, qualificados),
-              color: "text-[#B87333]",
+              color: "text-[#787F56]",
             },
             {
               icon: CheckCircle,
@@ -130,16 +130,16 @@ export default async function RelatorioPage() {
           ].map(({ icon: Icon, label, value, rate, color }, i) => (
             <div key={i} className="flex items-center gap-3">
               <div
-                className="h-8 rounded-lg bg-[#2D4A3E]/10 flex items-center justify-center shrink-0"
+                className="h-8 rounded-lg bg-[#30360E]/10 flex items-center justify-center shrink-0"
                 style={{ width: `${Math.max(10, Math.round((value / Math.max(totalLeads, 1)) * 100))}%`, minWidth: "40px" }}
               >
                 <Icon className={`w-3.5 h-3.5 ${color}`} />
               </div>
               <div className="flex items-center justify-between flex-1 min-w-0">
-                <span className="text-sm text-[#5A5A5A] truncate">{label}</span>
+                <span className="text-sm text-[#4A4A3A] truncate">{label}</span>
                 <div className="flex items-center gap-2 shrink-0 ml-2">
                   <span className={`text-sm font-medium ${color}`}>{value}</span>
-                  {rate && <span className="text-xs text-[#8A8A8A] bg-[#EAE3D9] px-1.5 py-0.5 rounded">{rate}</span>}
+                  {rate && <span className="text-xs text-[#7A7A6A] bg-[#E2D4B9] px-1.5 py-0.5 rounded">{rate}</span>}
                 </div>
               </div>
             </div>
@@ -150,14 +150,14 @@ export default async function RelatorioPage() {
       {/* Progress bar */}
       {!isCompleted && (
         <div className="space-y-2">
-          <div className="flex justify-between text-xs text-[#8A8A8A]">
+          <div className="flex justify-between text-xs text-[#7A7A6A]">
             <span>Dia 1</span>
             <span>Dia {daysElapsed} de 14</span>
             <span>Dia 14</span>
           </div>
-          <div className="h-2 bg-[#E0D8CE] rounded-full overflow-hidden">
+          <div className="h-2 bg-[#D4C5A0] rounded-full overflow-hidden">
             <div
-              className="h-full bg-[#B87333] rounded-full transition-all"
+              className="h-full bg-[#787F56] rounded-full transition-all"
               style={{ width: `${(daysElapsed / 14) * 100}%` }}
             />
           </div>
@@ -166,22 +166,22 @@ export default async function RelatorioPage() {
 
       {/* Marcos narrative */}
       <div className="space-y-3">
-        <h2 className="font-serif text-lg text-[#2D4A3E]">Marcos do diagnóstico</h2>
+        <h2 className="font-serif text-lg text-[#30360E]">Marcos do diagnóstico</h2>
         {[3, 7, 11, 14].map((day) => {
           const reached = daysElapsed >= day
           return (
-            <div key={day} className={`flex items-start gap-4 p-4 rounded-xl border ${reached ? "border-[#2D4A3E] bg-[#F0F5F2]" : "border-[#E0D8CE] bg-white opacity-50"}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${reached ? "bg-[#2D4A3E] text-white" : "bg-[#E0D8CE] text-[#8A8A8A]"}`}>
+            <div key={day} className={`flex items-start gap-4 p-4 rounded-xl border ${reached ? "border-[#30360E] bg-[#EEF0E8]" : "border-[#D4C5A0] bg-white opacity-50"}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${reached ? "bg-[#30360E] text-white" : "bg-[#D4C5A0] text-[#7A7A6A]"}`}>
                 {day}
               </div>
               <div>
-                <p className="font-medium text-[#2D4A3E] text-sm">
+                <p className="font-medium text-[#30360E] text-sm">
                   {day === 3 && "Primeiros resultados"}
                   {day === 7 && "Meio do caminho"}
                   {day === 11 && "Reta final"}
                   {day === 14 && "Veredito"}
                 </p>
-                <p className="text-xs text-[#8A8A8A] mt-0.5">
+                <p className="text-xs text-[#7A7A6A] mt-0.5">
                   {day === 3 && "Nara já entrou em contato com todos os leads e identificou os mais quentes."}
                   {day === 7 && "Leads qualificados estão sendo trabalhados. Visitas começando a acontecer."}
                   {day === 11 && "Negociações em andamento. Momento de você assumir os mais avançados."}
@@ -194,21 +194,21 @@ export default async function RelatorioPage() {
       </div>
 
       {/* Compartilhar */}
-      <div className="border border-[#E0D8CE] rounded-2xl p-6 text-center space-y-3 bg-[#FAF7F2]">
-        <p className="text-sm text-[#5A5A5A]">Compartilhe o resultado com seu gestor ou investidor</p>
+      <div className="border border-[#D4C5A0] rounded-2xl p-6 text-center space-y-3 bg-[#F5F0E0]">
+        <p className="text-sm text-[#4A4A3A]">Compartilhe o resultado com seu gestor ou investidor</p>
         <RelatorioShareButton />
       </div>
 
       {/* CTA */}
       {isCompleted && (
-        <div className="border border-[#E0D8CE] rounded-2xl p-6 text-center space-y-4 bg-[#FAF7F2]">
-          <p className="font-serif text-lg text-[#2D4A3E]">Diagnóstico concluído</p>
-          <p className="text-sm text-[#5A5A5A]">
+        <div className="border border-[#D4C5A0] rounded-2xl p-6 text-center space-y-4 bg-[#F5F0E0]">
+          <p className="font-serif text-lg text-[#30360E]">Diagnóstico concluído</p>
+          <p className="text-sm text-[#4A4A3A]">
             Se os resultados ficaram abaixo do esperado, você pode acionar o Pacto Moova 90.
           </p>
           <Link
             href="/dashboard/pacto"
-            className={cn(buttonVariants({ variant: "outline" }), "border-[#2D4A3E] text-[#2D4A3E]")}
+            className={cn(buttonVariants({ variant: "outline" }), "border-[#30360E] text-[#30360E]")}
           >
             Ver Pacto Moova 90
           </Link>
