@@ -90,22 +90,8 @@ export async function POST() {
     } catch { /* continue polling */ }
   }
 
-  if (!qr) {
-    // Check if server is fundamentally unable to connect
-    const stateRes = await fetch(`${evolutionUrl}/instance/connectionState/${instanceName}`, {
-      headers: { apikey: evolutionKey },
-    }).catch(() => null)
-    const stateData = stateRes?.ok ? await stateRes.json() as Record<string, unknown> : null
-    const state = (stateData?.instance as Record<string, unknown> | undefined)?.state ?? "unknown"
-
-    if (state === "connecting" || state === "close") {
-      return NextResponse.json({
-        error: "A Evolution API não conseguiu conectar ao WhatsApp. O servidor pode estar com restrição de rede. Use a opção Meta (API Oficial) acima — é mais estável.",
-        evolutionState: state,
-      }, { status: 503 })
-    }
-  }
-
+  // QR not ready yet — "connecting" and "close" are both normal initial states.
+  // Return ok so the frontend starts polling /api/whatsapp/qr every 3s.
   return NextResponse.json({ ok: true, instanceName, qr })
 }
 
