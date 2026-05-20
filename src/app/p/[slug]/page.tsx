@@ -1,7 +1,8 @@
 import { createAdminClient } from "@/lib/supabase/admin"
 import { notFound } from "next/navigation"
 import Link from "next/link"
-import { MapPin, Phone, MessageCircle, Building2 } from "lucide-react"
+import { MapPin, Phone, MessageCircle, Building2, ShieldCheck } from "lucide-react"
+import { CoraWidget } from "@/components/portal/cora-widget"
 
 export const dynamic = "force-dynamic"
 
@@ -30,7 +31,7 @@ export default async function PortalPage({ params }: { params: Promise<{ slug: s
 
   const { data: userData } = await supabase
     .from("users")
-    .select("id, broker_name, name, phone, city, state_uf, bio, avatar_url")
+    .select("id, broker_name, name, phone, creci, city, state_uf, bio, avatar_url")
     .eq("portal_slug", slug)
     .single()
 
@@ -43,6 +44,27 @@ export default async function PortalPage({ params }: { params: Promise<{ slug: s
     .eq("active", true)
     .order("created_at", { ascending: false })
     .limit(12)
+
+  // Fetch first photo for each property
+  let mediaMap: Record<string, string> = {}
+  if (properties && properties.length > 0) {
+    const propertyIds = properties.map((p) => p.id)
+    const { data: mediaRows } = await supabase
+      .from("property_media")
+      .select("property_id, url, type")
+      .in("property_id", propertyIds)
+      .in("type", ["photo_edited", "photo_original"])
+      .order("type", { ascending: true }) // photo_edited < photo_original alphabetically
+
+    if (mediaRows) {
+      // Keep only the best photo per property (photo_edited > photo_original)
+      for (const m of mediaRows) {
+        if (!mediaMap[m.property_id]) {
+          mediaMap[m.property_id] = m.url
+        }
+      }
+    }
+  }
 
   const brokerName = userData.broker_name ?? userData.name
   const location = [userData.city, userData.state_uf].filter(Boolean).join(", ")
@@ -87,12 +109,20 @@ export default async function PortalPage({ params }: { params: Promise<{ slug: s
             </div>
             <div>
               <h1 className="font-serif text-2xl text-[#2D4A3E]">{brokerName}</h1>
-              {location && (
-                <p className="flex items-center gap-1.5 text-sm text-[#8A8A8A] mt-1">
-                  <MapPin className="w-3.5 h-3.5" />
-                  {location}
-                </p>
-              )}
+              <div className="flex flex-wrap items-center gap-3 mt-1">
+                {location && (
+                  <p className="flex items-center gap-1.5 text-sm text-[#8A8A8A]">
+                    <MapPin className="w-3.5 h-3.5" />
+                    {location}
+                  </p>
+                )}
+                {userData.creci && (
+                  <p className="flex items-center gap-1.5 text-xs text-[#5A5A5A] bg-[#EAE3D9] px-2 py-0.5 rounded-full">
+                    <ShieldCheck className="w-3 h-3 text-[#B87333]" />
+                    CRECI {userData.creci}
+                  </p>
+                )}
+              </div>
               {userData.bio && (
                 <p className="text-sm text-[#5A5A5A] mt-3 leading-relaxed max-w-xl">{userData.bio}</p>
               )}
@@ -127,27 +157,57 @@ export default async function PortalPage({ params }: { params: Promise<{ slug: s
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {properties.map((p) => (
-              <div key={p.id} className="bg-white border border-[#E0D8CE] rounded-xl overflow-hidden hover:shadow-md transition-shadow">
-                <div className="h-36 bg-[#EAE3D9] flex items-center justify-center">
-                  <Building2 className="w-8 h-8 text-[#B87333] opacity-50" />
-                </div>
-                <div className="p-4">
-                  <p className="text-xs text-[#8A8A8A] uppercase tracking-wide mb-1">{p.type ?? "Imóvel"}</p>
-                  <h3 className="text-sm font-medium text-[#2A2A2A] line-clamp-2 mb-2">{p.title}</h3>
-                  <div className="flex items-center gap-3 text-xs text-[#8A8A8A]">
-                    {p.bedrooms && <span>{p.bedrooms} quartos</span>}
-                    {p.area_sqm && <span>{p.area_sqm}m²</span>}
+            {properties.map((p) => {
+              const coverUrl = mediaMap[p.id]
+              return (
+                <div key={p.id} className="bg-white border border-[#E0D8CE] rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+                  <div className="h-44 bg-[#EAE3D9] relative overflow-hidden">
+                    {coverUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={coverUrl}
+                        alt={p.title}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Building2 className="w-8 h-8 text-[#B87333] opacity-40" />
+                      </div>
+                    )}
+                    <div className="absolute top-2 left-2">
+                      <span className="text-[10px] font-medium text-[#5A5A5A] bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded-full uppercase tracking-wide">
+                        {p.type ?? "Imóvel"}
+                      </span>
+                    </div>
                   </div>
-                  {p.price && (
-                    <p className="text-sm font-semibold text-[#2D4A3E] mt-2">
-                      R$ {p.price.toLocaleString("pt-BR")}
-                    </p>
-                  )}
-                  {p.city && <p className="text-xs text-[#8A8A8A] mt-1">{p.city}</p>}
+                  <div className="p-4">
+                    <h3 className="text-sm font-medium text-[#2A2A2A] line-clamp-2 mb-2">{p.title}</h3>
+                    <div className="flex items-center gap-3 text-xs text-[#8A8A8A]">
+                      {p.bedrooms && <span>{p.bedrooms} quartos</span>}
+                      {p.area_sqm && <span>{p.area_sqm}m²</span>}
+                    </div>
+                    {p.price && (
+                      <p className="text-sm font-semibold text-[#2D4A3E] mt-2">
+                        R$ {p.price.toLocaleString("pt-BR")}
+                      </p>
+                    )}
+                    {p.city && <p className="text-xs text-[#8A8A8A] mt-1">{p.city}</p>}
+                    {whatsappHref && (
+                      <a
+                        href={`https://wa.me/55${userData.phone!.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá ${brokerName}, tenho interesse no imóvel "${p.title}"${p.price ? ` (R$ ${p.price.toLocaleString("pt-BR")})` : ""}. Vi no seu portal Moova.`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-3 w-full flex items-center justify-center gap-1.5 text-xs font-medium text-[#2D4A3E] border border-[#E0D8CE] rounded-lg py-2 hover:bg-[#EAE3D9] transition-colors"
+                      >
+                        <MessageCircle className="w-3.5 h-3.5" />
+                        Tenho interesse
+                      </a>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </main>
@@ -162,6 +222,11 @@ export default async function PortalPage({ params }: { params: Promise<{ slug: s
         {" · "}
         <Link href="/termos" className="hover:text-[#2D4A3E] transition-colors">Termos</Link>
       </footer>
+
+      {/* Cora chat widget */}
+      {whatsappHref && (
+        <CoraWidget whatsappHref={whatsappHref} brokerName={brokerName} />
+      )}
     </div>
   )
 }

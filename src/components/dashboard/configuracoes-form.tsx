@@ -73,6 +73,9 @@ export function ConfiguracoesForm({
   metaConnectedParam,
   metaErrorParam,
   initialMetaPageName,
+  bspConnectedParam,
+  bspErrorParam,
+  bspPhoneParam,
 }: {
   profile: Profile
   waAccount: WAAccount

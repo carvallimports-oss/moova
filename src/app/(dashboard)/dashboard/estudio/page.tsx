@@ -1,22 +1,68 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useCallback } from "react"
 import { Button } from "@/components/ui/button"
-import { Wand2, Loader2, ImageIcon, ArrowRight, Info } from "lucide-react"
+import { Wand2, Loader2, ImageIcon, ArrowRight, Info, Upload, Link2 } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 
 type Tab = "fotos" | "video" | "tour360"
+type InputMode = "upload" | "url"
 
 export default function EstudioPage() {
   const [tab, setTab] = useState<Tab>("fotos")
+  const [inputMode, setInputMode] = useState<InputMode>("upload")
   const [imageUrl, setImageUrl] = useState("")
+  const [uploading, setUploading] = useState(false)
   const [enhancing, setEnhancing] = useState(false)
   const [originalUrl, setOriginalUrl] = useState("")
   const [enhancedUrl, setEnhancedUrl] = useState("")
+  const [dragOver, setDragOver] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  async function uploadFile(file: File): Promise<string | null> {
+    const allowed = ["image/jpeg", "image/jpg", "image/png", "image/webp"]
+    if (!allowed.includes(file.type)) {
+      toast.error("Formato inválido. Use JPG, PNG ou WebP.")
+      return null
+    }
+    if (file.size > 20 * 1024 * 1024) {
+      toast.error("Arquivo muito grande. Máximo 20MB.")
+      return null
+    }
+    const fd = new FormData()
+    fd.append("file", file)
+    const res = await fetch("/api/studio/upload", { method: "POST", body: fd })
+    const data = await res.json()
+    if (!res.ok) { toast.error(data.error ?? "Erro no upload."); return null }
+    return data.url as string
+  }
+
+  async function handleFileSelect(file: File) {
+    setUploading(true)
+    setOriginalUrl("")
+    setEnhancedUrl("")
+    try {
+      const url = await uploadFile(file)
+      if (url) {
+        setImageUrl(url)
+        toast.success("Foto carregada. Clique em Melhorar para processar.")
+      }
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setDragOver(false)
+    const file = e.dataTransfer.files[0]
+    if (file) handleFileSelect(file)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   async function handleEnhance() {
-    if (!imageUrl.trim()) { toast.error("Cole a URL da foto."); return }
+    if (!imageUrl.trim()) { toast.error("Selecione ou cole a URL de uma foto."); return }
     setEnhancing(true)
     setOriginalUrl(imageUrl)
     setEnhancedUrl("")
@@ -27,10 +73,7 @@ export default function EstudioPage() {
         body: JSON.stringify({ image_url: imageUrl }),
       })
       const data = await res.json()
-      if (!res.ok) {
-        toast.error(data.error ?? "Erro ao processar foto.")
-        return
-      }
+      if (!res.ok) { toast.error(data.error ?? "Erro ao processar foto."); return }
       setEnhancedUrl(data.enhanced_url)
       toast.success("Foto melhorada com sucesso.")
     } catch {
@@ -73,34 +116,113 @@ export default function EstudioPage() {
       {tab === "fotos" && (
         <div className="space-y-5">
           <div className="bg-white border border-[#E0D8CE] rounded-xl p-6 space-y-4">
-            <h2 className="font-serif text-lg text-[#2D4A3E]">Melhorar foto com IA</h2>
-            <p className="text-sm text-[#5A5A5A]">
-              Cole a URL de uma foto do imóvel. A IA fará upscaling 2× e melhorará nitidez, cores e qualidade geral.
-            </p>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-[#5A5A5A]">URL da foto original</label>
-              <div className="flex gap-2">
-                <input
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  placeholder="https://exemplo.com/foto-imovel.jpg"
-                  className="flex-1 border border-[#E0D8CE] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D4A3E]/20"
-                />
-                <Button
-                  onClick={handleEnhance}
-                  disabled={enhancing || !imageUrl.trim()}
-                  className="bg-[#2D4A3E] hover:bg-[#1e3329] gap-2 shrink-0"
+            <div className="flex items-center justify-between">
+              <h2 className="font-serif text-lg text-[#2D4A3E]">Melhorar foto com IA</h2>
+              {/* Input mode toggle */}
+              <div className="flex gap-1 bg-[#EAE3D9] p-0.5 rounded-lg">
+                <button
+                  onClick={() => { setInputMode("upload"); setImageUrl("") }}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-colors",
+                    inputMode === "upload" ? "bg-white text-[#2D4A3E] shadow-sm" : "text-[#5A5A5A] hover:text-[#2D4A3E]"
+                  )}
                 >
-                  {enhancing ? <><Loader2 className="w-4 h-4 animate-spin" /> Processando...</> : <><Wand2 className="w-4 h-4" /> Melhorar</>}
-                </Button>
+                  <Upload className="w-3 h-3" />
+                  Upload
+                </button>
+                <button
+                  onClick={() => { setInputMode("url"); setImageUrl("") }}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-colors",
+                    inputMode === "url" ? "bg-white text-[#2D4A3E] shadow-sm" : "text-[#5A5A5A] hover:text-[#2D4A3E]"
+                  )}
+                >
+                  <Link2 className="w-3 h-3" />
+                  URL
+                </button>
               </div>
             </div>
+
+            {inputMode === "upload" ? (
+              <div className="space-y-3">
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f) }}
+                />
+                <div
+                  onClick={() => !uploading && fileRef.current?.click()}
+                  onDrop={handleDrop}
+                  onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
+                  onDragLeave={() => setDragOver(false)}
+                  className={cn(
+                    "border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors",
+                    dragOver
+                      ? "border-[#2D4A3E] bg-[#F0F7F4]"
+                      : "border-[#E0D8CE] hover:border-[#B87333] hover:bg-[#FAF7F2]",
+                    uploading && "pointer-events-none opacity-60"
+                  )}
+                >
+                  {uploading ? (
+                    <div className="space-y-2">
+                      <Loader2 className="w-8 h-8 text-[#B87333] animate-spin mx-auto" />
+                      <p className="text-sm text-[#5A5A5A]">Carregando foto...</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Upload className="w-8 h-8 text-[#B87333] mx-auto opacity-60" />
+                      <p className="text-sm font-medium text-[#2D4A3E]">Clique para selecionar ou arraste aqui</p>
+                      <p className="text-xs text-[#8A8A8A]">JPG, PNG ou WebP — máximo 20MB</p>
+                    </div>
+                  )}
+                </div>
+                {imageUrl && !uploading && (
+                  <div className="flex items-center gap-2 bg-[#F0F7F4] rounded-lg px-3 py-2">
+                    <ImageIcon className="w-4 h-4 text-[#2D4A3E] shrink-0" />
+                    <p className="text-xs text-[#2D4A3E] truncate flex-1">Foto carregada com sucesso</p>
+                    <Button
+                      onClick={handleEnhance}
+                      disabled={enhancing}
+                      size="sm"
+                      className="bg-[#2D4A3E] hover:bg-[#1e3329] gap-1.5 text-xs shrink-0"
+                    >
+                      {enhancing ? <><Loader2 className="w-3 h-3 animate-spin" /> Processando...</> : <><Wand2 className="w-3 h-3" /> Melhorar</>}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-sm text-[#5A5A5A]">
+                  Cole a URL de uma foto do imóvel. A IA fará upscaling 2× e melhorará nitidez, cores e qualidade geral.
+                </p>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-[#5A5A5A]">URL da foto original</label>
+                  <div className="flex gap-2">
+                    <input
+                      value={imageUrl}
+                      onChange={(e) => setImageUrl(e.target.value)}
+                      placeholder="https://exemplo.com/foto-imovel.jpg"
+                      className="flex-1 border border-[#E0D8CE] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D4A3E]/20"
+                    />
+                    <Button
+                      onClick={handleEnhance}
+                      disabled={enhancing || !imageUrl.trim()}
+                      className="bg-[#2D4A3E] hover:bg-[#1e3329] gap-2 shrink-0"
+                    >
+                      {enhancing ? <><Loader2 className="w-4 h-4 animate-spin" /> Processando...</> : <><Wand2 className="w-4 h-4" /> Melhorar</>}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="flex items-start gap-2 bg-[#FAF7F2] rounded-lg p-3">
               <Info className="w-4 h-4 text-[#B87333] shrink-0 mt-0.5" />
               <p className="text-xs text-[#5A5A5A]">
-                Funciona com qualquer URL pública de imagem (JPG, PNG, WebP). O processamento leva 20-60 segundos.
+                Upscaling 2× com Real-ESRGAN. O processamento leva 20-60 segundos.
                 Requer <code className="bg-[#EAE3D9] px-1 rounded">REPLICATE_API_KEY</code> configurada no ambiente.
               </p>
             </div>
@@ -131,7 +253,7 @@ export default function EstudioPage() {
                     ) : enhancing ? (
                       <div className="text-center space-y-2">
                         <Loader2 className="w-8 h-8 text-[#B87333] animate-spin mx-auto" />
-                        <p className="text-xs text-[#8A8A8A]">Processando...</p>
+                        <p className="text-xs text-[#8A8A8A]">Processando com Real-ESRGAN...</p>
                       </div>
                     ) : (
                       <ImageIcon className="w-8 h-8 text-[#E0D8CE]" />
@@ -140,16 +262,14 @@ export default function EstudioPage() {
                 </div>
               </div>
               {enhancedUrl && (
-                <div className="flex gap-2">
-                  <a
-                    href={enhancedUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-[#B87333] hover:underline flex items-center gap-1"
-                  >
-                    Abrir foto melhorada <ArrowRight className="w-3.5 h-3.5" />
-                  </a>
-                </div>
+                <a
+                  href={enhancedUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-[#B87333] hover:underline flex items-center gap-1"
+                >
+                  Abrir foto melhorada <ArrowRight className="w-3.5 h-3.5" />
+                </a>
               )}
             </div>
           )}
