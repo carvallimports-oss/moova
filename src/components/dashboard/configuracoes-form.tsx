@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { createClient } from "@/lib/supabase/client"
-import { Wifi, WifiOff, Shield, Loader2, Mic, MicOff, Calendar, CheckCircle2, Clock, Sparkles, Share2, QrCode, RefreshCw } from "lucide-react"
+import { Wifi, WifiOff, Shield, Loader2, Mic, MicOff, Calendar, CheckCircle2, Clock, Sparkles, Share2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
@@ -116,12 +116,6 @@ export function ConfiguracoesForm({
   const [bspAccessToken, setBspAccessToken] = useState("")
   const [bspConnecting, setBspConnecting] = useState(false)
 
-  // QR Code (Evolution API) state
-  const [qrCode, setQrCode] = useState<string | null>(null)
-  const [qrLoading, setQrLoading] = useState(false)
-  const [showQr, setShowQr] = useState(false)
-  const qrPollRef = useRef<ReturnType<typeof setInterval> | null>(null)
-
   // Meta OAuth phone picker state (populated after redirect callback)
   const [embeddedPhones, setEmbeddedPhones] = useState<BspPhone[]>(bspPickerPhones ?? [])
   const [embeddedToken, setEmbeddedToken] = useState(bspPickerToken ?? "")
@@ -193,8 +187,7 @@ export function ConfiguracoesForm({
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
-      if (qrPollRef.current) clearInterval(qrPollRef.current)
-      if (mediaRecorderRef.current?.state === "recording") {
+if (mediaRecorderRef.current?.state === "recording") {
         mediaRecorderRef.current.stop()
       }
     }
@@ -288,44 +281,6 @@ export function ConfiguracoesForm({
     })
     setCalendarConnected(false)
     toast.success("Google Agenda desconectada")
-  }
-
-  function stopQrPoll() {
-    if (qrPollRef.current) { clearInterval(qrPollRef.current); qrPollRef.current = null }
-  }
-
-  async function handleQRConnect() {
-    setQrLoading(true)
-    setQrCode(null)
-    setShowQr(true)
-    stopQrPoll()
-    try {
-      const res = await fetch("/api/whatsapp/connect", { method: "POST" })
-      const data = await res.json() as { ok?: boolean; qr?: string; error?: string }
-      if (!res.ok) { toast.error(data.error ?? "Erro ao iniciar conexão"); setQrLoading(false); return }
-      if (data.qr) setQrCode(data.qr)
-      setQrLoading(false)
-      // Poll status + QR every 3s
-      qrPollRef.current = setInterval(async () => {
-        const [statusRes, qrRes] = await Promise.all([
-          fetch("/api/whatsapp/status"),
-          fetch("/api/whatsapp/qr"),
-        ])
-        const status = await statusRes.json() as { connected?: boolean }
-        const qrData = await qrRes.json() as { qr?: string; connected?: boolean }
-        if (status.connected || qrData.connected) {
-          stopQrPoll()
-          setConnected(true)
-          setShowQr(false)
-          toast.success("WhatsApp conectado!")
-          return
-        }
-        if (qrData.qr) setQrCode(qrData.qr)
-      }, 3000)
-    } catch {
-      toast.error("Erro ao conectar. Tente novamente.")
-      setQrLoading(false)
-    }
   }
 
   async function handleBSPConnect() {
@@ -565,50 +520,8 @@ export function ConfiguracoesForm({
                     )}
                   </div>
 
-                  {/* Evolution API — QR Code */}
-                  <div className="rounded-xl border border-[#D4C5A0] p-4 bg-white space-y-3">
-                    <div className="flex items-center gap-2">
-                      <QrCode className="w-4 h-4 text-[#30360E] shrink-0" />
-                      <p className="text-sm font-medium text-[#30360E]">Conectar via QR Code</p>
-                    </div>
-                    <p className="text-xs text-[#4A4A3A]">
-                      Escaneie o QR com o WhatsApp do celular. Qualquer número — ideal para testes.
-                    </p>
-                    {!showQr ? (
-                      <Button
-                        onClick={handleQRConnect}
-                        variant="outline"
-                        className="w-full border-[#D4C5A0] text-[#30360E] text-sm gap-2"
-                      >
-                        <QrCode className="w-4 h-4" />
-                        Gerar QR Code
-                      </Button>
-                    ) : (
-                      <div className="space-y-3">
-                        {qrLoading ? (
-                          <div className="flex flex-col items-center gap-2 py-6">
-                            <Loader2 className="w-6 h-6 animate-spin text-[#787F56]" />
-                            <p className="text-xs text-[#7A7A6A]">Gerando QR Code...</p>
-                          </div>
-                        ) : qrCode ? (
-                          <div className="flex flex-col items-center gap-2">
-                            <img src={qrCode} alt="QR Code WhatsApp" className="w-48 h-48 rounded-lg border border-[#D4C5A0]" />
-                            <p className="text-xs text-[#4A4A3A] text-center">Abra o WhatsApp → ⋮ → Aparelhos conectados → Conectar aparelho</p>
-                            <button onClick={handleQRConnect} className="flex items-center gap-1 text-xs text-[#787F56] hover:underline">
-                              <RefreshCw className="w-3 h-3" /> Gerar novo QR
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="text-center py-4">
-                            <p className="text-xs text-red-600">Não foi possível gerar o QR. O servidor Evolution pode estar com restrição de rede.</p>
-                            <button onClick={() => setShowQr(false)} className="text-xs text-[#7A7A6A] hover:underline mt-1">Fechar</button>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
 
-                </>
+</>
               )}
             </div>
           )}
